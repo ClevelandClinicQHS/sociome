@@ -130,6 +130,8 @@ get_adi <- function(geography, year = 2016, state = NULL,
   acs_data_f <- acs_data %>%
     select(-GEOID)
   is.na(acs_data_f) <- do.call(cbind, lapply(acs_data_f, is.infinite))
+  
+  # Multiple imputation of missingness
   tempdf <- mice::mice(acs_data_f, m=5, maxit=50, method="pmm", seed=500,
                        printFlag = FALSE)
   acs_data_f <- complete(tempdf, 1)

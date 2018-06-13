@@ -133,10 +133,13 @@ get_adi <- function(geography, year = 2016, state = NULL,
   tempdf <- mice::mice(acs_data_f, m=5, maxit=50, method="pmm", seed=500,
                        printFlag = FALSE)
   acs_data_f <- complete(tempdf, 1)
-  # factor analysis
+  
   rownames(acs_data_f) <- acs_data_f$NAME
   acs_data_f$NAME <- NULL
+  
+  # factor analysis
   fit <- psych::fa(acs_data_f, nfactors = 1, rotate = "none", fm = "pa", max.iter = 25)
+  
   acs_data$ADI <- as.numeric(fit$scores*20+100)
   acs_adi <- acs_data %>% select(GEOID, NAME, ADI)
 

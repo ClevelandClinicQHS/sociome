@@ -35,7 +35,9 @@
 #' @return A tibble of three columns: GEOID of location, Name of location, ADI of location
 #' @export
 #'
-# @examples
+#' @examples
+#' get_adi(geography = "tract", year = 2015, state = "OH", county = "Cuyahoga")
+#' get_adi(geography = "region")
 get_adi <- function(geography, year = 2016, state = NULL,
                     county = NULL, geometry = FALSE,
                     keep_geo_vars = FALSE, shift_geo = FALSE,

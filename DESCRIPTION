@@ -15,7 +15,6 @@ Imports:
     mice (>= 3.0.0),
     psych (>= 1.8.4),
     tidycensus (>= 0.4.6),
-    tidyverse (>= 1.2.1),
     rlang (>= 0.1.2)
 Suggests: 
     covr (>= 3.1.0)

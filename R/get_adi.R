@@ -7,37 +7,41 @@
 #' @param geography a character string denoting the type of location whose ADIs
 #'   you'd like to see (e.g., "region", "county", "block group"). Must be one of
 #'   the keywords accepted by the tidycensus::get_acs() function (see
-#'   https://walkerke.github.io/tidycensus/articles/basic-usage.html#geography-in-tidycensus
+#'   \url{https://walkerke.github.io/tidycensus/articles/basic-usage.html#geography-in-tidycensus}
 #'    for a full list of options).
 #' @param year The year, or endyear, of the ACS sample used to calculate the ADI
 #'   values. 2010 through 2016 are available. Defaults to 2016.
-#' @param state The state for which you are requesting ADI data. Not applicable for
-#'   certain values of geography, required for other values of geography, and
-#'   optional for still other values of geography (see
-#'   https://walkerke.github.io/tidycensus/articles/basic-usage.html#geography-in-tidycensus
-#'   for more information). State names, postal codes, and FIPS codes are
+#' @param state The state for which you are requesting ADI data. Not applicable
+#'   for certain values of `geography`, required for other values of
+#'   `geography`, and optional for still other values of `geography` (see
+#'   \url{https://walkerke.github.io/tidycensus/articles/basic-usage.html#geography-in-tidycensus}
+#'    for more information). State names, postal codes, and FIPS codes are
 #'   accepted. Defaults to NULL.
-#' @param county The county for which you are requesting ADI data. County names and
-#'   FIPS codes are accepted. Must be combined with a value supplied to 'state'.
-#'   Not applicable for some values of geography, optional for other values of
-#'   geography, but never required (see
+#' @param county The county for which you are requesting ADI data. County names
+#'   and FIPS codes are accepted. Must be combined with a value supplied to
+#'   'state'. Not applicable for some values of `geography`, optional for other
+#'   values of `geography`, but never required (see
+#'   \code{\link[tidycensus]{census_api_key}} for more information).
 #'   https://walkerke.github.io/tidycensus/articles/basic-usage.html#geography-in-tidycensus
-#'   for more information). Defaults to NULL.
+#'    for more information). Defaults to NULL.
 #' @param geometry shall this be removed?
 #' @param keep_geo_vars shall this be removed?
 #' @param shift_geo shall this be removed?
 #' @param key Your Census API key. Obtain one at
 #'   http://api.census.gov/data/key_signup.html. Not necessary if you have
-#'   already loaded your key with the tidycensus::census_api_key() function.
+#'   already loaded your key with the tidycensus::census_api_key() function. See
 #' @param survey The ACS contains one-year, three-year, and five-year surveys
 #'   expressed as "acs1", "acs3", and "acs5". The default selection is "acs5."
 #'
-#' @return A tibble of three columns: GEOID of location, Name of location, ADI of location
-#' @export
+#' @return A tibble of three columns: GEOID of location, Name of location, ADI
+#'   of location
 #'
 #' @examples
 #' get_adi(geography = "tract", year = 2015, state = "OH", county = "Cuyahoga")
 #' get_adi(geography = "region")
+#' 
+#' @export
+
 get_adi <- function(geography, year = 2016, state = NULL,
                     county = NULL, geometry = FALSE,
                     keep_geo_vars = FALSE, shift_geo = FALSE,

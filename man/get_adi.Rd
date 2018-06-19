@@ -4,9 +4,8 @@
 \alias{get_adi}
 \title{get_adi}
 \usage{
-get_adi(geography, year = 2016, state = NULL, county = NULL,
-  geometry = FALSE, keep_geo_vars = FALSE, shift_geo = FALSE,
-  key = NULL, survey = "acs5")
+get_adi(geography, year = 2016, GEOIDs = NULL, state = NULL,
+  county = NULL, key = NULL, survey = "acs5")
 }
 \arguments{
 \item{geography}{a character string denoting the type of location whose ADIs
@@ -32,12 +31,6 @@ values of `geography`, but never required (see
 \code{\link[tidycensus]{census_api_key}} for more information).
 https://walkerke.github.io/tidycensus/articles/basic-usage.html#geography-in-tidycensus
  for more information). Defaults to NULL.}
-
-\item{geometry}{shall this be removed?}
-
-\item{keep_geo_vars}{shall this be removed?}
-
-\item{shift_geo}{shall this be removed?}
 
 \item{key}{Your Census API key. Obtain one at
 http://api.census.gov/data/key_signup.html. Not necessary if you have

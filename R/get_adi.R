@@ -1,3 +1,5 @@
+
+
 #' get_adi
 #'
 #' Returns a tibble of user-specified locations in the United States along with
@@ -24,9 +26,6 @@
 #'   \code{\link[tidycensus]{census_api_key}} for more information).
 #'   https://walkerke.github.io/tidycensus/articles/basic-usage.html#geography-in-tidycensus
 #'    for more information). Defaults to NULL.
-#' @param geometry shall this be removed?
-#' @param keep_geo_vars shall this be removed?
-#' @param shift_geo shall this be removed?
 #' @param key Your Census API key. Obtain one at
 #'   http://api.census.gov/data/key_signup.html. Not necessary if you have
 #'   already loaded your key with the tidycensus::census_api_key() function. See
@@ -39,14 +38,21 @@
 #' @examples
 #' get_adi(geography = "tract", year = 2015, state = "OH", county = "Cuyahoga")
 #' get_adi(geography = "region")
-#' 
+#'
 #' @export
 
-get_adi <- function(geography, year = 2016, state = NULL,
-                    county = NULL, geometry = FALSE,
-                    keep_geo_vars = FALSE, shift_geo = FALSE,
+get_adi <- function(geography,
+                    year = 2016,
+                    GEOIDs = NULL,
+                    state = NULL,
+                    county = NULL,
                     key = NULL,
                     survey = "acs5") {
+
+  if(!is.null(GEOIDs))
+    parse_GEOIDs(GEOIDs)
+
+
 
   acs_data_raw <-
     tidycensus::get_acs(geography = geography,
@@ -69,13 +75,13 @@ get_adi <- function(geography, year = 2016, state = NULL,
                             "B23008_021"),
                         table = NULL, cache_table = FALSE, year = year,
                         endyear = NULL, output = "wide", state = state,
-                        county = county, geometry = geometry,
-                        keep_geo_vars = keep_geo_vars, shift_geo = shift_geo,
+                        county = county, geometry = FALSE,
+                        keep_geo_vars = FALSE, shift_geo = FALSE,
                         summary_var = NULL, key = key, moe_level = 90,
                         survey = survey)
 
   acs_data <- acs_data_raw %>%
-    select(GEOID, NAME, B01003_001E, B19013_001E, B19001_002E, B19001_011E,
+    dplyr::select(GEOID, NAME, B01003_001E, B19013_001E, B19001_002E, B19001_011E,
            B19001_012E, B19001_013E, B19001_014E, B19001_015E, B19001_016E,
            B19001_017E, B17010_001E, B17010_002E, B25003_001E, B25003_002E,
            C17002_001E, C17002_002E, C17002_003E, C17002_004E, C17002_005E,
@@ -88,7 +94,7 @@ get_adi <- function(geography, year = 2016, state = NULL,
            B15003_017E, B15003_018E, B15003_019E, B15003_020E, B15003_021E,
            B15003_022E, B15003_023E, B15003_024E, B15003_025E, B23008_001E,
            B23008_008E, B23008_021E) %>%
-    mutate(Fpoverty        = B17010_002E / B17010_001E,
+    dplyr::mutate(Fpoverty        = B17010_002E / B17010_001E,
            OwnerOcc        = B25003_002E / B25003_001E,
            incomegreater50 = B19001_011E + B19001_012E + B19001_013E + B19001_014E +
              B19001_015E + B19001_016E + B19001_017E,
@@ -113,10 +119,10 @@ get_adi <- function(geography, year = 2016, state = NULL,
            SUMcrowded      = B25014_005E + B25014_006E + B25014_007E + B25014_011E +
              B25014_012E + B25014_013E,
            Ocrowded        = SUMcrowded / B25014_001E) %>%
-    select(GEOID, NAME, B19013_001E, B25088_001E, B25064_001E, B25077_001E, Fpoverty,
+    dplyr::select(GEOID, NAME, B19013_001E, B25088_001E, B25064_001E, B25077_001E, Fpoverty,
            OwnerOcc, IncomeDisparity, less150FPL, singlePHH, pnovehicle,
            whitecollar, unemployed, Phighschoolup, Pless9grade, Ocrowded) %>%
-    rename(
+    dplyr::rename(
       "medianHouseholdIncome" = B19013_001E,
       "medianMortgage"=B25088_001E,
       "medianRent"=B25064_001E,
@@ -134,22 +140,33 @@ get_adi <- function(geography, year = 2016, state = NULL,
       "pctHouseholdsWithOverOnePersonPerRoom"=  Ocrowded)
 
   acs_data_f <- acs_data %>%
-    select(-GEOID)
-  is.na(acs_data_f) <- do.call(cbind, lapply(acs_data_f, is.infinite))
-  
-  # Multiple imputation of missingness
-  tempdf <- mice::mice(acs_data_f, m=5, maxit=50, method="pmm", seed=500,
+    dplyr::select(-GEOID)
+
+  if(anyNA(acs_data_f)) {
+    # Performs multiple imputation if there is any missingness in the data.
+
+    is.na(acs_data_f) <- do.call(cbind, lapply(acs_data_f, is.infinite))
+
+    #mice.impute.pmm <- mice::mice.impute.pmm
+
+    tempdf <- mice::mice(acs_data_f, m=5, maxit=50, method="pmm", seed=500,
                        printFlag = FALSE)
-  acs_data_f <- complete(tempdf, 1)
-  
+    acs_data_f <- mice::complete(tempdf, 1)
+    message("Multiple imputation performed")
+  }
+
   rownames(acs_data_f) <- acs_data_f$NAME
   acs_data_f$NAME <- NULL
-  
+
+  #browser()
+
   # factor analysis
-  fit <- psych::fa(acs_data_f, nfactors = 1, rotate = "none", fm = "pa", max.iter = 25)
-  
+  fit <- psych::fa(acs_data_f, nfactors = 1, rotate = "none", fm = "pa",
+                   max.iter = 25)
   acs_data$ADI <- as.numeric(fit$scores*20+100)
-  acs_adi <- acs_data %>% select(GEOID, NAME, ADI)
+
+  acs_adi <- acs_data %>%
+    dplyr::select(GEOID, NAME, ADI)
 
   return(acs_adi)
 }

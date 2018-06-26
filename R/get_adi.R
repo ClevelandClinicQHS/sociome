@@ -44,13 +44,12 @@
 get_adi <- function(geography,
                     year = 2016,
                     GEOIDs = NULL,
-                    state = NULL,
-                    county = NULL,
+                    reference_area = NULL,
                     key = NULL,
                     survey = "acs5") {
 
   if(!is.null(GEOIDs))
-    parse_GEOIDs(GEOIDs)
+    GEOIDs <- parse_GEOIDs(GEOIDs)
 
 
 

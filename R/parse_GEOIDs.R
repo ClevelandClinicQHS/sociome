@@ -15,31 +15,35 @@
 # @export
 
 parse_GEOIDs <- function(GEOIDs) {
-  
+
+  # Trim whitespace
   GEOIDs <- stringr::str_trim(GEOIDs)
-  
+
+  # GEOIDs must be a vector of strings of digits between 2 and 12 characters
   checkmate::assert_character(
     GEOIDs, pattern = "^[[:digit:]]{2,12}$", min.len = 1, any.missing = FALSE)
-  
+
   GEOID_length <- unique(nchar(GEOIDs))
 
+  browser()
+
   # Checks to see if all elements of domain have the same number of characters
-  if(length(GEOID_length) > 1) {
-    stop("All GEOIDs must have the same number of digits")
-  }
-  
-  if(!(GEOID_length %in% c(2, 5, 11, 12))) {
+  # if(length(GEOID_length) > 1) {
+  #   stop("All GEOIDs must have the same number of digits")
+  # }
+
+  if(!all(GEOID_length %in% c(2, 5, 11, 12))) {
     stop("All GEOIDs must contain either 2 digits (states), 5 digits (counties), 11 digits (census tracts), or 12 digits (census block groups)")
   }
 
-  geography <- dplyr::case_when(
-    GEOID_length ==  2 ~ "state",
-    GEOID_length ==  5 ~ "county",
-    GEOID_length == 11 ~ "tract",
-    GEOID_length == 12 ~ "block group"
+  geography_level <- dplyr::case_when(
+    12 %in% GEOID_length ~ "block group",
+    11 %in% GEOID_length ~ "tract",
+     5 %in% GEOID_length ~ "county",
+     2 %in% GEOID_length ~ "state"
   )
 
-  GEOIDs <- list(geography, GEOIDs)
+  GEOIDs <- list(geography_level, GEOIDs)
   class(GEOIDs) <- "GEOIDs"
 
   return(GEOIDs)

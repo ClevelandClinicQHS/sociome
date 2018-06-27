@@ -1,9 +1,8 @@
 
-
 #' parse_GEOIDs
 #'
-#' Scans a vector of GEOIDs for problems, and returns a list of class "GEOIDs"
-#' to be used by get_reference_area()
+#' Processes a vector of GEOIDs, coercing them to the most specific level of
+#' geography present, and returns a list of class "GEOIDs".
 #'
 #' @param GEOIDs a character vector of GEOIDs. All elements of the vector must
 #'   contain the same number of digits so that they represent the same level of
@@ -25,8 +24,6 @@ parse_GEOIDs <- function(GEOIDs) {
 
   GEOID_length <- unique(nchar(GEOIDs))
 
-  browser()
-
   # Checks to see if all elements of domain have the same number of characters
   # if(length(GEOID_length) > 1) {
   #   stop("All GEOIDs must have the same number of digits")
@@ -42,6 +39,13 @@ parse_GEOIDs <- function(GEOIDs) {
      5 %in% GEOID_length ~ "county",
      2 %in% GEOID_length ~ "state"
   )
+
+  us_blkgrps <- stringr::str_pad(us_block_groups, width = 12,
+                                 side = "left", pad = " ")
+
+  fips.table <- tibble(state_fips = stringr::str_sub(us_blkgrps, 1, 2),
+                       county_fips = stringr::str_sub(us_blkgrps, 3, 5),
+                       tract_fips = stringr::str_sub(us_blkgrps, 6, 11),)
 
   GEOIDs <- list(geography_level, GEOIDs)
   class(GEOIDs) <- "GEOIDs"

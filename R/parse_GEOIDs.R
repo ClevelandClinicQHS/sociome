@@ -1,55 +1,58 @@
 
-#' parse_GEOIDs
+#' parse_geoids
 #'
 #' Processes a vector of GEOIDs, coercing them to the most specific level of
-#' geography present, and returns a list of class "GEOIDs".
+#' geography present, and returns a list of class "geoids".
 #'
-#' @param GEOIDs a character vector of GEOIDs. All elements of the vector must
-#'   contain the same number of digits so that they represent the same level of
-#'   geography.
+#' @param user_geoids a character vector of GEOIDs. They don't all have to
+#'   represent the same level of geography
 #'
-#' @return A list of class "GEOIDs", which contains the original vector of
+#' @return A list of class "geoids", which contains the original vector of
 #'   GEOIDs and a string indicating the level of geography that the
 #'   GEOIDs represent (one of "state", "county", "tract", or "block group").
 # @export
 
-parse_GEOIDs <- function(GEOIDs) {
+parse_geoids <- function(user_geoids) {
 
   # Trim whitespace
-  GEOIDs <- stringr::str_trim(GEOIDs)
+  user_geoids <- stringr::str_trim(user_geoids)
 
-  # GEOIDs must be a vector of strings of digits between 2 and 12 characters
+  # user_geoids must be a vector of strings of digits between 2 and 12 characters
   checkmate::assert_character(
-    GEOIDs, pattern = "^[[:digit:]]{2,12}$", min.len = 1, any.missing = FALSE)
+    user_geoids, pattern = "^[[:digit:]]{2,12}$", min.len = 1, any.missing = FALSE)
 
-  GEOID_length <- unique(nchar(GEOIDs))
+  geoid_length <- unique(nchar(user_geoids))
 
   # Checks to see if all elements of domain have the same number of characters
-  # if(length(GEOID_length) > 1) {
+  # if(length(geoid_length) > 1) {
   #   stop("All GEOIDs must have the same number of digits")
   # }
 
-  if(!all(GEOID_length %in% c(2, 5, 11, 12))) {
+  if(!all(geoid_length %in% c(2, 5, 11, 12))) {
     stop("All GEOIDs must contain either 2 digits (states), 5 digits (counties), 11 digits (census tracts), or 12 digits (census block groups)")
   }
 
+  # Chooses the most specific level of geography present in user_geoids
   geography_level <- dplyr::case_when(
-    12 %in% GEOID_length ~ "block group",
-    11 %in% GEOID_length ~ "tract",
-     5 %in% GEOID_length ~ "county",
-     2 %in% GEOID_length ~ "state"
+    12 %in% geoid_length ~ "block_group",
+    11 %in% geoid_length ~ "tract",
+     5 %in% geoid_length ~ "county",
+     2 %in% geoid_length ~ "state"
   )
 
-  us_blkgrps <- stringr::str_pad(us_block_groups, width = 12,
-                                 side = "left", pad = " ")
+  # Selects all rows of the full block-group-level fips code table that have a
+  # number in common with user_geoids
+  processed_geoids <- fips_table[which(fips_table[,1] %in% user_geoids |
+                                       fips_table[,2] %in% user_geoids |
+                                       fips_table[,3] %in% user_geoids |
+                                       fips_table[,4] %in% user_geoids),]
 
-  fips.table <- tibble(state_fips = stringr::str_sub(us_blkgrps, 1, 2),
-                       county_fips = stringr::str_sub(us_blkgrps, 3, 5),
-                       tract_fips = stringr::str_sub(us_blkgrps, 6, 11),)
+  # Selects the column corresponding to the most specific level of geography
+  # present in user_geoids, and eliminates duplicates
+  processed_geoids <- unname(unique(processed_geoids[geography_level]))
 
-  GEOIDs <- list(geography_level, GEOIDs)
-  class(GEOIDs) <- "GEOIDs"
+  geoids <- list(processed_geoids, geography_level)
+  class(geoids) <- "geoids"
 
-  return(GEOIDs)
-
+  return(geoids)
 }

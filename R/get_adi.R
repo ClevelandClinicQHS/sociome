@@ -26,6 +26,7 @@
 #'   \code{\link[tidycensus]{census_api_key}} for more information).
 #'   https://walkerke.github.io/tidycensus/articles/basic-usage.html#geography-in-tidycensus
 #'    for more information). Defaults to NULL.
+#' @param geoids A character vector of GEOIDs. See details.
 #' @param key Your Census API key. Obtain one at
 #'   http://api.census.gov/data/key_signup.html. Not necessary if you have
 #'   already loaded your key with the tidycensus::census_api_key() function. See
@@ -35,51 +36,94 @@
 #' @return A tibble of three columns: GEOID of location, Name of location, ADI
 #'   of location
 #'
+#' @details Elements of `geoids` can represent different levels of geography,
+#'   but they all must be either 2 digits (for states), 5 digits (for counties),
+#'   11 digits (for tracts) or 12 digits (for block groups). Be sure to put a
+#'   leading zero where applicable.
+#'
 #' @examples
 #' get_adi(geography = "tract", year = 2015, state = "OH", county = "Cuyahoga")
 #' get_adi(geography = "region")
 #'
 #' @export
 
-get_adi <- function(geography,
+
+us_blkgrps <- stringr::str_pad(us_block_groups, width = 12,
+                               side = "left", pad = "0")
+
+fips_table <- data.frame(state = stringr::str_sub(us_blkgrps, 1, 2),
+                         county = stringr::str_sub(us_blkgrps, 1, 5),
+                         tract = stringr::str_sub(us_blkgrps, 1, 11),
+                         `block group` = us_blkgrps,
+                         short_county = stringr::str_sub(us_blkgrps, 3, 5),
+                         check.names = FALSE,
+                         stringsAsFactors = FALSE)
+
+get_adi <- function(geography = NULL,
+                    state = NULL,
+                    geoids = NULL,
                     year = 2016,
-                    GEOIDs = NULL,
-                    reference_area = NULL,
-                    key = NULL,
-                    survey = "acs5") {
+                    survey = "acs5",
+                    key = NULL) {
 
-  if(!is.null(GEOIDs))
-    GEOIDs <- parse_GEOIDs(GEOIDs)
+  if(!is.null(state)) {
 
+    # Throws error if user supplies both states and geoids
+    if(!is.null(geoids)) {
+      stop("Cannot supply both geoids and state.")
+    }
 
+    # If user supplied states instead of geoids, fills geoids with the states'
+    # geoids.
+    else {
+      geoids <- unique(sapply(state, tidycensus:::validate_state))
+    }
+  }
+
+  ref_area <- get_reference_area(geoids, geography)
+
+  # If geography is NULL, populate it with the level of geography produced
+  # by get_reference_area()
+  if(is.null(geography)) {
+    geography <- ref_area[[2]]
+  }
+
+  if(geography %in% c("us", "region", "division") {
+    acs_data_raw =
+  }
+
+  )
 
   acs_data_raw <-
-    tidycensus::get_acs(geography = geography,
-                        variables =
-                          c("B01003_001","B19013_001","B19001_002","B19001_011",
-                            "B19001_012","B19001_013","B19001_014","B19001_015",
-                            "B19001_016","B19001_017","B17010_001","B17010_002",
-                            "B25003_001","B25003_002","C17002_001","C17002_002",
-                            "C17002_003","C17002_004","C17002_005","B25044_001",
-                            "B25044_003","B25044_010","B25014_001","B25014_005",
-                            "B25014_006","B25014_007","B25014_011","B25014_012",
-                            "B25014_013","B25088_001","B25064_001","B25077_001",
-                            "C24010_001","C24010_003","C24010_039","B23025_001",
-                            "B23025_005","B15003_001","B15003_002","B15003_003",
-                            "B15003_004","B15003_005","B15003_006","B15003_007",
-                            "B15003_008","B15003_009","B15003_010","B15003_011",
-                            "B15003_012","B15003_017","B15003_018","B15003_019",
-                            "B15003_020","B15003_021","B15003_022","B15003_023",
-                            "B15003_024","B15003_025","B23008_001","B23008_008",
-                            "B23008_021"),
-                        table = NULL, cache_table = FALSE, year = year,
-                        endyear = NULL, output = "wide", state = state,
-                        county = county, geometry = FALSE,
-                        keep_geo_vars = FALSE, shift_geo = FALSE,
-                        summary_var = NULL, key = key, moe_level = 90,
-                        survey = survey)
+    purrr::map_dfr(ref_area[[3]],
+                   function(state_county)
+                     tidycensus::get_acs(
+                       geography = ref_area[[2]],
+                       state = state_county[[1]], county = state_county[[2]],
+                       year = year, survey = survey, key = key,
+                       variables =
+                         c("B01003_001","B19013_001","B19001_002","B19001_011",
+                           "B19001_012","B19001_013","B19001_014","B19001_015",
+                           "B19001_016","B19001_017","B17010_001","B17010_002",
+                           "B25003_001","B25003_002","C17002_001","C17002_002",
+                           "C17002_003","C17002_004","C17002_005","B25044_001",
+                           "B25044_003","B25044_010","B25014_001","B25014_005",
+                           "B25014_006","B25014_007","B25014_011","B25014_012",
+                           "B25014_013","B25088_001","B25064_001","B25077_001",
+                           "C24010_001","C24010_003","C24010_039","B23025_001",
+                           "B23025_005","B15003_001","B15003_002","B15003_003",
+                           "B15003_004","B15003_005","B15003_006","B15003_007",
+                           "B15003_008","B15003_009","B15003_010","B15003_011",
+                           "B15003_012","B15003_017","B15003_018","B15003_019",
+                           "B15003_020","B15003_021","B15003_022","B15003_023",
+                           "B15003_024","B15003_025","B23008_001","B23008_008",
+                           "B23008_021"),
+                       output = "wide", table = NULL, cache_table = FALSE,
+                       geometry = FALSE, keep_geo_vars = FALSE,
+                       shift_geo = FALSE, summary_var = NULL, moe_level = 90))
 
   acs_data <- acs_data_raw %>%
+    dplyr::filter(GEOID %in% ref_area[[1]]) %>%
     dplyr::select(GEOID, NAME, B01003_001E, B19013_001E, B19001_002E, B19001_011E,
            B19001_012E, B19001_013E, B19001_014E, B19001_015E, B19001_016E,
            B19001_017E, B17010_001E, B17010_002E, B25003_001E, B25003_002E,
@@ -146,8 +190,6 @@ get_adi <- function(geography,
 
     is.na(acs_data_f) <- do.call(cbind, lapply(acs_data_f, is.infinite))
 
-    #mice.impute.pmm <- mice::mice.impute.pmm
-
     tempdf <- mice::mice(acs_data_f, m=5, maxit=50, method="pmm", seed=500,
                        printFlag = FALSE)
     acs_data_f <- mice::complete(tempdf, 1)
@@ -156,8 +198,6 @@ get_adi <- function(geography,
 
   rownames(acs_data_f) <- acs_data_f$NAME
   acs_data_f$NAME <- NULL
-
-  #browser()
 
   # factor analysis
   fit <- psych::fa(acs_data_f, nfactors = 1, rotate = "none", fm = "pa",

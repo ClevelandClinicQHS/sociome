@@ -88,11 +88,9 @@ get_adi <- function(geography = NULL,
     geography <- ref_area[[2]]
   }
 
-  if(geography %in% c("us", "region", "division") {
-    acs_data_raw =
-  }
-
-  )
+  # if(geography %in% c("us", "region", "division") {
+  #   acs_data_raw =
+  # }
 
   acs_data_raw <-
     purrr::map_dfr(ref_area[[3]],

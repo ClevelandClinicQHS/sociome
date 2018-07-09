@@ -62,26 +62,30 @@ get_reference_area <- function(user_geoids = NULL, geography = NULL) {
           fips_table[as.logical(rowSums(x == fips_table[,1:4])),]))
   }
 
+  browser()
+
+  # geography == "state" ~ lapply(unique(user_blk_grps$state),
+  #                                     function(user_state)
+  #                                       list(state = user_state,
+  #                                            county = NULL)),
+
   # Selects the column corresponding to geography
   ref_area <- list(
     ref_geoids = unname(as.vector(unique(user_blk_grps[[geography]]))),
     geography = geography,
     state_county =
-      dplyr::case_when(
-        geography == "us" ~ list(list(state = NULL, county = NULL)),
-        geography == "region" ~ list(list(state = NULL, county = NULL)),
-        geography == "division" ~ list(list(state = NULL, county = NULL)),
-        geography == "state" ~ lapply(unique(user_blk_grps$state),
-                                            function(user_state)
-                                              list(state = user_state,
-                                                   county = NULL)),
-        TRUE ~ lapply(unique(user_blk_grps$state),
-                      function(user_state)
-                        list(state = user_state,
-                             county = unique(
-                               dplyr::filter(
-                                 user_blk_grps,
-                                 state == user_state)$short_county)))))
+      ifelse(geography == "county" | geography == "tract" |
+               geography == "block group",
+             lapply(unique(user_blk_grps$state),
+                    function(user_state)
+                      list(state  = user_state,
+                           county = unique(dplyr::filter(user_blk_grps,
+                                           state == user_state)$short_county))),
+             ifelse(geography == "state",
+                    list(list(state = unique(user_blk_grps$state),
+                              county = NULL)),
+                    list(list(state = NULL, county = NULL)))))
+
   class(ref_area) <- "geoids"
 
   return(ref_area)

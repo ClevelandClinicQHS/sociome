@@ -1,5 +1,3 @@
-
-
 #' get_adi
 #'
 #' Returns a tibble of user-specified locations in the United States along with
@@ -47,18 +45,6 @@
 #'
 #' @export
 
-
-us_blkgrps <- stringr::str_pad(us_block_groups, width = 12,
-                               side = "left", pad = "0")
-
-fips_table <- data.frame(state = stringr::str_sub(us_blkgrps, 1, 2),
-                         county = stringr::str_sub(us_blkgrps, 1, 5),
-                         tract = stringr::str_sub(us_blkgrps, 1, 11),
-                         `block group` = us_blkgrps,
-                         short_county = stringr::str_sub(us_blkgrps, 3, 5),
-                         check.names = FALSE,
-                         stringsAsFactors = FALSE)
-
 get_adi <- function(geography = NULL,
                     state = NULL,
                     geoids = NULL,
@@ -91,7 +77,7 @@ get_adi <- function(geography = NULL,
   # if(geography %in% c("us", "region", "division") {
   #   acs_data_raw =
   # }
-
+  browser()
   acs_data_raw <-
     purrr::map_dfr(ref_area[[3]],
                    function(state_county)
@@ -116,7 +102,7 @@ get_adi <- function(geography = NULL,
                            "B15003_020","B15003_021","B15003_022","B15003_023",
                            "B15003_024","B15003_025","B23008_001","B23008_008",
                            "B23008_021"),
-                       output = "wide", table = NULL, cache_table = FALSE,
+                       output = "wide", table = NULL, cache_table = TRUE,
                        geometry = FALSE, keep_geo_vars = FALSE,
                        shift_geo = FALSE, summary_var = NULL, moe_level = 90))
 

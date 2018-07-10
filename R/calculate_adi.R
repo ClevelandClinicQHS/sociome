@@ -1,5 +1,5 @@
 calculate_adi <- function(ref_area, year, survey, key) {
-  
+
   acs_data_raw <-
     purrr::map_dfr(ref_area[[3]],
                    function(state_county)
@@ -27,7 +27,7 @@ calculate_adi <- function(ref_area, year, survey, key) {
                        output = "wide", table = NULL, cache_table = TRUE,
                        geometry = FALSE, keep_geo_vars = FALSE,
                        shift_geo = FALSE, summary_var = NULL, moe_level = 90))
-  
+
   acs_data <- acs_data_raw %>%
     dplyr::filter(GEOID %in% ref_area[[1]]) %>%
     dplyr::select(GEOID, NAME, B01003_001E, B19013_001E, B19001_002E, B19001_011E,
@@ -87,31 +87,31 @@ calculate_adi <- function(ref_area, year, survey, key) {
       "pctPeopleWithAtLeastHSEducation"= Phighschoolup,
       "pctPeopleWithLessThan9thGradeEducation" = Pless9grade,
       "pctHouseholdsWithOverOnePersonPerRoom"=  Ocrowded)
-  
+
   acs_data_f <- acs_data %>%
     dplyr::select(-GEOID)
-  
+
   if(anyNA(acs_data_f)) {
     # Performs multiple imputation if there is any missingness in the data.
-    
+
     is.na(acs_data_f) <- do.call(cbind, lapply(acs_data_f, is.infinite))
-    
+
     tempdf <- mice::mice(acs_data_f, m=5, maxit=50, method="pmm", seed=500,
                          printFlag = FALSE)
     acs_data_f <- mice::complete(tempdf, 1)
     message("Multiple imputation performed")
   }
-  
-  rownames(acs_data_f) <- acs_data_f$NAME
-  acs_data_f$NAME <- NULL
-  
+
+  # rownames(acs_data_f) <- acs_data_f$NAME
+  # acs_data_f$NAME <- NULL
+
   # factor analysis
   fit <- psych::fa(acs_data_f, nfactors = 1, rotate = "none", fm = "pa",
                    max.iter = 25)
   acs_data$ADI <- as.numeric(fit$scores*20+100)
-  
+
   acs_adi <- acs_data %>%
     dplyr::select(GEOID, NAME, ADI)
-  
+
   return(acs_adi)
 }

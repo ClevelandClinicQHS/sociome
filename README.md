@@ -1,6 +1,10 @@
 # tidySDOH
 
-The goal of tidySDOH is to help the user to view and analyze social determinants of health data in the American Community Survey.
+The goal of tidySDOH is to help the user to operationalize social determinants of health data in their research.
+
+Currently, we have implemented a variation of Singh's area deprivation index (ADI), which allows for estimation at different levels of spatial resolution and which allows for using different iterations of data from the American Community Survey (ACS).
+
+The result is a more flexible framework for representing neighborhood deprivation. The get_adi() function is the primary tool for generating these indices. It allows the user to customize the desired reference area down to the block group level when calculating ADI. This enables the user to compare only the specific locations of interest without having to include other areas in the calculation of ADI.
 
 ## Installation
 
@@ -20,13 +24,13 @@ The algorithm that determines the ADI of a specific location employs factor anal
 
 ## Main Features
 
-The get_adi() function allows the user to customize the desired reference area down to the block group level when calculating ADI. This enables the user to compare only the specific locations of interest without having to include other areas in the calculation of ADI.
+
 
 Since the package employs American Community Survey data, the user can also select specific years and specific editions of the Survey (i.e., the ACS's 1-, 3-, or 5-year estimates) in calculating ADI. 
 
 ADI can currently be calculated for states, counties, census tracts, and census block groups.
 
-## Example
+## Examples
 
 This code would return the ADI of each of the 50 states plus the District of Columbia and Puerto Rico, using the 2012 edition of the 5-year ACS estimates:
 
@@ -36,6 +40,10 @@ This code would return the ADI of all counties in Connecticut, using the 2010 ed
 
 `get_adi(geography = "county", state = "CT", year = 2010, survey = "acs1")`
 
-This code would return the ADI of roughly every census tract (the default) in the Delmarva peninsula (some tracts not actually on the Delmarva peninsula in the extreme north of Delaware and in Cecil County, Maryland may be inadvertently included), using the 5-year ACS estimates from 2016 (the defaults). Notice the mixing of different levels of geography in the `geoids` parameter:
+The user can mix of different levels of geography in the `geoids` parameter. This code would return the ADI of roughly every census tract (the default) in the Delmarva peninsula, using the 5-year ACS estimates from 2016 (the defaults). 
 
 `get_adi(geoids = c("10", "24015", "24029", "24035", "24011", "24041", "24019", "24045", "24039", "24047", "51001", "51131"))`
+
+## Warning about missing data
+
+While allowing flexibility in specifying reference areas, data from the ACS are masked and may have too many missing values to return ADIs for certain levels of geography.

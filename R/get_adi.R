@@ -65,7 +65,7 @@ get_adi <- function(geography = NULL,
       geoids <- unique(sapply(state, tidycensus:::validate_state))
     }
   }
-
+  
   ref_area <- get_reference_area(geoids, geography)
 
   acs_adi <- calculate_adi(ref_area, year, survey, key)

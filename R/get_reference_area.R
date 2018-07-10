@@ -41,15 +41,15 @@ get_reference_area <- function(user_geoids = NULL, geography = NULL) {
     }
 
     # Otherwise, warns user if the most granular GEOID in geoids is more
-    # granular than the geography
+    # granular than the user-specified level of geography
     else {
-      geoids_granularity <- dplyr::case_when(
+      geography_granularity <- dplyr::case_when(
         geography == "block group" ~ 12,
         geography == "tract" ~ 11,
         geography == "county" ~ 5,
         geography == "state" ~ 2
       )
-      if(geoids_granularity > max(geoid_length)) {
+      if(max(geoid_length) > geography_granularity) {
         warning("user-supplied GEOIDs more granular than user-supplied level of geography. See help('get_adi')")
       }
     }

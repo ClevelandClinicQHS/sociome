@@ -40,19 +40,19 @@ get_reference_area <- function(user_geoids = NULL, geography = NULL) {
       )
     }
 
-    # # Otherwise, warns user if the most granular GEOID in geoids is more
-    # # granular than the geography
-    # else {
-    #   geoids_granularity <- dplyr::case_when(
-    #     geography == "block group" ~ 12,
-    #     geography == "tract" ~ 11,
-    #     geography == "county" ~ 5,
-    #     geography == "state" ~ 2
-    #   )
-    #   if(geoids_granularity > max(geoid_length)) {
-    #     warning("Overly granular geoid(s) detected. See help('get_adi')")
-    #   }
-    # }
+    # Otherwise, warns user if the most granular GEOID in geoids is more
+    # granular than the geography
+    else {
+      geoids_granularity <- dplyr::case_when(
+        geography == "block group" ~ 12,
+        geography == "tract" ~ 11,
+        geography == "county" ~ 5,
+        geography == "state" ~ 2
+      )
+      if(geoids_granularity > max(geoid_length)) {
+        warning("user-supplied GEOIDs more granular than user-supplied level of geography. See help('get_adi')")
+      }
+    }
 
     # Selects all rows of fips_table that have a number in common with
     # user_geoids
@@ -62,30 +62,30 @@ get_reference_area <- function(user_geoids = NULL, geography = NULL) {
           fips_table[as.logical(rowSums(x == fips_table[,1:4])),]))
   }
 
-  browser()
-
-  # geography == "state" ~ lapply(unique(user_blk_grps$state),
-  #                                     function(user_state)
-  #                                       list(state = user_state,
-  #                                            county = NULL)),
-
-  # Selects the column corresponding to geography
+  # Creates a geoids-class object
   ref_area <- list(
     ref_geoids = unname(as.vector(unique(user_blk_grps[[geography]]))),
     geography = geography,
-    state_county =
-      ifelse(geography == "county" | geography == "tract" |
-               geography == "block group",
-             lapply(unique(user_blk_grps$state),
-                    function(user_state)
-                      list(state  = user_state,
-                           county = unique(dplyr::filter(user_blk_grps,
-                                           state == user_state)$short_county))),
-             ifelse(geography == "state",
-                    list(list(state = unique(user_blk_grps$state),
-                              county = NULL)),
-                    list(list(state = NULL, county = NULL)))))
-
+    state_county = NULL)
+  
+  if(geography == "county" | geography == "tract" | geography == "block group"){
+    ref_area[["state_county"]] <-
+      lapply(unique(user_blk_grps$state),
+             function(user_state)
+               list(state  = user_state,
+                    county = unique(dplyr::filter(user_blk_grps,
+                                    state == user_state)$short_county)))
+  }
+  else if(geography == "state"){
+    ref_area[["state_county"]] <-
+      list(list(state = unique(user_blk_grps$state),
+                              county = NULL))
+  }
+  else {
+    ref_area[["state_county"]] <-
+      list(list(state = NULL, county = NULL))
+  }
+  
   class(ref_area) <- "geoids"
 
   return(ref_area)

@@ -1,11 +1,6 @@
 calculate_adi <- function(ref_area, year, survey, key) {
   
-  # acs_data_raw <-
-  #   purrr::map_dfr(ref_area$state_county, call_get_acs,
-  #                  geography = ref_area$geography,
-  #                  year = year, survey = survey, key = key)
-  
-  acs_data_raw <-
+ acs_data_raw <-
     purrr::map_dfr(
       ref_area$state_county,
       function(state_county, geography, year, survey, key) {

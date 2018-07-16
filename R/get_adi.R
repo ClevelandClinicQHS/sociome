@@ -50,7 +50,8 @@ get_adi <- function(geography = NULL,
                     geoids = NULL,
                     year = 2016,
                     survey = "acs5",
-                    key = NULL) {
+                    key = NULL,
+                    geometry = TRUE) {
 
   if(!is.null(state)) {
 
@@ -68,7 +69,7 @@ get_adi <- function(geography = NULL,
   
   ref_area <- get_reference_area(geoids, geography)
 
-  acs_adi <- calculate_adi(ref_area, year, survey, key)
+  acs_adi <- calculate_adi(ref_area, year, survey, key, geometry)
 
   return(acs_adi)
 }

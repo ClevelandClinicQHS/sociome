@@ -15,7 +15,7 @@ Depends:
     R (>= 3.1)
 Imports:
     checkmate,
-    dplyr,
+    dplyr (>= 0.7.6),
     magrittr (>= 1.5),
     mice (>= 3.0.0),
     psych (>= 1.8.4),

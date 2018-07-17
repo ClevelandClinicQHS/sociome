@@ -44,7 +44,7 @@ The table produced by `get_adi()` can then be piped directly into `geom_sf()` fr
 
 `delmarva %>% ggplot() + geom_sf(aes(fill = ADI))`
 
-![Delmarva Peninsula](https://github.com/NikKrieger/tidySDOH/raw/master/tools/readme/Delmarva.png)
+![Delmarva Peninsula](https://raw.githubusercontent.com/NikKrieger/tidySDOH/master/man/figures/Delmarva.png)
 
 ## Demonstration of the relative nature of ADI
 

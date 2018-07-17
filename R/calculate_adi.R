@@ -105,16 +105,16 @@ calculate_adi <- function(ref_area, year, survey, key, geometry) {
       "pctHouseholdsWithOverOnePersonPerRoom" =  Ocrowded)
   
   if(anyNA(acs_data_f)) {
-    # Performs multiple imputation if there is any missingness in the data.
+    # Performs single imputation if there is any missingness in the data.
 
     is.na(acs_data_f) <- do.call(cbind, lapply(acs_data_f, is.infinite))
 
-    tempdf <- mice::mice(acs_data_f, m = 5, maxit = 50, method = "pmm",
+    tempdf <- mice::mice(acs_data_f, m = 1, maxit = 50, method = "pmm",
                          seed = 500, printFlag = FALSE)
     
-    acs_data_f <- mice::complete(tempdf, 1)
+    acs_data_f <- mice::complete(data = tempdf, action = 1L)
     
-    message("Multiple imputation performed")
+    message("Single imputation performed")
   }
   
   # factor analysis

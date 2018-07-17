@@ -44,7 +44,7 @@ The table produced by `get_adi()` can then be piped directly into `geom_sf()` fr
 
 `delmarva %>% ggplot() + geom_sf(aes(fill = ADI))`
 
-![Delmarva Peninsula](https://raw.githubusercontent.com/NikKrieger/tidySDOH/master/man/figures/Delmarva.png)
+![ADIs of counties on the Delmarva Peninsula](https://raw.githubusercontent.com/NikKrieger/tidySDOH/master/man/figures/Delmarva.png)
 
 ## Demonstration of the relative nature of ADI
 
@@ -53,11 +53,17 @@ The code below calculates and maps ADIs for Ohio counties.
 `ohio <- get_adi(geography = "county", state = "OH")`
 `ohio %>% ggplot(aes(fill = ADI)) + geom_sf()`
 
-The code below also calculates and maps ADIs for Ohio counties, but it uses all counties in Ohio, Michigan, and Indiana as the reference area:
+![ADI of Ohio counties, using only Ohio counties as the reference area](https://raw.githubusercontent.com/NikKrieger/tidySDOH/master/man/figures/Ohio_counties_ADI_ref_area_OH_counties.png)
 
-`ohmiin <- get_adi(geography = "county", state = c("OH", "MI", "IN")) %>%`
-`  filter(as.integer(GEOID) >= 39000)`
-`ohmiin %>% ggplot(aes(fill = ADI)) + geom_sf()`
+The code below also calculates and maps ADIs for Ohio counties, but it uses a reference area of all counties in the fifty states plus DC and Puerto Rico:
+
+`ohio_ref_US <- get_adi(geography = "county") %>%`
+`  filter(as.integer(GEOID) >= 39000, as.integer(GEOID) <= 39999)`
+`ohio_ref_US %>% ggplot(aes(fill = ADI)) + geom_sf()`
+
+![ADI of Ohio counties, using all US counties as the reference area](https://raw.githubusercontent.com/NikKrieger/tidySDOH/master/man/figures/Ohio_counties_ADI_ref_area_US_counties.png)
+
+Notice how the ADI of each county varies depending on the reference area provided.
 
 ## Warning about missing data
 

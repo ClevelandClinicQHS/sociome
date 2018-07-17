@@ -68,7 +68,7 @@ get_reference_area <- function(user_geoids = NULL, geography = NULL) {
     geography = geography,
     state_county = NULL)
   
-  if(geography == "county" | geography == "tract" | geography == "block group"){
+  if(geography == "tract" | geography == "block group"){
     ref_area[["state_county"]] <-
       lapply(unique(user_blk_grps$state),
              function(user_state)
@@ -76,7 +76,7 @@ get_reference_area <- function(user_geoids = NULL, geography = NULL) {
                     county = unique(dplyr::filter(user_blk_grps,
                                     state == user_state)$short_county)))
   }
-  else if(geography == "state"){
+  else if(geography == "state" | geography == "county"){
     ref_area[["state_county"]] <-
       list(list(state = unique(user_blk_grps$state),
                               county = NULL))

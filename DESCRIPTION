@@ -1,15 +1,15 @@
 Type: Package
 Package: sociome
-Title: What the Package Does (Title Case)
-Version: 0.0.0.9000
+Title: sociome
+Version: 0.2.0
 Authors@R: c(
     person("Nik", "Krieger", email = "nikkrieger@gmail.com", role = c("aut", "cre")),
     person("Jarrod", "Dalton", email = "daltonj@ccf.org", role = "aut"),
     person("Cindy", "Wang", email = "lxw384@case.edu", role = "aut"),
     person("Adam", "Perzynski", email = "adam.perzynski@case.edu", role = "aut"))
 Maintainer: The package maintainer <yourself@somewhere.net>
-Description: tidySDOH
-    Use four spaces when indenting paragraphs within the Description.
+Description: sociome
+    Operationalizes social determinants of health data for researchers
 License: CC0
 Depends:
     R (>= 3.1)

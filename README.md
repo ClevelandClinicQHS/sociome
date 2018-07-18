@@ -1,6 +1,6 @@
-# tidySDOH
+# sociome
 
-The goal of tidySDOH is to help the user to operationalize social determinants of health data in their research.
+The goal of sociome is to help the user to operationalize social determinants of health data in their research.
 
 Currently, we have implemented a variation of Singh's area deprivation index (ADI), which allows for estimation at the state, county, census tract, or census block group level and which allows for using different iterations of data from the American Community Survey (ACS).
 
@@ -10,10 +10,10 @@ The output of `get_adi()` can be piped directly into `ggplot2::geom_sf()` for ma
 
 ## Installation
 
-You can install the released version of tidySDOH from Github using:
+You can install the released version of sociome from Github using:
 
 ```
-devtools::install_github("NikKrieger/tidySDOH")
+devtools::install_github("NikKrieger/sociome")
 ```
 
 ## Background on ADI
@@ -136,7 +136,7 @@ With the help of `tidycensus::get_acs()`, tables produced by `get_adi()` contain
 delmarva %>% ggplot() + geom_sf(aes(fill = ADI))
 ```
 
-![](https://raw.githubusercontent.com/NikKrieger/tidySDOH/master/man/figures/Delmarva.png)
+![](https://raw.githubusercontent.com/NikKrieger/sociome/master/man/figures/Delmarva.png)
 
 
 ### Demonstration of the relative nature of ADIs, using custom reference areas
@@ -149,7 +149,7 @@ ohio <- get_adi(geography = "county", state = "OH")
 ohio %>% ggplot() + geom_sf(aes(fill = ADI))
 ```
 
-![](https://raw.githubusercontent.com/NikKrieger/tidySDOH/master/man/figures/Ohio_counties_ADI_ref_area_OH_counties.png)
+![](https://raw.githubusercontent.com/NikKrieger/sociome/master/man/figures/Ohio_counties_ADI_ref_area_OH_counties.png)
 
 
 The code below also calculates and maps ADIs for Ohio counties, but it uses a reference area of all counties in the fifty states plus DC and Puerto Rico:
@@ -162,7 +162,7 @@ ohio_ref_US <- get_adi(geography = "county") %>%
 ohio_ref_US %>% ggplot() + geom_sf(aes(fill = ADI))
 ```
 
-![](https://raw.githubusercontent.com/NikKrieger/tidySDOH/master/man/figures/Ohio_counties_ADI_ref_area_US_counties.png)
+![](https://raw.githubusercontent.com/NikKrieger/sociome/master/man/figures/Ohio_counties_ADI_ref_area_US_counties.png)
 
 Notice how the ADI of each county varies depending on the reference area provided.
 

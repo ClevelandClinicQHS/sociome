@@ -18,7 +18,7 @@ You can install the released version of sociome from Github using:
 
 ```
 devtools::install_github("NikKrieger/sociome")
-``` 
+```
 
 ## Background on ADI
 

@@ -2,7 +2,7 @@
 
 The goal of tidySDOH is to help the user to operationalize social determinants of health data in their research.
 
-Currently, we have implemented a variation of Singh's area deprivation index (ADI), which allows for estimation at different levels of spatial resolution and which allows for using different iterations of data from the American Community Survey (ACS).
+Currently, we have implemented a variation of Singh's area deprivation index (ADI), which allows for estimation at the state, county, census tract, or census block group level and which allows for using different iterations of data from the American Community Survey (ACS).
 
 The result is a more flexible framework for representing neighborhood deprivation. The `get_adi()` function is the primary tool for generating these indices. It allows the user to customize the desired **reference area** down to the block group level when calculating ADI. This enables the user to compare only the specific locations of interest without having to include other areas in the calculation of ADI. See the section called "Choosing a **Reference Area**" below for more detail.
 
@@ -27,6 +27,8 @@ In short,
 
 The *original* ADIs are static measures that were calculated using the 2013 edition of the ACS five-year estimates. Rankings based on these ADIs are available via downloadable datasets at https://www.neighborhoodatlas.medicine.wisc.edu/download.
 
+The original ADI of Kind et al. (2018) is defined as a national measure. In other words, it uses the United States as the **reference area**. A given area might have different ADI values depending on the choice of the reference area; for example, a census tract in an "upper-class" neighborhood in Milwaukee might have a lower ADI value if the index is computed using the Milwaukee area as the reference than it would if the index is computed using the United States as the reference. The `get_adi()` function flexibly allows for specifying the **reference area** for ADI estimation. See examples below.
+
 ## Choosing a **reference area**
 
 The algorithm that produced the original ADIs employs factor analysis. As a result, the ADI is a relative measure; the ADI of a particular location is dynamic, varying depending on which other locations were supplied to the algorithm. In other words, ADI will vary depending on the **reference area**. 
@@ -44,11 +46,9 @@ The `get_adi()` function returns a table of *customized* Singh's area deprivatio
 - the ACS estimates (viz. the one-, three-, or five-year estimates)
 - the **reference area** (see above).
 
-The function then calls the specified ACS data sets and employs the same algorithms that were used to calculate the *original* ADIs, resulting in *customized* ADIs. It stands on the shoulders of the `get_acs()` function in Kyle Walker's `tidycensus` package (see https://walkerke.github.io/tidycensus), which is what enables the user to so easily select specific years and specific ACS estimates. `get_adi()` also benefits from the shapefile-gathering capabilities of `get_acs()`, which enables the user to create maps of 
+The function then calls the specified ACS data sets and employs the same algorithms that were used to calculate the *original* ADIs, resulting in *customized* ADIs. It stands on the shoulders of the `get_acs()` function in Kyle Walker's `tidycensus` package (see https://walkerke.github.io/tidycensus), which is what enables the user to so easily select specific years and specific ACS estimates. `get_adi()` also benefits from the shapefile-gathering capabilities of `get_acs()`, which enables the user to create maps depicting ADI values with relative ease, thanks to `geom_sf()` in `ggplot2`.
 
 ## Examples
-
-### Example 1
 
 The code below would return the ADI of each of the 50 states plus the District of Columbia and Puerto Rico, using the 2012 edition of the 5-year ACS estimates:
 

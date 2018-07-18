@@ -1,8 +1,12 @@
 # sociome
 
-The goal of sociome is to help the user to operationalize social determinants of health data in their research.
+> The dimensions of existence that are social.
 
-Currently, we have implemented a variation of Singh's area deprivation index (ADI), which allows for estimation at the state, county, census tract, or census block group level and which allows for using different iterations of data from the American Community Survey (ACS).
+The goal of the `sociome` package is to help the user to operationalize social determinants of health data in their research.
+
+The current functionality is limited to measures of area deprivation, but we intend to expand into other elements of the "sociome."
+
+We have implemented a variation of Singh's area deprivation index (ADI), which allows for estimation at the state, county, census tract, or census block group level and which allows for using different iterations of data from the American Community Survey (ACS).
 
 The result is a more flexible framework for representing neighborhood deprivation. The `get_adi()` function is the primary tool for generating these indices. It allows the user to customize the desired **reference area** down to the block group level when calculating ADI. This enables the user to compare only the specific locations of interest without having to include other areas in the calculation of ADI. See the section called "Choosing a **Reference Area**" below for more detail.
 

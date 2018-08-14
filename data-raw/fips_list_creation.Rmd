@@ -4,8 +4,10 @@ output: html_notebook
 ---
 
 ```{r read_in_fips_data}
-# https://www2.census.gov/geo/docs/reference/cenpop2010/blkgrp/CenPop2010_Mean_BG.txt
-blk_grp_raw <- read.csv("data/CenPop2010_Mean_BG.txt", sep = ",", header = TRUE)
+blk_grp_raw <-
+  read.csv("https://www2.census.gov/geo/docs/reference/cenpop2010/blkgrp/CenPop2010_Mean_BG.txt",
+           sep = ",", header = TRUE, colClasses = "character")
+
 head(blk_grp_raw)
 ```
 
@@ -16,44 +18,6 @@ blk_grp1 <- blk_grp_raw %>%
 
 head(blk_grp1)
 ```
-```{r make_edgelist}
-blk_grp2 <- mutate(blk_grp1,
-                   STATEFP = stringr::str_pad(STATEFP, width = 2, pad = "0"),
-                   COUNTYFP = paste0(STATEFP, stringr::str_pad(COUNTYFP, width = 3, pad = "0")),
-                   TRACTCE = paste0(COUNTYFP, stringr::str_pad(TRACTCE, width = 6, pad = "0")),
-                   BLKGRPCE = paste0(TRACTCE, as.character(BLKGRPCE))
-                   )
-
-el_blkgp <- select(blk_grp2, TRACTCE, BLKGRPCE)%>% 
-  rename(from = TRACTCE, to = BLKGRPCE)
-el_tract <- select(blk_grp2, COUNTYFP, TRACTCE) %>%
-  group_by(COUNTYFP, TRACTCE) %>% 
-  filter(row_number() == 1) %>% 
-  ungroup() %>% 
-  rename(from = COUNTYFP, to = TRACTCE)
-el_county <- select(blk_grp2, STATEFP, COUNTYFP) %>%
-  group_by(STATEFP, COUNTYFP) %>% 
-  filter(row_number() == 1) %>% 
-  ungroup() %>% 
-  rename(from = STATEFP, to = COUNTYFP)
-el <- bind_rows(el_county, el_tract, el_blkgp)
-nodes <- tibble(node = c(el$from, el$to)) %>% 
-  group_by(node) %>% filter(row_number() == 1) %>% ungroup() %>% 
-  mutate(nodeID = row_number())
-el2 <- left_join(el, mutate(nodes, from = node), by  ="from") %>% 
-  rename(from.ix = nodeID) %>% 
-  select(-node) %>% 
-  left_join(mutate(nodes, to = node), by = "to") %>% 
-  rename(to.ix = nodeID) %>% 
-  select(-node)
-
-```
-
-```{r make_graph}
-areas <- igraph::graph_from_edgelist(as.matrix(el_county), directed = TRUE)
-```
-
-
 
 ```{r create_vector_of_unique_state_fips_codes}
 # Creates a vector of only the unique state fips codes

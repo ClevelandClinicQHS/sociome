@@ -1,0 +1,28 @@
+---
+title: "us_block_groups creation"
+---
+
+```{r read_in_fips_data}
+blk_grp_raw <-
+  read.csv("https://www2.census.gov/geo/docs/reference/cenpop2010/blkgrp/CenPop2010_Mean_BG.txt",
+           sep = ",", header = TRUE, colClasses = "character")
+
+head(blk_grp_raw)
+```
+
+```{r pare_down_to_fips_codes_only}
+# Pares down to only the fips code data
+blk_grp1 <- blk_grp_raw %>%
+  dplyr::select(STATEFP, COUNTYFP, TRACTCE, BLKGRPCE)
+
+head(blk_grp1)
+```
+
+```{r create_integer_vector_of_block_group_GEOIDs}
+us_block_groups <- as.numeric(paste0(blk_grp1$STATEFP, blk_grp1$COUNTYFP,
+                                     blk_grp1$TRACTCE, blk_grp1$BLKGRPCE))
+```
+
+```{r save_us_block_groups}
+devtools::use_data(us_block_groups, internal = FALSE, overwrite = TRUE)
+```

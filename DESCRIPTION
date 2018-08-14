@@ -3,11 +3,11 @@ Package: sociome
 Title: sociome
 Version: 0.2.0
 Authors@R: c(
-    person("Nik", "Krieger", email = "nikkrieger@gmail.com", role = c("aut", "cre")),
+    person("Nik", "Krieger", email = "nk@case.edu", role = c("aut", "cre")),
     person("Jarrod", "Dalton", email = "daltonj@ccf.org", role = "aut"),
     person("Cindy", "Wang", email = "lxw384@case.edu", role = "aut"),
     person("Adam", "Perzynski", email = "adam.perzynski@case.edu", role = "aut"))
-Maintainer: The package maintainer <yourself@somewhere.net>
+Maintainer: The package maintainer <nk@case.edu>
 Description: sociome
     Operationalizes social determinants of health data for researchers
 License: CC0
@@ -25,5 +25,4 @@ Suggests:
     covr (>= 3.1.0),
     testthat
 Encoding: UTF-8
-LazyData: true
 RoxygenNote: 6.0.1

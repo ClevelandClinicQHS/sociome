@@ -1,5 +1,7 @@
 options(tigris_use_cache = TRUE)
 
+load("~/sociome/R/sysdata.rda")
+
 us_blkgrps <- stringr::str_pad(us_block_groups, width = 12,
                                side = "left", pad = "0")
 

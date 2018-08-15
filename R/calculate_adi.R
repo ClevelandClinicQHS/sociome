@@ -1,5 +1,8 @@
 calculate_adi <- function(ref_area, tidycensus_function, tidycensus_args) {
 
+  old <- options(tigris_use_cache = TRUE)
+  on.exit(options(old), add = TRUE)
+  
   acs_data_raw <-
     ref_area$state_county %>% 
     purrr::map(

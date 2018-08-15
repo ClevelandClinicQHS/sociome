@@ -6,7 +6,6 @@ calculate_adi <- function(ref_area, tidycensus_function, tidycensus_args) {
       function(state_county, tidycensus_function, tidycensus_args) {
         state = state_county$state
         county = state_county$county
-        browser()
         do.call(eval(parse(text = tidycensus_function)),
                 c(list(state = state, county = county), tidycensus_args))
         },
@@ -109,3 +108,7 @@ calculate_adi <- function(ref_area, tidycensus_function, tidycensus_args) {
 
   return(acs_adi)
 }
+
+# Import the method mice.impute.pmm from mice package.
+# calculate_adi() requires it in order to work.
+mice.impute.pmm <- mice::mice.impute.pmm

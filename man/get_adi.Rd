@@ -4,8 +4,9 @@
 \alias{get_adi}
 \title{get_adi}
 \usage{
-get_adi(geography = NULL, state = NULL, geoids = NULL, year = 2016,
-  survey = "acs5", key = NULL)
+get_adi(geography = NULL, state = NULL, county = NULL,
+  geoids = NULL, year = NULL, survey = "acs5", geometry = TRUE,
+  key = NULL, ...)
 }
 \arguments{
 \item{geography}{a character string denoting the type of location whose ADIs
@@ -21,6 +22,14 @@ for certain values of `geography`, required for other values of
  for more information). State names, postal codes, and FIPS codes are
 accepted. Defaults to NULL.}
 
+\item{county}{The county for which you are requesting ADI data. County names
+and FIPS codes are accepted. Must be combined with a value supplied to
+'state'. Not applicable for some values of `geography`, optional for other
+values of `geography`, but never required (see
+\code{\link[tidycensus]{census_api_key}} for more information).
+https://walkerke.github.io/tidycensus/articles/basic-usage.html#geography-in-tidycensus
+ for more information). Defaults to NULL.}
+
 \item{geoids}{A character vector of GEOIDs. See details.}
 
 \item{year}{The year, or endyear, of the ACS sample used to calculate the ADI
@@ -32,14 +41,6 @@ expressed as "acs1", "acs3", and "acs5". The default selection is "acs5."}
 \item{key}{Your Census API key. Obtain one at
 http://api.census.gov/data/key_signup.html. Not necessary if you have
 already loaded your key with the tidycensus::census_api_key() function. See}
-
-\item{county}{The county for which you are requesting ADI data. County names
-and FIPS codes are accepted. Must be combined with a value supplied to
-'state'. Not applicable for some values of `geography`, optional for other
-values of `geography`, but never required (see
-\code{\link[tidycensus]{census_api_key}} for more information).
-https://walkerke.github.io/tidycensus/articles/basic-usage.html#geography-in-tidycensus
- for more information). Defaults to NULL.}
 }
 \value{
 A tibble of three columns: GEOID of location, Name of location, ADI

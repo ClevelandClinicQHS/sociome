@@ -23,8 +23,8 @@ fips_table
 \description{
 Data frame in which each row represents a block group. Columns contain the
 block groups' corresponding state-, county-, tract-, and block-group-level
-FIPS codes, along with an extra column containing the county-level FIPS code
-with the first two digits (i.e., the state identifier) removed.
+GEOIDs (FIPS codes), along with an extra column containing the county-level
+FIPS code with the first two digits (i.e., the state GEOID) removed.
 }
 \details{
 Adapted from the data file at the URL below.

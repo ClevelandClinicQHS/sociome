@@ -12,6 +12,6 @@
                
                check.names = FALSE,
                stringsAsFactors = FALSE)
-  getwd()
-  #save(fips_table, file = "")
+  
+  assign("fips_table", fips_table, envir = asNamespace("sociome"))
 }

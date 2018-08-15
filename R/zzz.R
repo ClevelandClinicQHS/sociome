@@ -13,5 +13,5 @@
                check.names = FALSE,
                stringsAsFactors = FALSE)
   
-  assign("fips_table", fips_table, envir = asNamespace("sociome"))
+  assign("fips_table", fips_table, pos = asNamespace("sociome"))
 }

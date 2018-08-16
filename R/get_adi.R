@@ -34,6 +34,8 @@
 #' @param key Your Census API key as a character string. Obtain one at
 #'   http://api.census.gov/data/key_signup.html. Defaults to null. Not necessary
 #'   if you have already loaded your key with \code{\link{census_api_key}}.
+#' @param ... Additional arguments to be passed onto
+#'   \code{tidycensus::get_acs()}.
 #'
 #' @return A tibble of three columns: GEOID of location, Name of location, ADI
 #'   of location
@@ -69,7 +71,7 @@
 #' 
 #' get_adi(geography = "county", state = "CT", year = 2015, survey = "acs1", geometry = FALSE)
 #'   
-#' delmarva <- get_adi(geoids = c("10", "51001", "51131", "24015", "24029", "24035", "24011", "24041", "24019", "24045", "24039", "24047"))
+#' delmarva <- get_adi(geoid = c("10", "51001", "51131", "24015", "24029", "24035", "24011", "24041", "24019", "24045", "24039", "24047"))
 #' 
 #' # Demonstration of geom_sf integration:
 #' \dontrun{
@@ -85,7 +87,7 @@
 get_adi <- function(geography = NULL,
                     state     = NULL,
                     county    = NULL,
-                    geoids    = NULL,
+                    geoid    = NULL,
                     year      = 2016,
                     survey    = "acs5",
                     geometry  = TRUE,
@@ -100,17 +102,17 @@ get_adi <- function(geography = NULL,
       stop("If supplying counties, exactly one state must be provided")
     }
     
-    # Throws error if user supplies county, state, and geoids
-    if(!is.null(geoids)) {
-      stop("If supplying geoids, state and county must be NULL")
+    # Throws error if user supplies county, state, and geoid
+    if(!is.null(geoid)) {
+      stop("If supplying geoid, state and county must be NULL")
     }
     
     # Validates user-supplied state and coerces it into its two-digit GEOID
     state <- tidycensus:::validate_state(state)
     
-    # Validates user-supplied county values and populates geoids with the
+    # Validates user-supplied county values and populates geoid with the
     # counties' five-digit GEOIDs
-    geoids <-
+    geoid <-
       unique(sapply(county,
                     function(x) {
                       paste0(state, 
@@ -122,20 +124,26 @@ get_adi <- function(geography = NULL,
   
   else if(!is.null(state)) {
 
-    # Throws error if user supplies both states and geoids
-    if(!is.null(geoids)) {
-      stop("If supplying geoids, state and county must be NULL")
+    # Throws error if user supplies both states and geoid
+    if(!is.null(geoid)) {
+      stop("If supplying geoid, state and county must be NULL")
     }
     
-    # Populates geoids with states' two-digit geoids.
+    # Populates geoid with states' two-digit geoid.
     else {
-      geoids <- unique(sapply(state, tidycensus:::validate_state))
+      geoid <- unique(sapply(state, tidycensus:::validate_state))
     }
     
   }
   
-  ref_area <- get_reference_area(geoids, geography)
+  # Sends geoid and geography to the function get_reference_area, which
+  # validates the GEOIDs in geoid and returns a ref_area-class object, which
+  # contains all the data needed to produce the ADIs specified by the user.
+  ref_area <- get_reference_area(geoid, geography)
   
+  # Makes a list of all arguments necessary for running tidycensus::get_acs,
+  # with the exception of state and county.
+  # Notice that the dots (...) are included in this list.
   get_acs_args <-
     list(
       geography = ref_area$geography,
@@ -157,9 +165,14 @@ get_adi <- function(geography = NULL,
           "B23008_021"),
       ...)
   
+  # Validates the names of the elements of get_acs_args against the formalArgs()
+  # of tidycensus::get_acs(), ensuring that only arguments useable by
+  # tidycensus::get_acs() are included
   get_acs_args <- get_acs_args[names(get_acs_args) %in%
                                  formalArgs(tidycensus::get_acs)]
   
+  # Passes the ref_area-class object and the function arguments onto
+  # calculate_adi(), which produces the tibble of ADIs
   acs_adi <- calculate_adi(ref_area, get_acs_args)
 
   return(acs_adi)

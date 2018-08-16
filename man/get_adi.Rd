@@ -4,8 +4,8 @@
 \alias{get_adi}
 \title{Calculates ADIs of user-specified areas.}
 \usage{
-get_adi(geography = NULL, state = NULL, county = NULL, geoids = NULL,
-  year = NULL, survey = "acs5", geometry = TRUE, key = NULL, ...)
+get_adi(geography = NULL, state = NULL, county = NULL, geoid = NULL,
+  year = 2016, survey = "acs5", geometry = TRUE, key = NULL, ...)
 }
 \arguments{
 \item{geography}{A character string denoting the level of census geography
@@ -27,15 +27,17 @@ leading zeros). All elements must be in the same state; therefore, if using
 \code{county}, \code{state} must contain exactly one value. Must be blank
 if \code{geoid} is used.}
 
-\item{year}{Single integer specifying the year of the ACS survey or decennial
-census data to use. Default for ACS surveys is 2016 and default for
-decennial census is 2010.}
+\item{geoid}{A character vector of GEOIDs (use quotation marks and leading
+zeros). Defaults to NULL. Must be blank if \code{state} and/or
+\code{county} is used. Can contain different levels of geography (see
+details).}
+
+\item{year}{Single integer specifying the year of the ACS survey to use. Defaults to 2016.}
 
 \item{survey}{The data set used to calculate ADIs. Must be one of c("acs5",
-"acs3", "acs1", or "census"), with the latter denoting the decennial US
-census and the others denoting the 5-, 3-, and 1-year ACS estimates.
-Defaults to "acs5." Important: data not always available depending on the
-level of geography. See
+"acs3", "acs1"), denoting the 5-, 3-, and 1-year ACS estimates. Defaults to
+"acs5." Important: data for not always available depending on the level of
+geography and data set chosen. See
 \url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html}.}
 
 \item{geometry}{Logical value indicating whether or not shapefile data should
@@ -45,10 +47,8 @@ be included in the tibble. Defaults to TRUE.}
 http://api.census.gov/data/key_signup.html. Defaults to null. Not necessary
 if you have already loaded your key with \code{\link{census_api_key}}.}
 
-\item{geoid}{A character vector of GEOIDs (use quotation marks and leading
-zeros). Defaults to NULL. Must be blank if \code{state} and/or
-\code{county} is used. Can contain different levels of geography (see
-details).}
+\item{...}{Additional arguments to be passed onto
+\code{tidycensus::get_acs()}.}
 }
 \value{
 A tibble of three columns: GEOID of location, Name of location, ADI
@@ -60,8 +60,7 @@ A tibble with four columns: \code{GEOID}, \code{NAME}, \code{GEOID},
 }
 \description{
 Returns a tibble of the area deprivation indices (ADIs) of user-specified
-locations in the United States, utilizing American Community Survey data or
-decennial US census data.
+locations in the United States, utilizing American Community Survey data.
 }
 \details{
 The algorithm that produced the original ADIs employs factor
@@ -95,7 +94,7 @@ get_adi(geography = "tract", state = "OH", county = "Cuyahoga")
 
 get_adi(geography = "county", state = "CT", year = 2015, survey = "acs1", geometry = FALSE)
   
-delmarva <- get_adi(geoids = c("10", "51001", "51131", "24015", "24029", "24035", "24011", "24041", "24019", "24045", "24039", "24047"))
+delmarva <- get_adi(geoid = c("10", "51001", "51131", "24015", "24029", "24035", "24011", "24041", "24019", "24045", "24039", "24047"))
 
 # Demonstration of geom_sf integration:
 \dontrun{

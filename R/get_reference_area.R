@@ -40,7 +40,7 @@ get_reference_area <- function(user_geoids = NULL, geography = NULL) {
       )
     }
 
-    # Otherwise, warns user if the most granular GEOID in geoids is more
+    # Otherwise, warns user if the most granular GEOID in user_geoids is more
     # granular than the user-specified level of geography
     else {
       geography_granularity <- dplyr::case_when(
@@ -62,7 +62,7 @@ get_reference_area <- function(user_geoids = NULL, geography = NULL) {
           fips_table[as.logical(rowSums(x == fips_table[,1:4])),]))
   }
 
-  # Creates a geoids-class object
+  # Creates a ref_area-class object
   ref_area <- list(
     ref_geoids = unname(as.vector(unique(user_blk_grps[[geography]]))),
     geography = geography,
@@ -86,7 +86,7 @@ get_reference_area <- function(user_geoids = NULL, geography = NULL) {
       list(list(state = NULL, county = NULL))
   }
   
-  class(ref_area) <- "geoids"
+  class(ref_area) <- "ref_area"
 
   return(ref_area)
 }

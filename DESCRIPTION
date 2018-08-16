@@ -1,7 +1,7 @@
 Type: Package
 Package: sociome
 Title: sociome
-Version: 0.2.0
+Version: 0.2.1
 Authors@R: c(
     person("Nik", "Krieger", email = "nk@case.edu", role = c("aut", "cre")),
     person("Jarrod", "Dalton", email = "daltonj@ccf.org", role = "aut"),

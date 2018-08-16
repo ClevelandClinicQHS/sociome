@@ -1,47 +1,88 @@
-#' get_adi
+#' Calculates ADIs of user-specified areas.
 #'
-#' Returns a tibble of user-specified locations in the United States along with
-#' their area deprivation indices (ADIs), utilizing American Community Survey
-#' data.
+#' Returns a tibble of the area deprivation indices (ADIs) of user-specified
+#' locations in the United States, utilizing American Community Survey data or
+#' decennial US census data.
 #'
-#' @param geography a character string denoting the type of location whose ADIs
-#'   you'd like to see (e.g., "region", "county", "block group"). Must be one of
-#'   the keywords accepted by the tidycensus::get_acs() function (see
-#'   \url{https://walkerke.github.io/tidycensus/articles/basic-usage.html#geography-in-tidycensus}
-#'    for a full list of options).
-#' @param year The year, or endyear, of the ACS sample used to calculate the ADI
-#'   values. 2010 through 2016 are available. Defaults to 2016.
-#' @param state The state for which you are requesting ADI data. Not applicable
-#'   for certain values of `geography`, required for other values of
-#'   `geography`, and optional for still other values of `geography` (see
-#'   \url{https://walkerke.github.io/tidycensus/articles/basic-usage.html#geography-in-tidycensus}
-#'    for more information). State names, postal codes, and FIPS codes are
-#'   accepted. Defaults to NULL.
-#' @param county The county for which you are requesting ADI data. County names
-#'   and FIPS codes are accepted. Must be combined with a value supplied to
-#'   'state'. Not applicable for some values of `geography`, optional for other
-#'   values of `geography`, but never required (see
-#'   \code{\link[tidycensus]{census_api_key}} for more information).
-#'   https://walkerke.github.io/tidycensus/articles/basic-usage.html#geography-in-tidycensus
-#'    for more information). Defaults to NULL.
-#' @param geoids A character vector of GEOIDs. See details.
-#' @param key Your Census API key. Obtain one at
-#'   http://api.census.gov/data/key_signup.html. Not necessary if you have
-#'   already loaded your key with the tidycensus::census_api_key() function. See
-#' @param survey The ACS contains one-year, three-year, and five-year surveys
-#'   expressed as "acs1", "acs3", and "acs5". The default selection is "acs5."
+#' @param geography A character string denoting the level of census geography
+#'   whose ADIs you'd like to obtain. Must be one of c("state", "county",
+#'   "tract", or "block group"). Defaults to NULL. See details for default
+#'   behaviors when this and other parameters are left blank.
+#' @param state A vector of character strings specifying the state(s) whose ADI
+#'   data you're requesting. Defaults to NULL. Can contain full state names,
+#'   two-letter state abbreviations, or FIPS codes/GEOIDs (must be a string, so
+#'   use quotation marks and leading zeros). Must contain exactly one state if
+#'   the parameter \code{counties} is also used. Must be blank if \code{geoid}
+#'   is used.
+#' @param county A vector of character strings specifying the counties whose ADI
+#'   data you're requesting. Defaults to NULL. County names and three-digit FIPS
+#'   codes are accepted (must contain strings, so use quotation marks and
+#'   leading zeros). All elements must be in the same state; therefore, if using
+#'   \code{county}, \code{state} must contain exactly one value. Must be blank
+#'   if \code{geoid} is used.
+#' @param geoid A character vector of GEOIDs (use quotation marks and leading
+#'   zeros). Defaults to NULL. Must be blank if \code{state} and/or
+#'   \code{county} is used. Can contain different levels of geography (see
+#'   details).
+#' @param year Single integer specifying the year of the ACS survey or decennial
+#'   census data to use. Default for ACS surveys is 2016 and default for
+#'   decennial census is 2010.
+#' @param survey The data set used to calculate ADIs. Must be one of c("acs5",
+#'   "acs3", "acs1", or "census"), with the latter denoting the decennial US
+#'   census and the others denoting the 5-, 3-, and 1-year ACS estimates.
+#'   Defaults to "acs5." Important: data not always available depending on the
+#'   level of geography. See
+#'   \url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html}.
+#' @param geometry Logical value indicating whether or not shapefile data should
+#'   be included in the tibble. Defaults to TRUE.
+#' @param key Your Census API key as a character string. Obtain one at
+#'   http://api.census.gov/data/key_signup.html. Defaults to null. Not necessary
+#'   if you have already loaded your key with \code{\link{census_api_key}}.
 #'
 #' @return A tibble of three columns: GEOID of location, Name of location, ADI
 #'   of location
 #'
-#' @details Elements of `geoids` can represent different levels of geography,
-#'   but they all must be either 2 digits (for states), 5 digits (for counties),
-#'   11 digits (for tracts) or 12 digits (for block groups). Be sure to put a
-#'   leading zero where applicable.
+#' @details The algorithm that produced the original ADIs employs factor
+#'   analysis. As a result, the ADI is a relative measure; the ADI of a
+#'   particular location is dynamic, varying depending on which other locations
+#'   were supplied to the algorithm. In other words, ADI will vary depending on
+#'   the reference area. For example, the ADI of Orange County, California is
+#'   \emph{x} when calculated alongside all other counties in California, but it
+#'   is \emph{y} when calculated alongside all counties in the US. The get_adi()
+#'   function enables the user to define a reference area by feeding a vector of
+#'   GEOIDs to its \code{geoid} parameter (or alternatively for convenience, a
+#'   vector of state and county names/abbreviations to \code{state} and
+#'   \code{county}). The function then gathers data from those specified
+#'   locations and performs calculations using their data alone.
+#'
+#'   If \code{geography} is left blank, the function will choose the most
+#'   specific level of geography specified by the parameter(s) \code{state},
+#'   \code{county}, and/or \code{geoid}. If \code{geography} is specified but
+#'   \code{state}, \code{county}, and \code{geoid} are all left blank, the
+#'   function will use the entire US as the reference area (see README.md for a
+#'   discussion of reference area). If all these parameters are left blank, the
+#'   function will report the ADIs of all census tracts in the United States.
+#'
+#'   Elements of \code{geoid} can represent different levels of geography, but
+#'   they all must be either 2 digits (for states), 5 digits (for counties), 11
+#'   digits (for tracts) or 12 digits (for block groups). Must contain character
+#'   strings, so use quotation marks as well as leading zero where applicable.
 #'
 #' @examples
-#' get_adi(geography = "tract", year = 2015, state = "OH", county = "Cuyahoga")
-#' get_adi(geography = "region")
+#' get_adi(geography = "tract", state = "OH", county = "Cuyahoga")
+#' 
+#' get_adi(geography = "county", state = "CT", year = 2015, survey = "acs1", geometry = FALSE)
+#'   
+#' delmarva <- get_adi(geoids = c("10", "51001", "51131", "24015", "24029", "24035", "24011", "24041", "24019", "24045", "24039", "24047"))
+#' 
+#' # Demonstration of geom_sf integration:
+#' \dontrun{
+#' delmarva %>% ggplot() + geom_sf(aes(fill = ADI))
+#' }
+#'
+#' @return A tibble with four columns: \code{GEOID}, \code{NAME}, \code{GEOID},
+#'   and \code{geometry} (which is left out if \code{geometry = FALSE} is
+#'   specified).
 #'
 #' @export
 

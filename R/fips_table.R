@@ -1,4 +1,7 @@
-#' FIPS codes of every state, county, tract, and block group
+#' GEOIDs of all US states, counties, tracts, and block groups.
+#' 
+#' Data set containing the GEOIDs (FIPS codes) of every state, county, tract,
+#' and block group in the US.
 #'
 #' Data frame in which each row represents a block group. Columns contain the
 #' block groups' corresponding state-, county-, tract-, and block-group-level
@@ -18,7 +21,11 @@
 #'   county}
 #' }
 #'
-#' @source \url{https://www2.census.gov/geo/docs/reference/cenpop2010/blkgrp/CenPop2010_Mean_BG.txt}
+#' @source
+#'   \url{https://www2.census.gov/geo/docs/reference/cenpop2010/blkgrp/CenPop2010_Mean_BG.txt}
+#'   and
+#'   \url{https://raw.githubusercontent.com/NikKrieger/sociome/master/data-raw/us_block_groups_integer_vector_creation.Rmd}
+#'   
 "fips_table"
 
 #' @export

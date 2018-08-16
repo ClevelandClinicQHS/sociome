@@ -1,8 +1,7 @@
 #' Calculates ADIs of user-specified areas.
 #'
 #' Returns a tibble of the area deprivation indices (ADIs) of user-specified
-#' locations in the United States, utilizing American Community Survey data or
-#' decennial US census data.
+#' locations in the United States, utilizing American Community Survey data.
 #'
 #' @param geography A character string denoting the level of census geography
 #'   whose ADIs you'd like to obtain. Must be one of c("state", "county",
@@ -24,14 +23,11 @@
 #'   zeros). Defaults to NULL. Must be blank if \code{state} and/or
 #'   \code{county} is used. Can contain different levels of geography (see
 #'   details).
-#' @param year Single integer specifying the year of the ACS survey or decennial
-#'   census data to use. Default for ACS surveys is 2016 and default for
-#'   decennial census is 2010.
+#' @param year Single integer specifying the year of the ACS survey to use. Defaults to 2016.
 #' @param survey The data set used to calculate ADIs. Must be one of c("acs5",
-#'   "acs3", "acs1", or "census"), with the latter denoting the decennial US
-#'   census and the others denoting the 5-, 3-, and 1-year ACS estimates.
-#'   Defaults to "acs5." Important: data not always available depending on the
-#'   level of geography. See
+#'   "acs3", "acs1"), denoting the 5-, 3-, and 1-year ACS estimates. Defaults to
+#'   "acs5." Important: data for not always available depending on the level of
+#'   geography and data set chosen. See
 #'   \url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html}.
 #' @param geometry Logical value indicating whether or not shapefile data should
 #'   be included in the tibble. Defaults to TRUE.
@@ -90,7 +86,7 @@ get_adi <- function(geography = NULL,
                     state     = NULL,
                     county    = NULL,
                     geoids    = NULL,
-                    year      = NULL,
+                    year      = 2016,
                     survey    = "acs5",
                     geometry  = TRUE,
                     key       = NULL,
@@ -140,10 +136,10 @@ get_adi <- function(geography = NULL,
   
   ref_area <- get_reference_area(geoids, geography)
   
-  tidycensus_args <-
+  get_acs_args <-
     list(
       geography = ref_area$geography,
-      year = year, survey = survey, key = key, geometry = geometry,
+      year = year, survey = survey, geometry = geometry, key = key,
       cache_table = TRUE, output = "wide",
       variables =
         c("B01003_001","B19013_001","B19001_002","B19001_011","B19001_012",
@@ -161,29 +157,10 @@ get_adi <- function(geography = NULL,
           "B23008_021"),
       ...)
   
-  if(survey == "census") {
-    if(is.null(year)) {
-      tidycensus_args$year <- 2010
-    }
-    else if(!(year %in% c(1990, 2000, 2010))) {
-      stop("To use decennial census data, specify year as 1990, 2000, or 2010")
-    }
-    tidycensus_function <- "tidycensus::get_decennial"
-    tidycensus_args <-
-      tidycensus_args[
-        names(tidycensus_args) %in% formalArgs(tidycensus::get_decennial)]
-  }
-  else {
-    if(is.null(year)) {
-      tidycensus_args$year <- 2016
-    }
-    tidycensus_function <- "tidycensus::get_acs"
-    tidycensus_args <-
-      tidycensus_args[
-        names(tidycensus_args) %in% formalArgs(tidycensus::get_acs)]
-  }
-
-  acs_adi <- calculate_adi(ref_area, tidycensus_function, tidycensus_args)
+  get_acs_args <- get_acs_args[names(get_acs_args) %in%
+                                 formalArgs(tidycensus::get_acs)]
+  
+  acs_adi <- calculate_adi(ref_area, get_acs_args)
 
   return(acs_adi)
 }

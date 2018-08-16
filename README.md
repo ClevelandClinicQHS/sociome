@@ -121,7 +121,7 @@ Here is that table in full:
 </tbody>
 </table>
 
-The user can mix different levels of geography in the `geoids` parameter. The code below stores the ADI of every county entirely or partially on the Delmarva peninsula, using by default the 5-year ACS estimates from 2016. 
+The user can mix different levels of geography in the `geoids` parameter. The code below stores the ADIs of the census block groups in every county entirely or partially on the Delmarva peninsula, using by default the 5-year ACS estimates from 2016. 
 
 ```
 delmarva_geoids <- c("10", "51001", "51131", "24015", "24029", "24035", "24011",
@@ -129,7 +129,7 @@ delmarva_geoids <- c("10", "51001", "51131", "24015", "24029", "24035", "24011",
   # The two-digit GEOID stands for the state of Delaware.
   # The five-digit GEOIDs stand for specific counties in Virginia and Maryland
 
-delmarva <- get_adi(geoids = delmarva_geoids)
+delmarva <- get_adi(geography = "block group", geoids = delmarva_geoids)
   # The Delmarva peninsula lies on the east coast of the US and is split
   #   between DELaware, MARyland, and VirginiA.
 ```
@@ -140,7 +140,7 @@ With the help of `tidycensus::get_acs()`, tables produced by `get_adi()` contain
 delmarva %>% ggplot() + geom_sf(aes(fill = ADI))
 ```
 
-![](https://raw.githubusercontent.com/NikKrieger/sociome/master/man/figures/Delmarva.png)
+![](https://raw.githubusercontent.com/NikKrieger/sociome/master/man/figures/delmarva_block_groups_adis.png)
 
 
 ### Demonstration of the relative nature of ADIs, using custom reference areas

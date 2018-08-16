@@ -1,4 +1,4 @@
-calculate_adi <- function(ref_area, tidycensus_function, tidycensus_args) {
+calculate_adi <- function(ref_area, get_acs_args) {
 
   old <- options(tigris_use_cache = TRUE)
   on.exit(options(old), add = TRUE)
@@ -6,20 +6,20 @@ calculate_adi <- function(ref_area, tidycensus_function, tidycensus_args) {
   acs_data_raw <-
     ref_area$state_county %>% 
     purrr::map(
-      function(state_county, tidycensus_function, tidycensus_args) {
+      function(state_county, get_acs_args) {
         state = state_county$state
         county = state_county$county
-        do.call(eval(parse(text = tidycensus_function)),
-                c(list(state = state, county = county), tidycensus_args))
+        do.call(eval(parse(text = "tidycensus::get_acs")),
+                c(list(state = state, county = county), get_acs_args))
         },
-      tidycensus_function = tidycensus_function,
-      tidycensus_args = tidycensus_args) %>%
+      get_acs_args = get_acs_args) %>%
     purrr::reduce(rbind)
   
   acs_ref_area <- acs_data_raw %>%
     dplyr::filter(GEOID %in% ref_area$ref_geoids)
   
-  acs_data_f <- acs_ref_area %>% 
+  acs_data_f <- acs_ref_area %>%
+    as.data.frame() %>% 
     tibble::as_tibble() %>% 
     dplyr::select(B01003_001E, B19013_001E, B19001_002E,
                   B19001_011E, B19001_012E, B19001_013E, B19001_014E,

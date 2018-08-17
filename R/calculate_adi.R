@@ -1,26 +1,37 @@
 calculate_adi <- function(ref_area, get_acs_args) {
 
+  # Saves old tigris_use_cache value and puts it back when function exits
   old <- options(tigris_use_cache = TRUE)
   on.exit(options(old), add = TRUE)
   
+  # purrr::map() is used to call tidycensus::get_acs() for each user-specified state
+  # or set of user-specified states.
+  # purrr::reduce(rbind) puts the results into a single data frame
   acs_data_raw <-
     ref_area$state_county %>% 
     purrr::map(
       function(state_county, get_acs_args) {
-        state = state_county$state
-        county = state_county$county
+        state  <- state_county$state
+        county <- state_county$county
         do.call(eval(parse(text = "tidycensus::get_acs")),
                 c(list(state = state, county = county), get_acs_args))
         },
       get_acs_args = get_acs_args) %>%
     purrr::reduce(rbind)
   
+  # Since the call (or calls) to tidycensus::get_acs() above usually gathers
+  # data on more places than what the user specified, this pares the data frame
+  # down to only include the user-specified reference area.
   acs_ref_area <- acs_data_raw %>%
     dplyr::filter(GEOID %in% ref_area$ref_geoids)
   
+  # Selects the relevant variables that tidycensus::get_acs() wrangles them into
+  # a data frame that contains the specific measures that are used to calculate
+  # ADI
   acs_data_f <- acs_ref_area %>%
-    as.data.frame() %>% 
-    tibble::as_tibble() %>% 
+    as.data.frame() %>% # This causes the geometry column to become un-"sticky",
+                        # allowing it to be removed so that it doesn't interfere
+                        # with the imputation that may follow.
     dplyr::select(B01003_001E, B19013_001E, B19001_002E,
                   B19001_011E, B19001_012E, B19001_013E, B19001_014E,
                   B19001_015E, B19001_016E, B19001_017E, B17010_001E,
@@ -88,23 +99,28 @@ calculate_adi <- function(ref_area, get_acs_args) {
       "pctPeopleWithLessThan9thGradeEducation" = Pless9grade,
       "pctHouseholdsWithOverOnePersonPerRoom" =  Ocrowded)
   
+  # Performs single imputation if there is any missingness in the data.
   if(anyNA(acs_data_f)) {
-    # Performs single imputation if there is any missingness in the data.
-
+    
     is.na(acs_data_f) <- do.call(cbind, lapply(acs_data_f, is.infinite))
 
-    tempdf <- mice::mice(acs_data_f, m = 1, maxit = 50, method = "pmm",
-                         seed = 500, printFlag = FALSE)
-    
-    acs_data_f <- mice::complete(data = tempdf, action = 1L)
+    acs_data_f <- #acs_data_f %>% 
+      mice::complete(
+      mice::mice(acs_data_f, m = 1, maxit = 50, method = "pmm", seed = 500,
+                 printFlag = FALSE) #%>% 
+      #mice::complete(
+      
+      )
     
     message("Single imputation performed")
   }
   
-  # factor analysis
+  # Where the magic happens: a factor analysis of the statistics that produces
+  # the raw ADI scores
   fit <- psych::fa(acs_data_f, nfactors = 1, rotate = "none", fm = "pa",
                    max.iter = 25)
   
+  # The raw ADI scores are standardized to have a mean of 100 and sd of 20
   acs_adi <- acs_ref_area %>% 
     dplyr::mutate(ADI = as.numeric(fit$scores*20+100)) %>% 
     dplyr::select(GEOID, NAME, ADI)
@@ -114,4 +130,4 @@ calculate_adi <- function(ref_area, get_acs_args) {
 
 # Import the method mice.impute.pmm from mice package.
 # calculate_adi() requires it in order to work.
-mice.impute.pmm <- mice::mice.impute.pmm
+#mice.impute.pmm <- mice::mice.impute.pmm

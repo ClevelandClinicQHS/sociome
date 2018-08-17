@@ -14,4 +14,5 @@
                stringsAsFactors = FALSE)
   
   assign("fips_table", fips_table, pos = asNamespace("sociome"))
+  assign("mice.impute.pmm", mice::mice.impute.pmm, pos = asNamespace("sociome"))
 }

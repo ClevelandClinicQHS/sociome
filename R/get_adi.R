@@ -78,7 +78,7 @@
 #' delmarva %>% ggplot() + geom_sf(aes(fill = ADI))
 #' }
 #'
-#' @return A tibble with four columns: \code{GEOID}, \code{NAME}, \code{GEOID},
+#' @return A tibble with four columns: \code{GEOID}, \code{NAME}, \code{ADI},
 #'   and \code{geometry} (which is left out if \code{geometry = FALSE} is
 #'   specified).
 #'

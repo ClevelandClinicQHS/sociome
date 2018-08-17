@@ -54,7 +54,7 @@ if you have already loaded your key with \code{\link{census_api_key}}.}
 A tibble of three columns: GEOID of location, Name of location, ADI
   of location
 
-A tibble with four columns: \code{GEOID}, \code{NAME}, \code{GEOID},
+A tibble with four columns: \code{GEOID}, \code{NAME}, \code{ADI},
   and \code{geometry} (which is left out if \code{geometry = FALSE} is
   specified).
 }

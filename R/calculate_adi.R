@@ -104,13 +104,10 @@ calculate_adi <- function(ref_area, get_acs_args) {
     
     is.na(acs_data_f) <- do.call(cbind, lapply(acs_data_f, is.infinite))
 
-    acs_data_f <- #acs_data_f %>% 
-      mice::complete(
-      mice::mice(acs_data_f, m = 1, maxit = 50, method = "pmm", seed = 500,
-                 printFlag = FALSE) #%>% 
-      #mice::complete(
-      
-      )
+    acs_data_f <- acs_data_f %>% 
+      mice::mice(m = 1, maxit = 50, method = "pmm", seed = 500,
+                 printFlag = FALSE) %>% 
+      mice::complete()
     
     message("Single imputation performed")
   }
@@ -128,6 +125,13 @@ calculate_adi <- function(ref_area, get_acs_args) {
   return(acs_adi)
 }
 
-# Import the method mice.impute.pmm from mice package.
-# calculate_adi() requires it in order to work.
-#mice.impute.pmm <- mice::mice.impute.pmm
+#' Import mice.impute.pmm from mice package
+#' 
+#' This simply imports mice.impute.pmm from the mice package.
+#' 
+#' This is only here so that mice::mice() will work. It needs mice.impute.pmm(),
+#' and it will not find it unless it is included as an exported function in
+#' sociome.
+#'
+#' @export
+mice.impute.pmm <- mice::mice.impute.pmm

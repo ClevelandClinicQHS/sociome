@@ -12,12 +12,12 @@ Description: sociome
     Operationalizes social determinants of health data for researchers
 License: CC0
 Depends:
-    R (>= 3.1)
+    R (>= 3.1),
+    mice (>= 3.0.0)
 Imports:
     checkmate (>= 1.8.5),
     dplyr (>= 0.7.6),
     magrittr (>= 1.5),
-    mice (>= 3.0.0),
     psych (>= 1.8.4),
     tidycensus (>= 0.4.6),
     rlang (>= 0.1.2)

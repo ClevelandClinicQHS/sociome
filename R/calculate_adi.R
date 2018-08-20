@@ -1,4 +1,3 @@
-#' @importFrom mice mice
 calculate_adi <- function(ref_area, get_acs_args) {
 
   # Saves old tigris_use_cache value and puts it back when function exits
@@ -125,14 +124,3 @@ calculate_adi <- function(ref_area, get_acs_args) {
 
   return(acs_adi)
 }
-
-#' Import mice.impute.pmm from mice package
-#' 
-#' This simply imports mice.impute.pmm from the mice package.
-#' 
-#' This is only here so that mice::mice() will work. It needs mice.impute.pmm(),
-#' and it will not find it unless it is included as an exported function in
-#' sociome.
-#' 
-#' @export
-mice.impute.pmm <- mice::mice.impute.pmm

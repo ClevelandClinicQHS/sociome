@@ -108,17 +108,15 @@ get_adi <- function(geography = NULL,
     }
     
     # Validates user-supplied state and coerces it into its two-digit GEOID
-    state <- tidycensus:::validate_state(state)
+    state <- validate_state(state)
     
     # Validates user-supplied county values and populates geoid with the
     # counties' five-digit GEOIDs
     geoid <-
       unique(sapply(county,
                     function(x) {
-                      paste0(state, 
-                             tidycensus:::validate_county(state = state,
-                                                          county = x))
-                    }))
+                      paste0(state,
+                             validate_county(state = state, county = x))}))
   }
   
   
@@ -176,4 +174,125 @@ get_adi <- function(geography = NULL,
   acs_adi <- calculate_adi(ref_area, get_acs_args)
 
   return(acs_adi)
+}
+
+
+validate_state <- function(state, .msg = interactive()) 
+{
+  if (is.null(state)) 
+    return(NULL)
+  state <- tolower(stringr::str_trim(state))
+  if (grepl("^[[:digit:]]+$", state)) {
+    state <- sprintf("%02d", as.numeric(state))
+    if (state %in% fips_state_table$fips) {
+      return(state)
+    }
+    else {
+      state_sub <- substr(state, 1, 2)
+      if (state_sub %in% fips_state_table$fips) {
+        message(
+          sprintf("Using first two digits of %s - '%s' (%s) - for FIPS code.",
+                  state, state_sub,
+                  fips_state_table[fips_state_table$fips == 
+                                     state_sub, "name"]),
+          call. = FALSE)
+        return(state_sub)
+      }
+      else {
+        warning(
+          sprintf("'%s' is not a valid FIPS code or state name/abbreviation",
+                  state), call. = FALSE)
+        return(NULL)
+      }
+    }
+  }
+  else if (grepl("^[[:alpha:]]+", state)) {
+    if (nchar(state) == 2 && state %in% fips_state_table$abb) {
+      if (.msg) 
+        message(sprintf("Using FIPS code '%s' for state '%s'", 
+                        fips_state_table[fips_state_table$abb == state, 
+                                         "fips"], toupper(state)))
+      return(fips_state_table[fips_state_table$abb == state, 
+                              "fips"])
+    }
+    else if (nchar(state) > 2 && state %in% fips_state_table$name) {
+      if (.msg) 
+        message(sprintf("Using FIPS code '%s' for state '%s'", 
+                        fips_state_table[fips_state_table$name == state, 
+                                         "fips"], simpleCapSO(state)))
+      return(fips_state_table[fips_state_table$name == 
+                                state, "fips"])
+    }
+    else {
+      warning(
+        sprintf("'%s' is not a valid FIPS code or state name/abbreviation", 
+                      state), call. = FALSE)
+      return(NULL)
+    }
+  }
+  else {
+    warning(sprintf("'%s' is not a valid FIPS code or state name/abbreviation", 
+                    state), call. = FALSE)
+    return(NULL)
+  }
+}
+
+simpleCapSO <- function(x) 
+{
+  s <- strsplit(x, " ")[[1]]
+  paste0(toupper(substring(s, 1, 1)), substring(s, 2), collapse = " ")
+}
+
+validate_county <- function (state, county, .msg = interactive()) 
+{
+  if (is.null(state) || is.null(county)) 
+    return(NULL)
+  state <- validate_state(state)
+  county_table <-
+    tidycensus::fips_codes[tidycensus::fips_codes$state_code == state, 
+                             ]
+  if (grepl("^[[:digit:]]+$", county)) {
+    county <- sprintf("%03d", as.numeric(county))
+    if (county %in% county_table$county_code) {
+      return(county)
+    }
+    else {
+      warning(sprintf("'%s' is not a valid FIPS code for counties in %s", 
+                      county, county_table$state_name[1]), call. = FALSE)
+      return(NULL)
+    }
+  }
+  else if ((grepl("^[[:alpha:]]+", county))) {
+    county_index <- grepl(sprintf("^%s", county), county_table$county, 
+                          ignore.case = TRUE)
+    matching_counties <- county_table$county[county_index]
+    if (length(matching_counties) == 0) {
+      warning(sprintf("'%s' is not a valid name for counties in %s", 
+                      county, county_table$state_name[1]), call. = FALSE)
+      return(NULL)
+    }
+    else if (length(matching_counties) == 1) {
+      if (.msg) 
+        message(sprintf("Using FIPS code '%s' for '%s'", 
+                        county_table[county_table$county == matching_counties, 
+                                     "county_code"], matching_counties))
+      return(county_table[county_table$county == matching_counties, 
+                          "county_code"])
+    }
+    else if (length(matching_counties) > 1) {
+      ctys <- format_vec(matching_counties)
+      warning("Your county string matches ", ctys,
+              " Please refine your selection.", call. = FALSE)
+      return(NULL)
+    }
+  }
+}
+
+format_vec <- function(vec) 
+{
+  out <- paste0(vec, ", ")
+  l <- length(out)
+  out[l - 1] <- paste0(out[l - 1], "and ")
+  out[l] <- gsub(", ", ".", out[l])
+  return(paste0(out, collapse = ""))
 }

@@ -1,0 +1,4 @@
+^figures$
+^.*\.Rproj$
+^\.Rproj\.user$
+^data-raw$

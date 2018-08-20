@@ -70,8 +70,10 @@
 #' get_adi(geography = "tract", state = "OH", county = "Cuyahoga")
 #' 
 #' get_adi(geography = "county", state = "CT", year = 2015, survey = "acs1", geometry = FALSE)
-#'   
-#' delmarva <- get_adi(geoid = c("10", "51001", "51131", "24015", "24029", "24035", "24011", "24041", "24019", "24045", "24039", "24047"))
+#'
+#' delmarva_geoids <- c("10", "51001", "51131", "24015", "24029", "24035",
+#'                      "24011", "24041", "24019", "24045", "24039", "24047")
+#' delmarva <- get_adi(geoid = delmarva_geoids)
 #' 
 #' # Demonstration of geom_sf integration:
 #' \dontrun{
@@ -129,7 +131,7 @@ get_adi <- function(geography = NULL,
     
     # Populates geoid with states' two-digit geoid.
     else {
-      geoid <- unique(sapply(state, tidycensus:::validate_state))
+      geoid <- unique(sapply(state, validate_state))
     }
     
   }
@@ -167,7 +169,7 @@ get_adi <- function(geography = NULL,
   # of tidycensus::get_acs(), ensuring that only arguments useable by
   # tidycensus::get_acs() are included
   get_acs_args <- get_acs_args[names(get_acs_args) %in%
-                                 formalArgs(tidycensus::get_acs)]
+                                 methods::formalArgs(tidycensus::get_acs)]
   
   # Passes the ref_area-class object and the function arguments onto
   # calculate_adi(), which produces the tibble of ADIs

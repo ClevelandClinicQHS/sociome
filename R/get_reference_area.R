@@ -93,7 +93,8 @@ get_reference_area <- function(user_geoids = NULL, geography = NULL) {
                list(state  = user_state,
                     county =
                       unique(dplyr::filter(user_blk_grps,
-                                           state == user_state)$short_county)))
+                                           .data$state ==
+                                             user_state)$short_county)))
   }
   else if(geography == "state" | geography == "county"){
     ref_area[["state_county"]] <-

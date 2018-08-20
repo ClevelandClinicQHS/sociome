@@ -93,8 +93,10 @@ The algorithm that produced the original ADIs employs factor
 get_adi(geography = "tract", state = "OH", county = "Cuyahoga")
 
 get_adi(geography = "county", state = "CT", year = 2015, survey = "acs1", geometry = FALSE)
-  
-delmarva <- get_adi(geoid = c("10", "51001", "51131", "24015", "24029", "24035", "24011", "24041", "24019", "24045", "24039", "24047"))
+
+delmarva_geoids <- c("10", "51001", "51131", "24015", "24029", "24035",
+                     "24011", "24041", "24019", "24045", "24039", "24047")
+delmarva <- get_adi(geoid = delmarva_geoids)
 
 # Demonstration of geom_sf integration:
 \dontrun{

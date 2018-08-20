@@ -1,15 +1,17 @@
 Type: Package
 Package: sociome
 Title: sociome
-Version: 0.2.1
+Version: 0.2.2
 Authors@R: c(
     person("Nik", "Krieger", email = "nk@case.edu", role = c("aut", "cre")),
     person("Jarrod", "Dalton", email = "daltonj@ccf.org", role = "aut"),
     person("Cindy", "Wang", email = "lxw384@case.edu", role = "aut"),
-    person("Adam", "Perzynski", email = "adam.perzynski@case.edu", role = "aut"))
+    person("Adam", "Perzynski", email = "adam.perzynski@case.edu",
+      role = "aut"),
+    person("Kyle", "Walker", email = "kwalkerdata@gmail.com", role = "aut"))
 Maintainer: The package maintainer <nk@case.edu>
 Description: sociome
-    Operationalizes social determinants of health data for researchers
+    Operationalizes social determinants of health data for researchers.
 License: CC0
 Depends:
     R (>= 3.1),
@@ -18,12 +20,12 @@ Imports:
     checkmate (>= 1.8.5),
     dplyr (>= 0.7.6),
     magrittr (>= 1.5),
+    methods (>= 3.5.0),
     psych (>= 1.8.4),
-    tidycensus (>= 0.4.6),
-    rlang (>= 0.1.2)
-Suggests:
-    covr (>= 3.1.0),
-    testthat (>= 2.0.0)
+    purrr (>= 0.2.5),
+    rlang (>= 0.1.2),
+    stringr (>= 1.3.1),
+    tidycensus (>= 0.4.6)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.0

@@ -106,7 +106,7 @@ The algorithm that produced the original ADIs employs factor
   https://www.census.gov/programs-surveys/acs/guidance/estimates.html.
 }
 \examples{
-library("mice") # Needed for imputation. library("sociome") is another option.
+library("sociome") # Needed for imputation. library("mice") is another option.
 get_adi(geography = "tract", state = "OH", county = "Cuyahoga")
 
 get_adi(geography = "county", state = "CT", year = 2015, survey = "acs1", geometry = FALSE)
@@ -116,8 +116,8 @@ delmarva_geoids <- c("10", "51001", "51131", "24015", "24029", "24035",
 delmarva <- get_adi(geoid = delmarva_geoids)
 
 # Demonstration of geom_sf integration:
-\dontrun{
+library(ggplot2)
+
 delmarva \%>\% ggplot() + geom_sf(aes(fill = ADI))
-}
 
 }

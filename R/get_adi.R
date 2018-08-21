@@ -83,7 +83,7 @@
 #'   https://www.census.gov/programs-surveys/acs/guidance/estimates.html.
 #'
 #' @examples
-#' library("mice") # Needed for imputation. library("sociome") is another option.
+#' library("sociome") # Needed for imputation. library("mice") is another option.
 #' get_adi(geography = "tract", state = "OH", county = "Cuyahoga")
 #' 
 #' get_adi(geography = "county", state = "CT", year = 2015, survey = "acs1", geometry = FALSE)
@@ -93,9 +93,9 @@
 #' delmarva <- get_adi(geoid = delmarva_geoids)
 #' 
 #' # Demonstration of geom_sf integration:
-#' \dontrun{
+#' library(ggplot2)
+#' 
 #' delmarva %>% ggplot() + geom_sf(aes(fill = ADI))
-#' }
 #'
 #' @return A tibble with four columns: \code{GEOID}, \code{NAME}, \code{ADI},
 #'   and \code{geometry} (which is left out if \code{geometry = FALSE} is

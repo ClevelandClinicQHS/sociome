@@ -62,28 +62,27 @@
 #'   of class \code{sf}, the \code{geometry} column will be unaffected.
 #'   
 #' @examples
-#' \dontrun{
-#'  acs_vars <- c("B01003_001", "B19013_001", "B19001_002", "B19001_011",
-#'                "B19001_012", "B19001_013", "B19001_014", "B19001_015",
-#'                "B19001_016", "B19001_017", "B17010_001", "B17010_002",
-#'                "B25003_001", "B25003_002", "C17002_001", "C17002_002",
-#'                "C17002_003", "C17002_004", "C17002_005", "B25044_001",
-#'                "B25044_003", "B25044_010", "B25014_001", "B25014_005",
-#'                "B25014_006", "B25014_007", "B25014_011", "B25014_012",
-#'                "B25014_013", "B25088_001", "B25064_001", "B25077_001",
-#'                "C24010_001", "C24010_003", "C24010_039", "B23025_001",
-#'                "B23025_005", "B15003_001", "B15003_002", "B15003_003",
-#'                "B15003_004", "B15003_005", "B15003_006", "B15003_007",
-#'                "B15003_008", "B15003_009", "B15003_010", "B15003_011",
-#'                "B15003_012", "B15003_017", "B15003_018", "B15003_019",
-#'                "B15003_020", "B15003_021", "B15003_022", "B15003_023",
-#'                "B15003_024", "B15003_025", "B23008_001", "B23008_008",
-#'                "B23008_021")
+#' acs_vars <- c("B01003_001", "B19013_001", "B19001_002", "B19001_011",
+#'               "B19001_012", "B19001_013", "B19001_014", "B19001_015",
+#'               "B19001_016", "B19001_017", "B17010_001", "B17010_002",
+#'               "B25003_001", "B25003_002", "C17002_001", "C17002_002",
+#'               "C17002_003", "C17002_004", "C17002_005", "B25044_001",
+#'               "B25044_003", "B25044_010", "B25014_001", "B25014_005",
+#'               "B25014_006", "B25014_007", "B25014_011", "B25014_012",
+#'               "B25014_013", "B25088_001", "B25064_001", "B25077_001",
+#'               "C24010_001", "C24010_003", "C24010_039", "B23025_001",
+#'               "B23025_005", "B15003_001", "B15003_002", "B15003_003",
+#'               "B15003_004", "B15003_005", "B15003_006", "B15003_007",
+#'               "B15003_008", "B15003_009", "B15003_010", "B15003_011",
+#'               "B15003_012", "B15003_017", "B15003_018", "B15003_019",
+#'               "B15003_020", "B15003_021", "B15003_022", "B15003_023",
+#'               "B15003_024", "B15003_025", "B23008_001", "B23008_008",
+#'               "B23008_021")
 #'                
 #' connecticut_counties <- tidycensus::get_acs(geography = "county", variables = acs_vars,
 #'                                             output = "wide", state = "CT")
+#' 
 #' calculate_adi(acs_data = connecticut_counties)
-#' }
 #' 
 #' @importFrom rlang .data
 #' 
@@ -185,6 +184,11 @@ calculate_adi <- function(acs_data, keep_columns = c("GEOID", "NAME")) {
   # Performs single imputation if there is any missingness in the data.
   if(anyNA(acs_data_f)) {
     
+    # Error message if user has not attached the sociome and/or mice package.
+    # Attaching one of these packages is necessary because of how mice::mice
+    # operates: it calls another, more specific specific imputation function
+    # from the mice package, but it looks for the function only in the global
+    # environment and its parent environments.
     if(!any(c("package:sociome", "package:mice") %in% search())) {
       stop(paste0('Imputation required. Run library("sociome") or ',
                   'library("mice") and try again.'))
@@ -213,4 +217,6 @@ calculate_adi <- function(acs_data, keep_columns = c("GEOID", "NAME")) {
   return(acs_adi)
 }
 
+# This is only here so that imputation can work when sociome is attached but
+# mice isn't
 mice.impute.pmm <- mice::mice.impute.pmm

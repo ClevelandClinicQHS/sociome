@@ -217,6 +217,14 @@ calculate_adi <- function(acs_data, keep_columns = c("GEOID", "NAME")) {
   return(acs_adi)
 }
 
-# This is only here so that imputation can work when sociome is attached but
-# mice isn't
-mice.impute.pmm <- mice::mice.impute.pmm
+#' \code{mice.impute.pmm} from the \code{mice} package
+#'
+#' This is only visible in the sociome package out of necessity so that
+#' imputation works.
+#'
+#' See \code{\link[mice]{mice.impute.pmm}} for its actual documentation.
+#'
+#' @name mice.impute.pmm
+#' @export
+#' @importFrom mice mice.impute.pmm
+NULL

@@ -1,4 +1,4 @@
-#' Calculates ADIs of user-specified areas.
+#' Returns the ADIs of user-specified areas.
 #'
 #' Returns a tibble of the area deprivation indices (ADIs) of user-specified
 #' locations in the United States, utilizing American Community Survey data.
@@ -26,7 +26,7 @@
 #' @param year Single integer specifying the year of the ACS survey to use. Defaults to 2016.
 #' @param survey The data set used to calculate ADIs. Must be one of c("acs5",
 #'   "acs3", "acs1"), denoting the 5-, 3-, and 1-year ACS estimates. Defaults to
-#'   "acs5." Important: data for not always available depending on the level of
+#'   "acs5." Important: data not always available depending on the level of
 #'   geography and data set chosen. See
 #'   \url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html}.
 #' @param geometry Logical value indicating whether or not shapefile data should
@@ -37,21 +37,18 @@
 #' @param ... Additional arguments to be passed onto
 #'   \code{tidycensus::get_acs()}.
 #'
-#' @return A tibble of three columns: GEOID of location, Name of location, ADI
-#'   of location
-#'
 #' @details The algorithm that produced the original ADIs employs factor
 #'   analysis. As a result, the ADI is a relative measure; the ADI of a
 #'   particular location is dynamic, varying depending on which other locations
 #'   were supplied to the algorithm. In other words, ADI will vary depending on
 #'   the reference area. For example, the ADI of Orange County, California is
 #'   \emph{x} when calculated alongside all other counties in California, but it
-#'   is \emph{y} when calculated alongside all counties in the US. The get_adi()
-#'   function enables the user to define a reference area by feeding a vector of
-#'   GEOIDs to its \code{geoid} parameter (or alternatively for convenience, a
-#'   vector of state and county names/abbreviations to \code{state} and
-#'   \code{county}). The function then gathers data from those specified
-#'   locations and performs calculations using their data alone.
+#'   is \emph{y} when calculated alongside all counties in the US. The
+#'   \code{get_adi()} function enables the user to define a reference area by
+#'   feeding a vector of GEOIDs to its \code{geoid} parameter (or alternatively
+#'   for convenience, a vector of state and county names/abbreviations to
+#'   \code{state} and \code{county}). The function then gathers data from those
+#'   specified locations and performs calculations using their data alone.
 #'
 #'   If \code{geography} is left blank, the function will choose the most
 #'   specific level of geography specified by the parameter(s) \code{state},
@@ -142,8 +139,9 @@ get_adi <- function(geography = NULL,
   ref_area <- get_reference_area(geoid, geography)
   
   # Makes a list of all arguments necessary for running tidycensus::get_acs,
-  # with the exception of state and county.
-  # Notice that the dots (...) are included in this list.
+  # with the exception of state and county. Notice that the dots (...) are
+  # included in this list. This allows the user to pass other arguments to
+  # tidycensus::get_acs() if desired (e.g., shift_geo).
   get_acs_args <-
     list(
       geography = ref_area$geography,
@@ -171,14 +169,44 @@ get_adi <- function(geography = NULL,
   get_acs_args <- get_acs_args[names(get_acs_args) %in%
                                  methods::formalArgs(tidycensus::get_acs)]
   
-  # Passes the ref_area-class object and the function arguments onto
-  # calculate_adi(), which produces the tibble of ADIs
-  acs_adi <- calculate_adi(ref_area, get_acs_args)
+  # Saves old tigris_use_cache value and puts it back when function exits
+  old <- options(tigris_use_cache = TRUE)
+  on.exit(options(old), add = TRUE)
+  
+  # purrr::map() is used to call tidycensus::get_acs() for each user-specified
+  # state or set of user-specified states.
+  # purrr::reduce(rbind) puts the results into a single data frame
+  acs_data_raw <-
+    ref_area$state_county %>% 
+    purrr::map(
+      function(state_county, get_acs_args) {
+        state  <- state_county$state
+        county <- state_county$county
+        do.call(eval(parse(text = "tidycensus::get_acs")),
+                c(list(state = state, county = county), get_acs_args))
+      },
+      get_acs_args = get_acs_args) %>%
+    purrr::reduce(rbind)
+  
+  # Since the call (or calls) to tidycensus::get_acs() above usually gathers
+  # data on more places than what the user specified, this pares the data frame
+  # down to only include the user-specified reference area.
+  acs_ref_area <- acs_data_raw %>%
+    dplyr::filter(.data$GEOID %in% ref_area$ref_geoids)
+  
+  # Passes the filtered tidycensus::get_acs() tibble onto calculate_adi(), which
+  # produces the tibble of ADIs
+  acs_adi <- calculate_adi(acs_ref_area)
 
   return(acs_adi)
 }
 
 
+###############################################################################
+# The functions below are copied verbatim or nearly verbatim from the tidycensus
+# package's internal functions with the same names.
+# Written by Kyle Walker.
+###############################################################################
 validate_state <- function(state, .msg = interactive()) 
 {
   if (is.null(state)) 

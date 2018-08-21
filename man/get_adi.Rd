@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_adi.R
 \name{get_adi}
 \alias{get_adi}
-\title{Calculates ADIs of user-specified areas.}
+\title{Returns the ADIs of user-specified areas.}
 \usage{
 get_adi(geography = NULL, state = NULL, county = NULL, geoid = NULL,
   year = 2016, survey = "acs5", geometry = TRUE, key = NULL, ...)
@@ -36,7 +36,7 @@ details).}
 
 \item{survey}{The data set used to calculate ADIs. Must be one of c("acs5",
 "acs3", "acs1"), denoting the 5-, 3-, and 1-year ACS estimates. Defaults to
-"acs5." Important: data for not always available depending on the level of
+"acs5." Important: data not always available depending on the level of
 geography and data set chosen. See
 \url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html}.}
 
@@ -51,9 +51,6 @@ if you have already loaded your key with \code{\link{census_api_key}}.}
 \code{tidycensus::get_acs()}.}
 }
 \value{
-A tibble of three columns: GEOID of location, Name of location, ADI
-  of location
-
 A tibble with four columns: \code{GEOID}, \code{NAME}, \code{ADI},
   and \code{geometry} (which is left out if \code{geometry = FALSE} is
   specified).
@@ -69,12 +66,12 @@ The algorithm that produced the original ADIs employs factor
   were supplied to the algorithm. In other words, ADI will vary depending on
   the reference area. For example, the ADI of Orange County, California is
   \emph{x} when calculated alongside all other counties in California, but it
-  is \emph{y} when calculated alongside all counties in the US. The get_adi()
-  function enables the user to define a reference area by feeding a vector of
-  GEOIDs to its \code{geoid} parameter (or alternatively for convenience, a
-  vector of state and county names/abbreviations to \code{state} and
-  \code{county}). The function then gathers data from those specified
-  locations and performs calculations using their data alone.
+  is \emph{y} when calculated alongside all counties in the US. The
+  \code{get_adi()} function enables the user to define a reference area by
+  feeding a vector of GEOIDs to its \code{geoid} parameter (or alternatively
+  for convenience, a vector of state and county names/abbreviations to
+  \code{state} and \code{county}). The function then gathers data from those
+  specified locations and performs calculations using their data alone.
 
   If \code{geography} is left blank, the function will choose the most
   specific level of geography specified by the parameter(s) \code{state},

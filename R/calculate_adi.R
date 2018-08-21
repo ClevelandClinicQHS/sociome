@@ -1,60 +1,125 @@
+#' Calculates ADIs from raw ACS data.
+#' 
+#' Returns a tibble of area deprivation indices (ADIs), calculating them from a
+#' data frame of raw ACS data gathered from the US Census API (preferrably via
+#' \code{tidycensus::get_acs}).
+#' 
+#' @param acs_data A data-frame-like object of ACS data from the US Census API.
+#'   Must have the variables described in the "Details" section below.
+#' @param keep_columns Character string vector of the names of columns in
+#'   acs_data to keep in the final result. Defaults to \code{c("GEOID",
+#'   "NAME")}. If acs_data is of class \code{sf}, the geometry column will be
+#'   kept regardless.
+#'   
+#' @details The acs_data must be a tibble, data frame, or equivalent containing
+#'   the following columns:
+#'   
+#'   \code{c("B01003_001E", "B19013_001E", "B19001_002E", "B19001_011E",
+#'   "B19001_012E", "B19001_013E", "B19001_014E", "B19001_015E",
+#'   "B19001_016E", "B19001_017E", "B17010_001E", "B17010_002E",
+#'   "B25003_001E", "B25003_002E", "C17002_001E", "C17002_002E",
+#'   "C17002_003E", "C17002_004E", "C17002_005E", "B25044_001E",
+#'   "B25044_003E", "B25044_010E", "B25014_001E", "B25014_005E",
+#'   "B25014_006E", "B25014_007E", "B25014_011E", "B25014_012E",
+#'   "B25014_013E", "B25088_001E", "B25064_001E", "B25077_001E",
+#'   "C24010_001E", "C24010_003E", "C24010_039E", "B23025_001E",
+#'   "B23025_005E", "B15003_001E", "B15003_002E", "B15003_003E",
+#'   "B15003_004E", "B15003_005E", "B15003_006E", "B15003_007E",
+#'   "B15003_008E", "B15003_009E", "B15003_010E", "B15003_011E",
+#'   "B15003_012E", "B15003_017E", "B15003_018E", "B15003_019E",
+#'   "B15003_020E", "B15003_021E", "B15003_022E", "B15003_023E",
+#'   "B15003_024E", "B15003_025E", "B23008_001E", "B23008_008E",
+#'   "B23008_021E")}
+#'   
+#'   To obtain these columns using \code{tidycensus::get_acs}, make sure to set
+#'   the argument \code{output = "wide"}, and make sure that the argument
+#'   \code{variables} includes at least the elements of the character string
+#'   vector in the example below (notice the lack of "E" at the end of each
+#'   column name).
+#'   
+#'   All other columns in \code{acs_data} that are not specified in
+#'   \code{keep_columns} won't be present in the output. Exception: if
+#'   \code{acs_data} is an \code{sf-class} object, the \code{geometry} column
+#'   will remain in the output regardless of the contents of
+#'   \code{keep_columns}.
+#'    
+#' @return A tibble with the columns of \code{acs_data} specified by
+#'   \code{keep_columns}, followed by a column called \code{ADI}, calculated
+#'   from the data present in \code{acs_data}.
+#'   
+#'   By default, this will be three
+#'   columns: \code{GEOID}, \code{NAME}, and \code{ADI}. If \code{acs_data} is
+#'   of class \code{sf}, the \code{geometry} column will be unaffected.
+#'   
+#' @examples
+#' \dontrun{
+#'  acs_vars <- c("B01003_001", "B19013_001", "B19001_002", "B19001_011",
+#'                "B19001_012", "B19001_013", "B19001_014", "B19001_015",
+#'                "B19001_016", "B19001_017", "B17010_001", "B17010_002",
+#'                "B25003_001", "B25003_002", "C17002_001", "C17002_002",
+#'                "C17002_003", "C17002_004", "C17002_005", "B25044_001",
+#'                "B25044_003", "B25044_010", "B25014_001", "B25014_005",
+#'                "B25014_006", "B25014_007", "B25014_011", "B25014_012",
+#'                "B25014_013", "B25088_001", "B25064_001", "B25077_001",
+#'                "C24010_001", "C24010_003", "C24010_039", "B23025_001",
+#'                "B23025_005", "B15003_001", "B15003_002", "B15003_003",
+#'                "B15003_004", "B15003_005", "B15003_006", "B15003_007",
+#'                "B15003_008", "B15003_009", "B15003_010", "B15003_011",
+#'                "B15003_012", "B15003_017", "B15003_018", "B15003_019",
+#'                "B15003_020", "B15003_021", "B15003_022", "B15003_023",
+#'                "B15003_024", "B15003_025", "B23008_001", "B23008_008",
+#'                "B23008_021")
+#'                
+#' connecticut_counties <- tidycensus::get_acs(geography = "county", variables = acs_vars,
+#'                                             output = "wide", state = "CT")
+#' calculate_adi(acs_data = connecticut_counties)
+#' }
+#' 
 #' @import mice
 #' @importFrom rlang .data
-calculate_adi <- function(ref_area, get_acs_args) {
+#' 
+#' @export
+calculate_adi <- function(acs_data, keep_columns = c("GEOID", "NAME")) {
+  
+  if(!is.data.frame(as.data.frame(acs_data))) {
+    stop("acs_data must be a tibble or data frame")
+  }
 
-  # Saves old tigris_use_cache value and puts it back when function exits
-  old <- options(tigris_use_cache = TRUE)
-  on.exit(options(old), add = TRUE)
+  if(!all(keep_columns %in% colnames(acs_data))) {
+    stop("Not all columns specified by keep_columns are in acs_data.")
+  }
   
-  # purrr::map() is used to call tidycensus::get_acs() for each user-specified
-  # state or set of user-specified states.
-  # purrr::reduce(rbind) puts the results into a single data frame
-  acs_data_raw <-
-    ref_area$state_county %>% 
-    purrr::map(
-      function(state_county, get_acs_args) {
-        state  <- state_county$state
-        county <- state_county$county
-        do.call(eval(parse(text = "tidycensus::get_acs")),
-                c(list(state = state, county = county), get_acs_args))
-        },
-      get_acs_args = get_acs_args) %>%
-    purrr::reduce(rbind)
+  acs_vars <- c("B01003_001E", "B19013_001E", "B19001_002E", "B19001_011E",
+                "B19001_012E", "B19001_013E", "B19001_014E", "B19001_015E",
+                "B19001_016E", "B19001_017E", "B17010_001E", "B17010_002E",
+                "B25003_001E", "B25003_002E", "C17002_001E", "C17002_002E",
+                "C17002_003E", "C17002_004E", "C17002_005E", "B25044_001E",
+                "B25044_003E", "B25044_010E", "B25014_001E", "B25014_005E",
+                "B25014_006E", "B25014_007E", "B25014_011E", "B25014_012E",
+                "B25014_013E", "B25088_001E", "B25064_001E", "B25077_001E",
+                "C24010_001E", "C24010_003E", "C24010_039E", "B23025_001E",
+                "B23025_005E", "B15003_001E", "B15003_002E", "B15003_003E",
+                "B15003_004E", "B15003_005E", "B15003_006E", "B15003_007E",
+                "B15003_008E", "B15003_009E", "B15003_010E", "B15003_011E",
+                "B15003_012E", "B15003_017E", "B15003_018E", "B15003_019E",
+                "B15003_020E", "B15003_021E", "B15003_022E", "B15003_023E",
+                "B15003_024E", "B15003_025E", "B23008_001E", "B23008_008E",
+                "B23008_021E")
   
-  # Since the call (or calls) to tidycensus::get_acs() above usually gathers
-  # data on more places than what the user specified, this pares the data frame
-  # down to only include the user-specified reference area.
-  acs_ref_area <- acs_data_raw %>%
-    dplyr::filter(.data$GEOID %in% ref_area$ref_geoids)
+  if(!all(acs_vars %in% colnames(acs_data))) {
+    missing_vars <- acs_vars[!(acs_vars %in% colnames(acs_data))]
+    stop(paste(c("The following variables are missing from acs_data:",
+               missing_vars), collapse = " "))
+  }
   
-  # Selects the relevant variables that tidycensus::get_acs() wrangles them into
-  # a data frame that contains the specific measures that are used to calculate
-  # ADI
-  acs_data_f <- acs_ref_area %>%
+  # Selects the relevant variables from the tidycensus::get_acs() output", "then
+  # wrangles them into a data frame that contains the specific measures that are
+  # used to calculate ADI
+  acs_data_f <- acs_data %>%
     as.data.frame() %>% # This causes the geometry column to become un-"sticky",
                         # allowing it to be removed so that it doesn't interfere
                         # with the imputation that may follow.
-    dplyr::select(.data$B01003_001E, .data$B19013_001E, .data$B19001_002E,
-                  .data$B19001_011E, .data$B19001_012E, .data$B19001_013E,
-                  .data$B19001_014E, .data$B19001_015E, .data$B19001_016E,
-                  .data$B19001_017E, .data$B17010_001E, .data$B17010_002E, 
-                  .data$B25003_001E, .data$B25003_002E, .data$C17002_001E,
-                  .data$C17002_002E, .data$C17002_003E, .data$C17002_004E, 
-                  .data$C17002_005E, .data$B25044_001E, .data$B25044_003E, 
-                  .data$B25044_010E, .data$B25014_001E, .data$B25014_005E,
-                  .data$B25014_006E, .data$B25014_007E, .data$B25014_011E,
-                  .data$B25014_012E, .data$B25014_013E, .data$B25088_001E,
-                  .data$B25064_001E, .data$B25077_001E, .data$C24010_001E,
-                  .data$C24010_003E, .data$C24010_039E, .data$B23025_001E,
-                  .data$B23025_005E, .data$B15003_001E, .data$B15003_002E,
-                  .data$B15003_003E, .data$B15003_004E, .data$B15003_005E,
-                  .data$B15003_006E, .data$B15003_007E, .data$B15003_008E,
-                  .data$B15003_009E, .data$B15003_010E, .data$B15003_011E,
-                  .data$B15003_012E, .data$B15003_017E, .data$B15003_018E,
-                  .data$B15003_019E, .data$B15003_020E, .data$B15003_021E,
-                  .data$B15003_022E, .data$B15003_023E, .data$B15003_024E,
-                  .data$B15003_025E, .data$B23008_001E, .data$B23008_008E,
-                  .data$B23008_021E) %>%
+    dplyr::select(acs_vars) %>%
     dplyr::mutate(Fpoverty        = .data$B17010_002E / .data$B17010_001E,
                   OwnerOcc        = .data$B25003_002E / .data$B25003_001E,
                   incomegreater50 = .data$B19001_011E + .data$B19001_012E +
@@ -127,7 +192,7 @@ calculate_adi <- function(ref_area, get_acs_args) {
                    max.iter = 25)
   
   # The raw ADI scores are standardized to have a mean of 100 and sd of 20
-  acs_adi <- acs_ref_area %>% 
+  acs_adi <- acs_data %>% 
     dplyr::mutate(ADI = as.numeric(fit$scores * 20 + 100)) %>% 
     dplyr::select(.data$GEOID, .data$NAME, .data$ADI)
 

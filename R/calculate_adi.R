@@ -42,6 +42,16 @@
 #'   \code{acs_data} is an \code{sf-class} object, the \code{geometry} column
 #'   will remain in the output regardless of the contents of
 #'   \code{keep_columns}.
+#'   
+#'   If there are any missing values, single imputation will be attempted using
+#'   the \code{mice} package. Because of how \code{mice} is coded, the user must
+#'   attach the \code{sociome} package or the \code{mice} package for imputation
+#'   to work (i.e., run \code{library("sociome")} and/or \code{library("mice")}
+#'   before running \code{calculate_adi}).
+#'   
+#'   Be advised that if too many missing values are present in \code{acs_data}
+#'   (due to running \code{tidycensus::get_acs} on sparsely populated localities
+#'   or for some other reason), ADIs might not be able to be obtained.
 #'    
 #' @return A tibble with the columns of \code{acs_data} specified by
 #'   \code{keep_columns}, followed by a column called \code{ADI}, calculated
@@ -75,7 +85,6 @@
 #' calculate_adi(acs_data = connecticut_counties)
 #' }
 #' 
-#' @import mice
 #' @importFrom rlang .data
 #' 
 #' @export
@@ -176,8 +185,13 @@ calculate_adi <- function(acs_data, keep_columns = c("GEOID", "NAME")) {
   # Performs single imputation if there is any missingness in the data.
   if(anyNA(acs_data_f)) {
     
+    if(!any(c("package:sociome", "package:mice") %in% search())) {
+      stop(paste0('Imputation required. Run library("sociome") or ',
+                  'library("mice") and try again.'))
+    }
+    
     is.na(acs_data_f) <- do.call(cbind, lapply(acs_data_f, is.infinite))
-
+    
     acs_data_f <- acs_data_f %>% 
       mice::mice(m = 1, maxit = 50, method = "pmm", seed = 500,
                  printFlag = FALSE) %>% 
@@ -198,3 +212,5 @@ calculate_adi <- function(acs_data, keep_columns = c("GEOID", "NAME")) {
 
   return(acs_adi)
 }
+
+mice.impute.pmm <- mice::mice.impute.pmm

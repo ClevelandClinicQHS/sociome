@@ -61,6 +61,16 @@ The acs_data must be a tibble, data frame, or equivalent containing
   \code{acs_data} is an \code{sf-class} object, the \code{geometry} column
   will remain in the output regardless of the contents of
   \code{keep_columns}.
+  
+  If there are any missing values, single imputation will be attempted using
+  the \code{mice} package. Because of how \code{mice} is coded, the user must
+  attach the \code{sociome} package or the \code{mice} package for imputation
+  to work (i.e., run \code{library("sociome")} and/or \code{library("mice")}
+  before running \code{calculate_adi}).
+  
+  Be advised that if too many missing values are present in \code{acs_data}
+  (due to running \code{tidycensus::get_acs} on sparsely populated localities
+  or for some other reason), ADIs might not be able to be obtained.
 }
 \examples{
 \dontrun{

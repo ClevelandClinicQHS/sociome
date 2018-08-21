@@ -62,6 +62,25 @@
 #'   they all must be either 2 digits (for states), 5 digits (for counties), 11
 #'   digits (for tracts) or 12 digits (for block groups). Must contain character
 #'   strings, so use quotation marks as well as leading zero where applicable.
+#'   
+#'   Please note that this function calls data from US Census servers, so
+#'   execution may take a long time depending on the user's internet connection
+#'   and the amount of data requested.
+#'   
+#'   If there are any missing values, single imputation will be attempted using
+#'   the \code{mice} package. Because of how \code{mice} is coded, the user must
+#'   attach the \code{sociome} package or the \code{mice} package for imputation
+#'   to work (i.e., run \code{library("sociome")} and/or \code{library("mice")}
+#'   before running \code{calculate_adi}).
+#'   
+#'   In the same vein, while this function allows flexibility in specifying
+#'   reference areas, data from the ACS are masked for sparsely populated places
+#'   and may have too many missing values to return ADIs in some cases.
+#'   
+#'   For advanced users, if adding the \code{survey} argument to \code{get_adi}
+#'   to be passed to \code{tidycensus::get_acs}, be sure to know the limitations
+#'   of the 1-year and 3-year ACS estimates. See
+#'   https://www.census.gov/programs-surveys/acs/guidance/estimates.html.
 #'
 #' @examples
 #' get_adi(geography = "tract", state = "OH", county = "Cuyahoga")

@@ -232,7 +232,11 @@ get_adi <- function(geography = NULL,
 ###############################################################################
 # The functions below are copied verbatim or nearly verbatim from the tidycensus
 # package's internal functions with the same names.
-# Written by Kyle Walker.
+# License: MIT + the following LICENSE (which can also be found at
+# https://cran.r-project.org/web/packages/tidycensus/LICENSE):
+#
+# YEAR: 2017
+# COPYRIGHT HOLDER: Kyle Walker
 ###############################################################################
 validate_state <- function(state, .msg = interactive()) 
 {

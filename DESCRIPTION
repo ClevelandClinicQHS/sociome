@@ -1,29 +1,46 @@
 Type: Package
 Package: sociome
-Title: sociome
+Title: Operationalize social determinants of health data
+    for researchers.
 Version: 0.3.1
-Authors@R: c(
-    person("Nik", "Krieger", email = "nk@case.edu", role = c("aut", "cre")),
-    person("Jarrod", "Dalton", email = "daltonj@ccf.org", role = "aut"),
-    person("Cindy", "Wang", email = "lxw384@case.edu", role = "aut"),
-    person("Adam", "Perzynski", email = "adam.perzynski@case.edu",
-      role = "aut"),
-    person("Kyle", "Walker", email = "kwalkerdata@gmail.com", role = "aut"))
-Maintainer: The package maintainer <nk@case.edu>
-Description: sociome
-    Operationalizes social determinants of health data for researchers.
-License: CC0
+Authors@R: 
+    c(person(given = "Nik",
+             family = "Krieger",
+             role = c("aut", "cre"),
+             email = "nk@case.edu"),
+      person(given = "Jarrod",
+             family = "Dalton",
+             role = "aut",
+             email = "daltonj@ccf.org"),
+      person(given = "Cindy",
+             family = "Wang",
+             role = "aut",
+             email = "lxw384@case.edu"),
+      person(given = "Adam",
+             family = "Perzynski",
+             role = "aut",
+             email = "adam.perzynski@case.edu"),
+      person(given = "Kyle",
+             family = "Walker",
+             role = "aut",
+             email = "kwalkerdata@gmail.com"))
+Maintainer: Nik Krieger <nk@case.edu>
+Description: Accesses raw data via API and calculates social
+    determinants of health measures for user-specified locations in the
+    US, returning them in tidyverse- and sf-compatible data frames.
+License: MIT + file LICENSE
+BugReports: https://github.com/NikKrieger/sociome/issues
 Depends:
-    R (>= 3.1),
+    R (>= 3.3.0)
 Imports:
     checkmate (>= 1.8.5),
     dplyr (>= 0.7.6),
     magrittr (>= 1.5),
     methods (>= 3.5.0),
-    mice (>= 3.0.0),
+    mice (>= 3.3.0),
     psych (>= 1.8.4),
     purrr (>= 0.2.5),
-    rlang (>= 0.1.2),
+    rlang (>= 0.2.2),
     stringr (>= 1.3.1),
     tidycensus (>= 0.4.6)
 Suggests:

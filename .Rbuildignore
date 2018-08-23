@@ -1,6 +1,8 @@
+^LICENSE\.md$
 ^figures$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^data-raw$
 ^ignore$
 ^demonstration$
+^LICENSE$

@@ -221,8 +221,21 @@ calculate_adi <- function(acs_data, keep_columns = c("GEOID", "NAME")) {
 #'
 #' This is only visible in the sociome package out of necessity so that
 #' imputation works.
-#'
+#' 
 #' See \code{\link[mice]{mice.impute.pmm}} for its actual documentation.
+#' 
+#' The reason that this function is in the visible exported namespace of sociome
+#' is as follows:
+#' mice::mice internally calls one or more of the imputation method functions in
+#' the mice package (in this case, mice.impute.pmm), but mice::mice looks for
+#' these functions in an unconventional way: it looks only in the global
+#' environment and all its parent environments. Therefore, the mice package must
+#' be attached in order for mice::mice to work. Instead of forcing the user to
+#' attach mice whenever sociome needs to utilize mice::mice, we elected to
+#' import the imputation method function that we used (mice.impute.pmm) into the
+#' exported namespace of sociome. In effect, this lets the user choose whether
+#' to attach the sociome package OR the mice package (e.g., running
+#' library(sociome) or library(mice)).
 #'
 #' @name mice.impute.pmm
 #' @export

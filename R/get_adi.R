@@ -4,79 +4,86 @@
 #' locations in the United States, utilizing American Community Survey data.
 #'
 #' @param geography A character string denoting the level of census geography
-#'   whose ADIs you'd like to obtain. Must be one of c("state", "county",
-#'   "tract", or "block group"). Defaults to NULL. See details for default
-#'   behaviors when this and other parameters are left blank.
+#'   whose ADIs you'd like to obtain. Must be one of \code{c("state", "county",
+#'   "tract", or "block group")}. Defaults to \code{NULL}. See details for
+#'   default behaviors when this and other parameters are left blank.
 #' @param state A vector of character strings specifying the state(s) whose ADI
-#'   data you're requesting. Defaults to NULL. Can contain full state names,
-#'   two-letter state abbreviations, or FIPS codes/GEOIDs (must be a string, so
-#'   use quotation marks and leading zeros). Must contain exactly one state if
-#'   the parameter \code{counties} is also used. Must be blank if \code{geoid}
-#'   is used.
+#'   data you're requesting. Defaults to \code{NULL}. Can contain full state
+#'   names, two-letter state abbreviations, or FIPS codes/GEOIDs (must be a
+#'   string, so use quotation marks and leading zeros). Must contain exactly one
+#'   state if the parameter \code{counties} is also used. Must be blank if
+#'   \code{geoid} is used.
 #' @param county A vector of character strings specifying the counties whose ADI
-#'   data you're requesting. Defaults to NULL. County names and three-digit FIPS
-#'   codes are accepted (must contain strings, so use quotation marks and
-#'   leading zeros). All elements must be in the same state; therefore, if using
-#'   \code{county}, \code{state} must contain exactly one value. Must be blank
-#'   if \code{geoid} is used.
+#'   data you're requesting. Defaults to \code{NULL}. County names and
+#'   three-digit FIPS codes are accepted (must contain strings, so use quotation
+#'   marks and leading zeros). All elements must be in the same state;
+#'   therefore, if using \code{county}, \code{state} must contain exactly one
+#'   value. Must be blank if \code{geoid} is used.
 #' @param geoid A character vector of GEOIDs (use quotation marks and leading
-#'   zeros). Defaults to NULL. Must be blank if \code{state} and/or
+#'   zeros). Defaults to \code{NULL}. Must be blank if \code{state} and/or
 #'   \code{county} is used. Can contain different levels of geography (see
 #'   details).
-#' @param year Single integer specifying the year of the ACS survey to use. Defaults to 2016.
-#' @param survey The data set used to calculate ADIs. Must be one of c("acs5",
-#'   "acs3", "acs1"), denoting the 5-, 3-, and 1-year ACS estimates. Defaults to
-#'   "acs5." Important: data not always available depending on the level of
-#'   geography and data set chosen. See
+#' @param year Single integer specifying the year of the ACS survey to use.
+#'   Defaults to 2016.
+#' @param survey The data set used to calculate ADIs. Must be one of
+#'   \code{c("acs5", "acs3", "acs1")}, denoting the 5-, 3-, and 1-year ACS
+#'   estimates. Defaults to \code{"acs5."} Important: data not always available
+#'   depending on the level of geography and data set chosen. See
 #'   \url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html}.
 #' @param geometry Logical value indicating whether or not shapefile data should
-#'   be included in the tibble. Defaults to TRUE.
+#'   be included in the tibble. Defaults to \code{TRUE}.
 #' @param key Your Census API key as a character string. Obtain one at
-#'   http://api.census.gov/data/key_signup.html. Defaults to null. Not necessary
-#'   if you have already loaded your key with \code{\link{census_api_key}}.
+#'   http://api.census.gov/data/key_signup.html. Defaults to \code{NULL}. Not
+#'   necessary if you have already loaded your key with
+#'   \code{\link{census_api_key}}.
 #' @param ... Additional arguments to be passed onto
 #'   \code{tidycensus::get_acs()}.
 #'
-#' @details The algorithm that produced the original ADIs employs factor
-#'   analysis. As a result, the ADI is a relative measure; the ADI of a
-#'   particular location is dynamic, varying depending on which other locations
-#'   were supplied to the algorithm. In other words, ADI will vary depending on
-#'   the reference area. For example, the ADI of Orange County, California is
-#'   \emph{x} when calculated alongside all other counties in California, but it
-#'   is \emph{y} when calculated alongside all counties in the US. The
-#'   \code{get_adi()} function enables the user to define a reference area by
-#'   feeding a vector of GEOIDs to its \code{geoid} parameter (or alternatively
-#'   for convenience, a vector of state and county names/abbreviations to
+#' @details \strong{The concept of "reference area" is important to understand
+#'   when using this function.} The algorithm that produced the original ADIs
+#'   employs factor analysis. As a result, the ADI is a relative measure; the
+#'   ADI of a particular location is dynamic, varying depending on which other
+#'   locations were supplied to the algorithm. In other words, \strong{ADI will
+#'   vary depending on the reference area you specify.}
+#'
+#'   For example, the ADI of Orange County, California is \emph{x} when
+#'   calculated alongside all other counties in California, but it is \emph{y}
+#'   when calculated alongside all counties in the US. The \code{get_adi()}
+#'   function enables the user to define a \strong{reference area} by feeding a
+#'   vector of GEOIDs to its \code{geoid} parameter (or alternatively for
+#'   convenience, a vector of state and county names/abbreviations to
 #'   \code{state} and \code{county}). The function then gathers data from those
 #'   specified locations and performs calculations using their data alone.
 #'
-#'   If \code{geography} is left blank, the function will choose the most
-#'   specific level of geography specified by the parameter(s) \code{state},
-#'   \code{county}, and/or \code{geoid}. If \code{geography} is specified but
-#'   \code{state}, \code{county}, and \code{geoid} are all left blank, the
-#'   function will use the entire US as the reference area (see README.md for a
-#'   discussion of reference area). If all these parameters are left blank, the
-#'   function will report the ADIs of all census tracts in the United States.
+#'   If \code{geography} is specified but \code{state}, \code{county}, and
+#'   \code{geoid} are all left blank, the function will use the entire US (the
+#'   50 states plus the District of Columbia (DC) and Puerto Rico (PR)) as the
+#'   reference area (see paragraph above for a discussion of reference area). If
+#'   \code{geography} is left blank, the function will choose the most specific
+#'   level of geography specified by the parameter(s) \code{state},
+#'   \code{county}, and/or \code{geoid}. If all these parameters are left blank,
+#'   the function will report the ADIs of all census tracts in the United States
+#'   (the 50 states plus the District of Columbia (DC) and Puerto Rico (PR)).
 #'
 #'   Elements of \code{geoid} can represent different levels of geography, but
 #'   they all must be either 2 digits (for states), 5 digits (for counties), 11
 #'   digits (for tracts) or 12 digits (for block groups). Must contain character
 #'   strings, so use quotation marks as well as leading zero where applicable.
-#'   
+#'
 #'   Please note that this function calls data from US Census servers, so
 #'   execution may take a long time depending on the user's internet connection
 #'   and the amount of data requested.
-#'   
+#'
 #'   If there are any missing values, single imputation will be attempted using
 #'   the \code{mice} package. Because of how \code{mice} is coded, the user must
-#'   attach the \code{sociome} package or the \code{mice} package for imputation
-#'   to work (i.e., run \code{library("sociome")} and/or \code{library("mice")}
-#'   before running \code{calculate_adi}).
-#'   
+#'   attach either the \code{sociome} package or the \code{mice} package for
+#'   imputation to work (e.g., run \code{library("sociome")} or
+#'   \code{library("mice")} before running \code{get_adi}).
+#'
 #'   In the same vein, while this function allows flexibility in specifying
 #'   reference areas, data from the ACS are masked for sparsely populated places
 #'   and may have too many missing values to return ADIs in some cases.
-#'   
+#'
 #'   For advanced users, if adding the \code{survey} argument to \code{get_adi}
 #'   to be passed to \code{tidycensus::get_acs}, be sure to know the limitations
 #'   of the 1-year and 3-year ACS estimates. See

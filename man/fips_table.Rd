@@ -24,7 +24,8 @@ fips_table
 }
 \description{
 Data set containing the GEOIDs (FIPS codes) of every state, county, tract,
-and block group in the US.
+and block group in the United States (i.e., the 50 states plus the District of Columbia (DC) and
+Puerto Rico (PR)).
 }
 \details{
 Data frame in which each row represents a block group. Columns contain the

@@ -53,7 +53,8 @@ get_reference_area <- function(user_geoids = NULL, geography = NULL) {
         geography == "state" ~ 2
       )
       if(max(geoid_length) > geography_granularity) {
-        warning("user-supplied GEOIDs more granular than user-supplied level of geography. See help('get_adi')")
+        warning(paste0("user-supplied GEOIDs more granular than user-supplied ",
+                       "level of geography. See help('get_adi')"))
       }
     }
 
@@ -66,7 +67,8 @@ get_reference_area <- function(user_geoids = NULL, geography = NULL) {
       unique()
   }
 
-  # Sets ups the ref_area-class object, which is a list of 3 elements:
+  ##############################################################################
+  # Sets up the ref_area-class object, which is a list of 3 elements:
   #   1. ref_geoids
   #      The actual reference area: a character vector containing all the GEOIDs
   #      in the reference area at the user-specified level of geography.
@@ -74,13 +76,31 @@ get_reference_area <- function(user_geoids = NULL, geography = NULL) {
   #      Character string indicating the user-specified level of geography
   #      (i.e., one of "state", "county", "tract", or "block group")
   #   3. state_county
-  #      A list. Each element of this list is a list of 2. Each list of 2
-  #      contains:
-  #         a) A character vector of one or more state GEOIDs
-  #         b) If element (a) above contains more than one state, NULL.
-  #            If element (a) contains exactly one state, a character vector of
-  #              the three-character GEOIDs corresponding to the user-specified
-  #              tracts/block groups.
+  #      A list. Each element of this list is itself a list of 2 elements named
+  #      "state" and "county".
+  #      
+  #      If geography is equal to "state" or "county", there will only be one
+  #      list of 2, valued thusly:
+  #        state
+  #           If the reference area is the entire country:
+  #             NULL. This is to accomodate how tidycensus::get_acs handles the
+  #             optional argument shift_geo.
+  #           Else:
+  #             A character vector of the GEOIDs of the states that encompass a
+  #             portion of the reference area.
+  #        county
+  #           NULL
+  #      
+  #      If geography is "tract" or "block group", the number of lists of 2 will
+  #      be equal to the number of states that encompass a portion of the
+  #      reference area. Each list of 2 is valued thusly:
+  #        state
+  #           A single character string containing the two-character GEOID of
+  #           one of the states that encompass the reference area.
+  #        county
+  #           A character string vector of the three-character GEOIDs of the
+  #           counties in that state that encompass a portion of the reference
+  #           area.
   ref_area <- list(
     ref_geoids = unname(as.vector(unique(user_blk_grps[[geography]]))),
     geography = geography,
@@ -97,13 +117,18 @@ get_reference_area <- function(user_geoids = NULL, geography = NULL) {
                                              user_state)$short_county)))
   }
   else if(geography == "state" | geography == "county"){
-    ref_area[["state_county"]] <-
-      list(list(state = unique(user_blk_grps$state),
-                county = NULL))
+    
+    ref_area[["state_county"]] <- list(list(state = NULL, county = NULL))
+    
+    if(!identical(user_blk_grps, fips_table)) {
+      ref_area[["state_county"]][[1]][["state"]] <- unique(user_blk_grps$state)
+    }
+    
   }
   else {
     stop('geography must be "state", "county", "tract", or "block group"')
   }
+  ##############################################################################
   
   class(ref_area) <- "ref_area"
 

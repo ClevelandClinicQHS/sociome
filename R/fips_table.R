@@ -1,7 +1,8 @@
 #' GEOIDs of all US states, counties, tracts, and block groups.
 #' 
 #' Data set containing the GEOIDs (FIPS codes) of every state, county, tract,
-#' and block group in the US.
+#' and block group in the United States (i.e., the 50 states plus the District of Columbia (DC) and
+#' Puerto Rico (PR)).
 #'
 #' Data frame in which each row represents a block group. Columns contain the
 #' block groups' corresponding state-, county-, tract-, and block-group-level
@@ -26,7 +27,5 @@
 #'   and
 #'   \url{https://raw.githubusercontent.com/NikKrieger/sociome/master/data-raw/us_block_groups_integer_vector_creation.Rmd}
 #'   
-"fips_table"
-
 #' @export
 fips_table <- NULL

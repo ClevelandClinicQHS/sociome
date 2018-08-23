@@ -84,7 +84,8 @@ get_reference_area <- function(user_geoids = NULL, geography = NULL) {
   #        state
   #           If the reference area is the entire country:
   #             NULL. This is to accomodate how tidycensus::get_acs handles the
-  #             optional argument shift_geo.
+  #             optional argument shift_geo (requires that its "state" argument
+  #             to be NULL).
   #           Else:
   #             A character vector of the GEOIDs of the states that encompass a
   #             portion of the reference area.

@@ -231,7 +231,8 @@ get_adi <- function(geography = NULL,
 
 ###############################################################################
 # The functions below are copied verbatim or nearly verbatim from the tidycensus
-# package's internal functions with the same names.
+# package's internal functions with the same names. The license for this code is
+# as follows:
 # License: MIT + the following LICENSE (which can also be found at
 # https://cran.r-project.org/web/packages/tidycensus/LICENSE):
 #

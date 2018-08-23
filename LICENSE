@@ -1,11 +1,2 @@
 YEAR: 2018
 COPYRIGHT HOLDER: Nik Krieger, Jarrod Dalton, Cindy Wang, Adam Perzynski, and Kyle Walker
-
-Code exclusively or primarily written by Kyle Walker (namely, the functions
-validate_state, simpleCapSO, validate_county, and format_vec in the file get_adi.R):
-
-MIT + the following LICENSE (which can also be found at
-https://cran.r-project.org/web/packages/tidycensus/LICENSE):
-
-YEAR: 2017
-COPYRIGHT HOLDER: Kyle Walker

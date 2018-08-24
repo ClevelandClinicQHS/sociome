@@ -82,6 +82,7 @@ The argument acs_data must contain a tibble, sf tibble, data frame,
   or for some other reason), ADIs might not be able to be obtained.
 }
 \examples{
+\dontrun{              
 acs_vars <- c("B01003_001", "B19013_001", "B19001_002", "B19001_011",
               "B19001_012", "B19001_013", "B19001_014", "B19001_015",
               "B19001_016", "B19001_017", "B17010_001", "B17010_002",
@@ -98,10 +99,11 @@ acs_vars <- c("B01003_001", "B19013_001", "B19001_002", "B19001_011",
               "B15003_020", "B15003_021", "B15003_022", "B15003_023",
               "B15003_024", "B15003_025", "B23008_001", "B23008_008",
               "B23008_021")
-               
+
 connecticut_counties <- tidycensus::get_acs(geography = "county", variables = acs_vars,
                                             output = "wide", state = "CT")
 
 calculate_adi(acs_data = connecticut_counties)
+}
 
 }

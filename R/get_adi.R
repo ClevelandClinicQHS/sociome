@@ -107,6 +107,7 @@
 #'   for details.
 #'
 #' @examples
+#' \dontrun{
 #' library("sociome") # Needed for imputation. library("mice") is another option.
 #' get_adi(geography = "tract", state = "OH", county = "Cuyahoga")
 #' 
@@ -120,7 +121,8 @@
 #' library(ggplot2)
 #' 
 #' delmarva %>% ggplot() + geom_sf(aes(fill = ADI))
-#'
+#' }
+#' 
 #' @return If \code{geometry = TRUE} (the default), an sf tibble with four
 #'   columns: \code{GEOID}, \code{NAME}, \code{ADI}, and \code{geometry}. If
 #'   \code{geometry = FALSE} is specified, a plain tibble with only the first

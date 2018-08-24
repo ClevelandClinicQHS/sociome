@@ -140,6 +140,7 @@ Survey data.
 }
 
 \examples{
+\dontrun{
 library("sociome") # Needed for imputation. library("mice") is another option.
 get_adi(geography = "tract", state = "OH", county = "Cuyahoga")
 
@@ -153,5 +154,6 @@ delmarva <- get_adi(geoid = delmarva_geoids)
 library(ggplot2)
 
 delmarva \%>\% ggplot() + geom_sf(aes(fill = ADI))
+}
 
 }

@@ -39,7 +39,7 @@ The algorithm that produced the original ADIs employs factor analysis. As a resu
 
 For example, the ADI of Orange County, California is *x* when calculated alongside all other counties in California, but it is *y* when calculated alongside all counties in the US.
 
-The `get_adi()` function enables the user to define a reference area by feeding a vector of GEOIDs to its `geoids` parameter (or alternatively for convenience, a vector of state abbreviations to its `state` parameter). The function then gathers data from those specified locations and performs calculations using their data alone.
+The `get_adi()` function enables the user to define a reference area by feeding a vector of GEOIDs to its `geoid` parameter (or alternatively for convenience, a vector of state abbreviations to its `state` parameter). The function then gathers data from those specified locations and performs calculations using their data alone.
 
 ## *Customizable* ADIs via `get_adi()`
 
@@ -121,7 +121,7 @@ Here is that table in full:
 </tbody>
 </table>
 
-The user can mix different levels of geography in the `geoids` parameter. The code below stores the ADIs of the census block groups in every county entirely or partially on the Delmarva peninsula, using by default the 5-year ACS estimates from 2016. 
+The user can mix different levels of geography in the `geoid` parameter. The code below stores the ADIs of the census block groups in every county entirely or partially on the Delmarva peninsula, using by default the 5-year ACS estimates from 2016. 
 
 ```
 delmarva_geoids <- c("10", "51001", "51131", "24015", "24029", "24035", "24011",
@@ -129,7 +129,7 @@ delmarva_geoids <- c("10", "51001", "51131", "24015", "24029", "24035", "24011",
   # The two-digit GEOID stands for the state of Delaware.
   # The five-digit GEOIDs stand for specific counties in Virginia and Maryland
 
-delmarva <- get_adi(geography = "block group", geoids = delmarva_geoids)
+delmarva <- get_adi(geography = "block group", geoid = delmarva_geoids)
   # The Delmarva peninsula lies on the east coast of the US and is split
   #   between DELaware, MARyland, and VirginiA.
 ```
@@ -137,11 +137,23 @@ delmarva <- get_adi(geography = "block group", geoids = delmarva_geoids)
 With the help of `tidycensus::get_acs()`, tables produced by `get_adi()` contain a column named `geometry`, which contains `sf` data gathered from the US census API. As a result, `get_adi()` tables can be piped directly into `geom_sf()` from the `ggplot2` package. Below is a demonstration of this capability, using the Delmarva peninsula county ADIs created above:
 
 ```
-delmarva %>% ggplot() + geom_sf(aes(fill = ADI))
+delmarva %>%
+  ggplot() +
+  geom_sf(aes(fill = ADI))
 ```
 
 ![](https://raw.githubusercontent.com/NikKrieger/sociome/master/figures/delmarva_block_groups_adis.png)
 
+Notice that the default behavior of `geom_sf()` is to make high-ADI areas lighter in color than low-ADI areas, which is counterintuitive. While not necessarily "incorrect," this can be "fixed" using other ggplot features, such as `scale_fill_viridis_c(direction = -1)` which is subsequently used in this README:
+
+```
+delmarva %>%
+  ggplot() +
+  geom_sf(aes(fill = ADI)) +
+  scale_fill_viridis_c(direction = -1)
+```
+
+![](https://raw.githubusercontent.com/NikKrieger/sociome/master/figures/delmarva_viridis.png)
 
 ### Demonstration of the relative nature of ADIs, using custom reference areas
 
@@ -150,25 +162,59 @@ The code below calculates and maps ADIs for Ohio counties.
 ```
 ohio <- get_adi(geography = "county", state = "OH")
 
-ohio %>% ggplot() + geom_sf(aes(fill = ADI))
+ohio %>%
+  ggplot() +
+  geom_sf(aes(fill = ADI)) +
+  scale_fill_viridis_c(direction = -1)
 ```
 
-![](https://raw.githubusercontent.com/NikKrieger/sociome/master/figures/Ohio_counties_ADI_ref_area_OH_counties.png)
+![](https://raw.githubusercontent.com/NikKrieger/sociome/master/figures/Ohio_ref_oh_no_rescaling.png)
 
 
 The code below also calculates and maps ADIs for Ohio counties, but it uses a reference area of all counties in the fifty states plus DC and Puerto Rico:
 
 ```
-ohio_ref_US <- get_adi(geography = "county") %>%
-  filter(substr(GEOID, 1, 2) == "39")
+ohio_ref_US <- 
+  get_adi(geography = "county") %>%
+  dplyr::filter(substr(GEOID, 1, 2) == "39")
   # Ohio's GEOID is 39, so the GEOIDs of all Ohio counties begin with 39.
 
-ohio_ref_US %>% ggplot() + geom_sf(aes(fill = ADI))
+ohio_ref_US %>%
+  ggplot() +
+  geom_sf(aes(fill = ADI)) +
+  scale_fill_viridis_c(direction = -1)
 ```
 
-![](https://raw.githubusercontent.com/NikKrieger/sociome/master/figures/Ohio_counties_ADI_ref_area_US_counties.png)
+![](https://raw.githubusercontent.com/NikKrieger/sociome/master/figures/Ohio_ref_us_no_rescaling.png)
 
-Notice how the ADI of each county varies depending on the reference area provided.
+Notice how the ADI of each county varies depending on the reference area provided. This map allows the viewer to visually compare and contrast Ohio counties based on an ADI calculated with all US counties as the reference area. 
+
+**However, also notice that the above two maps are not completely comparable** because their color scales are different. Each time `ggplot` draws one of these maps, it sets the color scale by setting the lightest color to the lowest ADI in the data set and the darkest color to the highest ADI in the data set. The data sets that were used to create the two maps above have different minimum and maximum ADIs, so between the two maps, identical colors do not stand for identical ADI values.
+
+In order to remedy this, we need `ggplot` to set its lightest and darkest color to the same ADI value for each map. **This can be accomplished by adding the `limits` argument to `scale_fill_viridis_c`.** The `limits` argument is a numeric vector of length two, and `ggplot` associates the lightest color with the first number and the darkest color with the second number.
+
+The following code reproduces the two maps above with the same color scale, making them comparable:
+
+```
+# This produces a numeric vector of length two, containing the lowest and
+#   highest ADI value among the two data sets. This ensures that the full color
+#   range will be used while keeping the scales the same.
+color_range <- range(c(ohio$ADI, ohio_ref_US$ADI))
+
+ohio %>%
+  ggplot() +
+  geom_sf(aes(fill = ADI)) +
+  scale_fill_viridis_c(direction = -1, limits = color_range)
+
+ohio_ref_US %>%
+  ggplot() +
+  geom_sf(aes(fill = ADI)) +
+  scale_fill_viridis_c(direction = -1, limits = color_range)
+```
+
+![](https://raw.githubusercontent.com/NikKrieger/sociome/master/figures/rescaled_oh_adis.png)
+
+Notice that there is a middling effect on Ohio ADIs when all US counties are used as the reference area; this implies that Ohio counties are neither among the most deprived nor the least deprived in the United States.
 
 ## Warning about missing data
 

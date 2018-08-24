@@ -4,11 +4,16 @@
 \alias{calculate_adi}
 \title{Calculates ADIs from raw ACS data.}
 \usage{
-calculate_adi(acs_data, keep_columns = c("GEOID", "NAME"))
+calculate_adi(acs_data, keep_indicators = FALSE,
+  keep_columns = c("GEOID", "NAME"))
 }
 \arguments{
 \item{acs_data}{A data-frame-like object of ACS data from the US Census API.
 Must have the variables described in the "Details" section below.}
+
+\item{keep_indicators}{Logical value indicating whether or not the resulting
+tibble (or sf tibble) will contain the socioeconomic measures used to
+calculate the ADI values.}
 
 \item{keep_columns}{Character string vector of the names of columns in
 acs_data to keep in the final result. Defaults to \code{c("GEOID",
@@ -16,22 +21,25 @@ acs_data to keep in the final result. Defaults to \code{c("GEOID",
 kept regardless.}
 }
 \value{
-A tibble with the columns of \code{acs_data} specified by
+A tibble (or an sf tibble if \code{acs_data} iss itself an sf tibble)
+  containing firstly the columns of \code{acs_data} specified by
   \code{keep_columns}, followed by a column called \code{ADI}, calculated
-  from the data present in \code{acs_data}.
+  from the data present in \code{acs_data}, followed by the indicators used
+  to calculate the ADIs if \code{keep_indicators = TRUE} (followed by the
+  \code{geometry} column if \code{acs_data} iss an sf tibble).
   
-  By default, this will be three
-  columns: \code{GEOID}, \code{NAME}, and \code{ADI}. If \code{acs_data} is
-  of class \code{sf}, the \code{geometry} column will be unaffected.
+  By default, this will be three columns: \code{GEOID}, \code{NAME}, and
+  \code{ADI}. (Four columns, adding \code{geometry}, if \code{acs_data} is an
+  sf tibble).
 }
 \description{
-Returns a tibble of area deprivation indices (ADIs), calculating them from a
-data frame of raw ACS data gathered from the US Census API (preferrably via
-\code{tidycensus::get_acs}).
+Returns a tibble or sf tibble of area deprivation indices (ADIs), calculating
+them from a data frame of raw ACS data gathered from the US Census API
+(preferrably via \code{tidycensus::get_acs}).
 }
 \details{
-The acs_data must be a tibble, data frame, or equivalent containing
-  the following columns:
+The argument acs_data must contain a tibble, sf tibble, data frame,
+  or equivalent containing the following columns:
   
   \code{c("B01003_001E", "B19013_001E", "B19001_002E", "B19001_011E",
   "B19001_012E", "B19001_013E", "B19001_014E", "B19001_015E",
@@ -53,7 +61,7 @@ The acs_data must be a tibble, data frame, or equivalent containing
   To obtain these columns using \code{tidycensus::get_acs}, make sure to set
   the argument \code{output = "wide"}, and make sure that the argument
   \code{variables} includes at least the elements of the character string
-  vector in the example below (notice the lack of "E" at the end of each
+  vector in the example \strong{below} (notice the lack of "E" at the end of each
   column name).
   
   All other columns in \code{acs_data} that are not specified in
@@ -64,9 +72,10 @@ The acs_data must be a tibble, data frame, or equivalent containing
   
   If there are any missing values, single imputation will be attempted using
   the \code{mice} package. Because of how \code{mice} is coded, the user must
-  attach the \code{sociome} package or the \code{mice} package for imputation
-  to work (i.e., run \code{library("sociome")} and/or \code{library("mice")}
-  before running \code{calculate_adi}).
+  attach either the \code{sociome} package or the \code{mice} package for
+  imputation to work (e.g., run \code{library("sociome")} or
+  \code{library("mice")} before running \code{get_adi}). See
+  \code{\link{mice.impute.pmm}} for details.
   
   Be advised that if too many missing values are present in \code{acs_data}
   (due to running \code{tidycensus::get_acs} on sparsely populated localities

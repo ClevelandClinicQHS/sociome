@@ -18,11 +18,7 @@ Authors@R:
       person(given = "Adam",
              family = "Perzynski",
              role = "aut",
-             email = "adam.perzynski@case.edu"),
-      person(given = "Kyle",
-             family = "Walker",
-             role = "aut",
-             email = "kwalkerdata@gmail.com"))
+             email = "adam.perzynski@case.edu"))
 Maintainer: Nik Krieger <nk@case.edu>
 Description: Accesses raw data via API and calculates social
     determinants of health measures for user-specified locations in the

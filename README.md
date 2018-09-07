@@ -28,24 +28,25 @@ In short,
 
 <div style="text-align: right"> (see https://www.neighborhoodatlas.medicine.wisc.edu) </div>
 
-
 The *original* ADIs are static measures that were calculated using the 2013 edition of the ACS five-year estimates. Rankings based on these ADIs are available via downloadable datasets at https://www.neighborhoodatlas.medicine.wisc.edu/download.
 
-The original ADI of Kind et al. (2018) is defined as a national measure. In other words, it uses the United States as the **reference area**. A given area might have different ADI values depending on the choice of the reference area; for example, a census tract in an "upper-class" neighborhood in Milwaukee might have a lower ADI value if the index is computed using the Milwaukee area as the reference than it would if the index is computed using the United States as the reference. The `get_adi()` function flexibly allows for specifying the **reference area** for ADI estimation. See examples below.
+The original ADI of Kind et al. (2018) is defined as a national measure. In other words, each ADI value uses the entire United States as the **reference area**. 
 
-## Choosing a **reference area**
+The `get_adi()` function flexibly allows for specifying the **reference area** for ADI estimation.
+
+## Choosing a **Reference Area**
 
 The algorithm that produced the original ADIs employs factor analysis. As a result, the ADI is a relative measure; the ADI of a particular location is dynamic, varying depending on which other locations were supplied to the algorithm. In other words, ADI will vary depending on the **reference area**. 
 
 For example, the ADI of Orange County, California is *x* when calculated alongside all other counties in California, but it is *y* when calculated alongside all counties in the US.
 
-The `get_adi()` function enables the user to define a reference area by feeding a vector of GEOIDs to its `geoid` parameter (or alternatively for convenience, a vector of state abbreviations to its `state` parameter). The function then gathers data from those specified locations and performs calculations using their data alone.
+The `get_adi()` function enables the user to define a reference area by feeding a vector of GEOIDs to its `geoid` parameter (or alternatively for convenience, state and county abbreviations/names to the `state` and or `county` parameters). The function then gathers data from those specified locations and performs calculations using their data alone.
 
 ## *Customizable* ADIs via `get_adi()`
 
 The `get_adi()` function returns a table of *customized* Singh's area deprivation indices (ADIs). The user chooses:
 
-- the level of geography whose ADIs are desired (viz., state, county, census tract, census block group)
+- the level of geography whose ADIs are desired (viz., either state, county, census tract, or census block group)
 - the year
 - the ACS estimates (viz. the one-, three-, or five-year estimates)
 - the **reference area** (see above).

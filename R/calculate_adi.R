@@ -57,7 +57,7 @@
 #'   (due to running \code{tidycensus::get_acs} on sparsely populated localities
 #'   or for some other reason), ADIs might not be able to be obtained.
 #'    
-#' @return A tibble (or an sf tibble if \code{acs_data} iss itself an sf tibble)
+#' @return A tibble (or an sf tibble if \code{acs_data} is itself an sf tibble)
 #'   containing firstly the columns of \code{acs_data} specified by
 #'   \code{keep_columns}, followed by a column called \code{ADI}, calculated
 #'   from the data present in \code{acs_data}, followed by the indicators used
@@ -138,40 +138,45 @@ calculate_adi <- function(acs_data,
   acs_data_f <- acs_data %>%
     as.data.frame() %>% # In case acs_data is an sf table, this causes the
                         # geometry column to become un-"sticky", allowing it to
-                        # be removed so that it doesn't interfere with the
-                        # imputation that may follow.
+                        # be removed by the subsequent dplyr::select() command
+                        # so that it doesn't interfere with the imputation that
+                        # may follow.
     dplyr::select(acs_vars) %>%
-    dplyr::mutate(Fpoverty        = .data$B17010_002E / .data$B17010_001E,
-                  OwnerOcc        = .data$B25003_002E / .data$B25003_001E,
-                  incomegreater50 = .data$B19001_011E + .data$B19001_012E +
-                    .data$B19001_013E + .data$B19001_014E + .data$B19001_015E +
-                    .data$B19001_016E + .data$B19001_017E,
-                  IncomeDisparity = log(100 * (.data$B19001_002E / 
-                                                 .data$incomegreater50)),
-                  less150poverty  = .data$C17002_002E + .data$C17002_003E +
-                    .data$C17002_004E + .data$C17002_005E,
-                  less150FPL      = .data$less150poverty / .data$C17002_001E,
-                  oneparent       = .data$B23008_008E + .data$B23008_021E,
-                  singlePHH       = .data$oneparent / .data$B23008_001E,
-                  vehiclesum      = .data$B25044_003E + .data$B25044_010E,
-                  pnovehicle      = .data$vehiclesum / .data$B25044_001E,
-                  sumprofs        = .data$C24010_003E + .data$C24010_039E,
-                  whitecollar     = .data$sumprofs / .data$C24010_001E,
-                  unemployed      = .data$B23025_005E / .data$B23025_001E,
-                  Nhighschoolup   = .data$B15003_017E + .data$B15003_018E +
-                    .data$B15003_019E + .data$B15003_020E + .data$B15003_021E +
-                    .data$B15003_022E + .data$B15003_023E + .data$B15003_024E +
-                    .data$B15003_025E,
-                  Phighschoolup   = .data$Nhighschoolup / .data$B15003_001E,
-                  Nless9thgrade   = .data$B15003_002E + .data$B15003_003E +
-                    .data$B15003_004E + .data$B15003_005E + .data$B15003_006E +
-                    .data$B15003_007E + .data$B15003_008E + .data$B15003_009E +
-                    .data$B15003_010E + .data$B15003_011E + .data$B15003_012E,
-                  Pless9grade     = .data$Nless9thgrade / .data$B15003_001E,
-                  SUMcrowded      = .data$B25014_005E + .data$B25014_006E +
-                    .data$B25014_007E + .data$B25014_011E + .data$B25014_012E +
-                    .data$B25014_013E,
-                  Ocrowded        = .data$SUMcrowded / .data$B25014_001E) %>%
+    dplyr::mutate(
+      Fpoverty        = .data$B17010_002E / .data$B17010_001E,
+      OwnerOcc        = .data$B25003_002E / .data$B25003_001E,
+      incomegreater50 = .data$B19001_011E + .data$B19001_012E +
+                        .data$B19001_013E + .data$B19001_014E +
+                        .data$B19001_015E + .data$B19001_016E +
+                        .data$B19001_017E,
+      IncomeDisparity = log(100 * (.data$B19001_002E / .data$incomegreater50)),
+      less150poverty  = .data$C17002_002E + .data$C17002_003E +
+                        .data$C17002_004E + .data$C17002_005E,
+      less150FPL      = .data$less150poverty / .data$C17002_001E,
+      oneparent       = .data$B23008_008E + .data$B23008_021E,
+      singlePHH       = .data$oneparent / .data$B23008_001E,
+      vehiclesum      = .data$B25044_003E + .data$B25044_010E,
+      pnovehicle      = .data$vehiclesum / .data$B25044_001E,
+      sumprofs        = .data$C24010_003E + .data$C24010_039E,
+      whitecollar     = .data$sumprofs / .data$C24010_001E,
+      unemployed      = .data$B23025_005E / .data$B23025_001E,
+      Nhighschoolup   = .data$B15003_017E + .data$B15003_018E +
+                        .data$B15003_019E + .data$B15003_020E +
+                        .data$B15003_021E + .data$B15003_022E +
+                        .data$B15003_023E + .data$B15003_024E +
+                        .data$B15003_025E,
+      Phighschoolup   = .data$Nhighschoolup / .data$B15003_001E,
+      Nless9thgrade   = .data$B15003_002E + .data$B15003_003E +
+                        .data$B15003_004E + .data$B15003_005E +
+                        .data$B15003_006E + .data$B15003_007E +
+                        .data$B15003_008E + .data$B15003_009E +
+                        .data$B15003_010E + .data$B15003_011E +
+                        .data$B15003_012E,
+      Pless9grade     = .data$Nless9thgrade / .data$B15003_001E,
+      SUMcrowded      = .data$B25014_005E + .data$B25014_006E +
+                        .data$B25014_007E + .data$B25014_011E +
+                        .data$B25014_012E + .data$B25014_013E,
+      Ocrowded        = .data$SUMcrowded / .data$B25014_001E) %>%
     dplyr::select(.data$B19013_001E, .data$B25088_001E, .data$B25064_001E,
                   .data$B25077_001E, .data$Fpoverty, .data$OwnerOcc,
                   .data$IncomeDisparity, .data$less150FPL, .data$singlePHH,
@@ -267,16 +272,18 @@ calculate_adi <- function(acs_data,
 #' 
 #' The reason that this function is in the visible exported namespace of sociome
 #' is as follows:
-#' mice::mice internally calls one or more of the imputation method functions in
-#' the mice package (in this case, mice.impute.pmm), but mice::mice looks for
-#' these functions in an unconventional way: it looks only in the global
-#' environment and all its parent environments. Therefore, the mice package must
-#' be attached in order for mice::mice to work. Instead of forcing the user to
-#' attach mice whenever sociome needs to utilize mice::mice, we elected to
-#' import the imputation method function that we used (mice.impute.pmm) into the
-#' exported namespace of sociome. In effect, this lets the user choose whether
-#' to attach the sociome package OR the mice package (e.g., running
-#' library(sociome) or library(mice)).
+#' \code{mice::mice()} internally calls one or more of the imputation method
+#' functions in the \code{mice} package (in this case,
+#' \code{mice.impute.pmm()}), but \code{mice::mice} looks for these functions in
+#' an unconventional way: it looks only in the global environment and all its
+#' parent environments. Therefore, the mice package must be attached in order
+#' for \code{mice::mice()} to work. Instead of forcing the user to attach
+#' \code{mice} whenever sociome needs to utilize \code{mice::mice()}, we elected
+#' to import the imputation method function that we used
+#' (\code{mice.impute.pmm()}) into the exported namespace of sociome. In effect,
+#' this lets the user choose whether to attach the sociome package OR the
+#' \code{mice} package (e.g., running \code{library(sociome)} or
+#' \code{library(mice)}).
 #'
 #' @name mice.impute.pmm
 #' @export

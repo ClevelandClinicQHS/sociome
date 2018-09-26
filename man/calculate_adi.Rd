@@ -21,7 +21,7 @@ acs_data to keep in the final result. Defaults to \code{c("GEOID",
 kept regardless.}
 }
 \value{
-A tibble (or an sf tibble if \code{acs_data} iss itself an sf tibble)
+A tibble (or an sf tibble if \code{acs_data} is itself an sf tibble)
   containing firstly the columns of \code{acs_data} specified by
   \code{keep_columns}, followed by a column called \code{ADI}, calculated
   from the data present in \code{acs_data}, followed by the indicators used

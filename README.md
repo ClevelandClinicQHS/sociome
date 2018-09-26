@@ -4,11 +4,11 @@
 
 The goal of the `sociome` package is to help the user to operationalize social determinants of health data in their research.
 
-The current functionality is limited to measures of area deprivation, but we intend to expand into other elements of the "sociome."
+The current functionality is limited to measures of area deprivation in the United States, but we intend to expand into other elements of the "sociome."
 
 We have implemented a variation of Singh's area deprivation index (ADI), which allows for estimation at the state, county, census tract, or census block group level and which allows for using different iterations of data from the American Community Survey (ACS).
 
-The result is a more flexible framework for representing neighborhood deprivation. The `get_adi()` function is the primary tool for generating these indices. It allows the user to customize the desired **reference area** down to the block group level when calculating ADI. This enables the user to compare only the specific locations of interest without having to include other areas in the calculation of ADI. See the section called "Choosing a **Reference Area**" below for more detail.
+The result is a more flexible framework for representing neighborhood deprivation. The `get_adi()` function is the primary tool for generating these indices. It allows the user to customize the desired **reference population** down to the block group level when calculating ADI. This enables the user to compare only the specific locations of interest without having to include other areas in the calculation of ADI. See the section called "Choosing a **reference population**" below for more detail.
 
 The output of `get_adi()` can be piped directly into `ggplot2::geom_sf()` for mapping.
 
@@ -25,32 +25,30 @@ devtools::install_github("NikKrieger/sociome")
 In short,
 
 > "The Area Deprivation Index (ADI) is based on a measure created by the Health Resources & Services Administration (HRSA) over two decades ago for primarily county-level use, but refined, adapted, and validated to the Census block group/neighborhood level by Amy Kind, MD, PhD and her research team at the University of Wisconsin-Madison. It allows for rankings of neighborhoods by socioeconomic status disadvantage in a region of interest (e.g. at the state or national level)."
+> <div style="text-align: right"> https://www.neighborhoodatlas.medicine.wisc.edu </div>
 
-<div style="text-align: right"> (see https://www.neighborhoodatlas.medicine.wisc.edu) </div>
+The *original* ADIs are static measures that G. K. Singh formulated in 2003 (Singh GK. Area deprivation and widening inequalities in US mortality, 1969-1998. Am J Public Health 2003;93(7):1137-43). Kind et al. utilized the 2013 edition of the ACS five-year estimates in order to formulate an updated ADI, which was announced in 2018. Rankings based on this ADIs are available via downloadable datasets at https://www.neighborhoodatlas.medicine.wisc.edu/download.
 
+The ADI that Kind et al. formulated is a national measure on each census block group in the US; the specific ADI value associated with each block group in the US is calculated in reference to all other block groups in the US. In other words, Kind et al. used the entire US as the **reference population** in their formulation. Concordantly, a given area might be assigned a different ADI value depending on the reference population utilized in its formulation; for example, the ADI of the wealthiest census block group in Milwaukee might be lower if it is computed using only the Milwaukee area as the reference population as opposed to using the entire US as the reference population. The `get_adi()` function flexibly allows for specifying the **reference population** for ADI estimation. See examples below.
 
-The *original* ADIs are static measures that were calculated using the 2013 edition of the ACS five-year estimates. Rankings based on these ADIs are available via downloadable datasets at https://www.neighborhoodatlas.medicine.wisc.edu/download.
+## Customizing the **reference population**
 
-The original ADI of Kind et al. (2018) is defined as a national measure. In other words, it uses the United States as the **reference area**. A given area might have different ADI values depending on the choice of the reference area; for example, a census tract in an "upper-class" neighborhood in Milwaukee might have a lower ADI value if the index is computed using the Milwaukee area as the reference than it would if the index is computed using the United States as the reference. The `get_adi()` function flexibly allows for specifying the **reference area** for ADI estimation. See examples below.
-
-## Choosing a **reference area**
-
-The algorithm that produced the original ADIs employs factor analysis. As a result, the ADI is a relative measure; the ADI of a particular location is dynamic, varying depending on which other locations were supplied to the algorithm. In other words, ADI will vary depending on the **reference area**. 
+The algorithm that produced the ADIs of Singh and Kind et al. employs factor analysis. As a result, the ADI is a relative measure; the ADI of a particular location is dynamic, varying depending on which other locations were supplied to the algorithm. In other words, ADI will vary depending on the **reference population**. 
 
 For example, the ADI of Orange County, California is *x* when calculated alongside all other counties in California, but it is *y* when calculated alongside all counties in the US.
 
-The `get_adi()` function enables the user to define a reference area by feeding a vector of GEOIDs to its `geoid` parameter (or alternatively for convenience, a vector of state abbreviations to its `state` parameter). The function then gathers data from those specified locations and performs calculations using their data alone.
+The `get_adi()` function enables the user to define a reference population by feeding a vector of GEOIDs to its `geoid` parameter (or alternatively for convenience, a vector of state abbreviations to its `state` parameter). The function then gathers data from those specified locations and performs calculations using their data alone.
 
-## *Customizable* ADIs via `get_adi()`
+## *Localized* ADIs via `get_adi()`
 
-The `get_adi()` function returns a table of *customized* Singh's area deprivation indices (ADIs). The user chooses:
+The `get_adi()` function returns a table of *localized* Singh's area deprivation indices (ADIs). The user chooses:
 
-- the level of geography whose ADIs are desired (viz., state, county, census tract, census block group)
+- the level of geography whose ADIs are desired (viz., state, county, census tract, or census block group)
 - the year
 - the ACS estimates (viz. the one-, three-, or five-year estimates)
-- the **reference area** (see above).
+- the **reference population** (see above).
 
-The function then calls the specified ACS data sets and employs the same algorithms that were used to calculate the *original* ADIs, resulting in *customized* ADIs. It stands on the shoulders of the `get_acs()` function in Kyle Walker's `tidycensus` package (see https://walkerke.github.io/tidycensus), which is what enables the user to so easily select specific years and specific ACS estimates. `get_adi()` also benefits from the shapefile-gathering capabilities of `get_acs()`, which enables the user to create maps depicting ADI values with relative ease, thanks to `geom_sf()` in `ggplot2`.
+The function then calls the specified ACS data sets and employs the same algorithms that were used to calculate the *original* ADIs, resulting in *localized* ADIs. It stands on the shoulders of the `get_acs()` function in Kyle Walker's `tidycensus` package (see https://walkerke.github.io/tidycensus), which is what enables the user to so easily select specific years and specific ACS estimates. `get_adi()` also benefits from the shapefile-gathering capabilities of `get_acs()`, which enables the user to create maps depicting ADI values with relative ease, thanks to `geom_sf()` in `ggplot2`.
 
 ## Examples
 
@@ -67,7 +65,7 @@ get_adi(geography = "county", state = "CT",
         year = 2015, survey = "acs1", geometry = FALSE)
 ```
 
-Here is that table in full:
+It produces this table:
 
 <table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
  <thead>
@@ -134,7 +132,9 @@ delmarva <- get_adi(geography = "block group", geoid = delmarva_geoids)
   #   between DELaware, MARyland, and VirginiA.
 ```
 
-With the help of `tidycensus::get_acs()`, tables produced by `get_adi()` contain a column named `geometry`, which contains `sf` data gathered from the US census API. As a result, `get_adi()` tables can be piped directly into `geom_sf()` from the `ggplot2` package. Below is a demonstration of this capability, using the Delmarva peninsula county ADIs created above:
+The unique advantage of `sociome`'s `get_adi()` function is that it removes the need for researchers to separately download, merge, and filter different data files for each state or county. A single call to `get_adi()` automatically downloads, filters, and merges each necessary data set.
+
+Furthermore, with the help of `tidycensus::get_acs()`, tables produced by `get_adi()` contain a column named `geometry`, which contains `sf` data gathered from the US census API. As a result, `get_adi()` tables can be piped directly into `geom_sf()` from the `ggplot2` package. Below is a demonstration of this capability, using the Delmarva peninsula county ADIs created above:
 
 ```
 delmarva %>%
@@ -144,7 +144,7 @@ delmarva %>%
 
 ![](https://raw.githubusercontent.com/NikKrieger/sociome/master/figures/delmarva_block_groups_adis.png)
 
-Notice that the default behavior of `geom_sf()` is to make high-ADI areas lighter in color than low-ADI areas, which is counterintuitive. While not necessarily "incorrect," this can be "fixed" using other ggplot features, such as `scale_fill_viridis_c(direction = -1)` which is subsequently used in this README:
+Notice that the default behavior of `geom_sf()` is to make high-ADI areas lighter in color than low-ADI areas, which is counterintuitive. While not necessarily "incorrect," this can be "fixed" using other `ggplot` features, such as `scale_fill_viridis_c(direction = -1)` which is subsequently used in this README:
 
 ```
 delmarva %>%
@@ -155,7 +155,7 @@ delmarva %>%
 
 ![](https://raw.githubusercontent.com/NikKrieger/sociome/master/figures/delmarva_viridis.png)
 
-### Demonstration of the relative nature of ADIs, using custom reference areas
+### Demonstration of the relative nature of ADIs, using custom reference populations
 
 The code below calculates and maps ADIs for Ohio counties. 
 
@@ -171,7 +171,7 @@ ohio %>%
 ![](https://raw.githubusercontent.com/NikKrieger/sociome/master/figures/Ohio_ref_oh_no_rescaling.png)
 
 
-The code below also calculates and maps ADIs for Ohio counties, but it uses a reference area of all counties in the fifty states plus DC and Puerto Rico:
+The code below also calculates and maps ADIs for Ohio counties, but it uses a reference population of all counties in the fifty states plus DC and Puerto Rico:
 
 ```
 ohio_ref_US <- 
@@ -187,11 +187,11 @@ ohio_ref_US %>%
 
 ![](https://raw.githubusercontent.com/NikKrieger/sociome/master/figures/Ohio_ref_us_no_rescaling.png)
 
-Notice how the ADI of each county varies depending on the reference area provided. This map allows the viewer to visually compare and contrast Ohio counties based on an ADI calculated with all US counties as the reference area. 
+Notice how the ADI of each county varies depending on the reference population provided. This map allows the viewer to visually compare and contrast Ohio counties based on an ADI calculated with all US counties as the reference population. 
 
 **However, also notice that the above two maps are not completely comparable** because their color scales are different. Each time `ggplot` draws one of these maps, it sets the color scale by setting the lightest color to the lowest ADI in the data set and the darkest color to the highest ADI in the data set. The data sets that were used to create the two maps above have different minimum and maximum ADIs, so between the two maps, identical colors do not stand for identical ADI values.
 
-In order to remedy this, we need `ggplot` to set its lightest and darkest color to the same ADI value for each map. **This can be accomplished by adding the `limits` argument to `scale_fill_viridis_c`.** The `limits` argument is a numeric vector of length two, and `ggplot` associates the lightest color with the first number and the darkest color with the second number.
+In order to remedy this, we need `ggplot` to set its lightest and darkest color to the same ADI value for each map. **This can be accomplished by adding the `limits` argument to `scale_fill_viridis_c()`.** The `limits` argument is a numeric vector of length two; `ggplot` associates its lightest color with the first number and its darkest color with the second number.
 
 The following code reproduces the two maps above with the same color scale, making them comparable:
 
@@ -214,10 +214,13 @@ ohio_ref_US %>%
 
 ![](https://raw.githubusercontent.com/NikKrieger/sociome/master/figures/rescaled_oh_adis.png)
 
-Notice that there is a middling effect on Ohio ADIs when all US counties are used as the reference area; this implies that Ohio counties are neither among the most deprived nor the least deprived in the United States.
+Notice that there is a middling effect on Ohio ADIs when all US counties are used as the reference population; this implies that Ohio counties are neither among the most deprived nor the least deprived in the US.
 
 ## Warning about missing data
 
-While allowing flexibility in specifying reference areas, data from the ACS are masked for sparsely populated places and may have too many missing values to return ADIs in some cases. 
+While allowing flexibility in specifying reference populations, data from the ACS are masked for sparsely populated places and may have too many missing values to return ADIs in some cases. 
 
 Also, know when to use the ACS1, ACS3, or ACS5. See https://www.census.gov/programs-surveys/acs/guidance/estimates.html.
+
+## Grant information
+The development of this software package was supported by a research grant from the National Institutes of Health/National Institute on Aging, (Principal Investigators: Jarrod E. Dalton, PhD and Adam T. Perzynski, PhD; Grant Number: 5R01AG055480-02).  All of its contents are solely the responsibility of the authors and do not necessarily represent the official views of the NIH.

@@ -60,17 +60,11 @@ get_reference_area <- function(user_geoids = NULL, geography = NULL) {
 
     # Selects all rows of fips_table that contain any of the geoids in
     # user_geoids, and then unique() is used to remove duplicate rows.
-    # user_blk_grps <- user_geoids %>% 
-    #   purrr::map_dfr(
-    #     function(geoid)
-    #       fips_table[as.logical(rowSums(geoid == fips_table[,1:4])),]) %>% 
-    #   unique()
-    browser()
-    user_blk_grps <-
-      fips_table[
-        1:nrow(fips_table) %>%
-          purrr::map_lgl(function(i) any(user_geoids %in% fips_table[i, 1:4]))
-        ]
+    user_blk_grps <- user_geoids %>%
+      purrr::map_dfr(
+        function(geoid)
+          fips_table[as.logical(rowSums(geoid == fips_table[,1:4])),]) %>%
+      unique()
   }
 
   ##############################################################################

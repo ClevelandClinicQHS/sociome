@@ -2,7 +2,7 @@
 % Please edit documentation in R/calculate_adi.R
 \name{calculate_adi}
 \alias{calculate_adi}
-\title{Calculates ADIs from raw ACS data.}
+\title{Calculate area deprivation index (ADI)}
 \usage{
 calculate_adi(acs_data, keep_indicators = FALSE,
   keep_columns = c("GEOID", "NAME"))
@@ -27,62 +27,66 @@ A tibble (or an sf tibble if \code{acs_data} is itself an sf tibble)
   from the data present in \code{acs_data}, followed by the indicators used
   to calculate the ADIs if \code{keep_indicators = TRUE} (followed by the
   \code{geometry} column if \code{acs_data} iss an sf tibble).
-  
+
   By default, this will be three columns: \code{GEOID}, \code{NAME}, and
   \code{ADI}. (Four columns, adding \code{geometry}, if \code{acs_data} is an
   sf tibble).
 }
 \description{
+Calculates ADIs from raw ACS data.
+}
+\details{
 Returns a tibble or sf tibble of area deprivation indices (ADIs), calculating
 them from a data frame of raw ACS data gathered from the US Census API
 (preferrably via \code{tidycensus::get_acs}).
-}
-\details{
+
+The returned tibble or sf tibble is also of class \code{adi}, and it contains
+an attribute called \code{loadings}, which contains a named numeric vector of
+the PCA loadings of each factor. This is accessible through
+\code{attr(name_of_tibble, "loadings")}.
+
 The argument acs_data must contain a tibble, sf tibble, data frame,
   or equivalent containing the following columns:
-  
+
   \code{c("B01003_001E", "B19013_001E", "B19001_002E", "B19001_011E",
-  "B19001_012E", "B19001_013E", "B19001_014E", "B19001_015E",
-  "B19001_016E", "B19001_017E", "B17010_001E", "B17010_002E",
-  "B25003_001E", "B25003_002E", "C17002_001E", "C17002_002E",
-  "C17002_003E", "C17002_004E", "C17002_005E", "B25044_001E",
-  "B25044_003E", "B25044_010E", "B25014_001E", "B25014_005E",
-  "B25014_006E", "B25014_007E", "B25014_011E", "B25014_012E",
-  "B25014_013E", "B25088_001E", "B25064_001E", "B25077_001E",
-  "C24010_001E", "C24010_003E", "C24010_039E", "B23025_001E",
-  "B23025_005E", "B15003_001E", "B15003_002E", "B15003_003E",
-  "B15003_004E", "B15003_005E", "B15003_006E", "B15003_007E",
-  "B15003_008E", "B15003_009E", "B15003_010E", "B15003_011E",
-  "B15003_012E", "B15003_017E", "B15003_018E", "B15003_019E",
-  "B15003_020E", "B15003_021E", "B15003_022E", "B15003_023E",
-  "B15003_024E", "B15003_025E", "B23008_001E", "B23008_008E",
-  "B23008_021E")}
-  
+  "B19001_012E", "B19001_013E", "B19001_014E", "B19001_015E", "B19001_016E",
+  "B19001_017E", "B17010_001E", "B17010_002E", "B25003_001E", "B25003_002E",
+  "C17002_001E", "C17002_002E", "C17002_003E", "C17002_004E", "C17002_005E",
+  "B25044_001E", "B25044_003E", "B25044_010E", "B25014_001E", "B25014_005E",
+  "B25014_006E", "B25014_007E", "B25014_011E", "B25014_012E", "B25014_013E",
+  "B25088_001E", "B25064_001E", "B25077_001E", "C24010_001E", "C24010_003E",
+  "C24010_039E", "B23025_001E", "B23025_005E", "B15003_001E", "B15003_002E",
+  "B15003_003E", "B15003_004E", "B15003_005E", "B15003_006E", "B15003_007E",
+  "B15003_008E", "B15003_009E", "B15003_010E", "B15003_011E", "B15003_012E",
+  "B15003_017E", "B15003_018E", "B15003_019E", "B15003_020E", "B15003_021E",
+  "B15003_022E", "B15003_023E", "B15003_024E", "B15003_025E", "B23008_001E",
+  "B23008_008E", "B23008_021E")}
+
   To obtain these columns using \code{tidycensus::get_acs}, make sure to set
   the argument \code{output = "wide"}, and make sure that the argument
   \code{variables} includes at least the elements of the character string
-  vector in the example \strong{below} (notice the lack of "E" at the end of each
-  column name).
-  
+  vector in the example \strong{below} (notice the lack of "E" at the end of
+  each column name).
+
   All other columns in \code{acs_data} that are not specified in
   \code{keep_columns} won't be present in the output. Exception: if
   \code{acs_data} is an \code{sf-class} object, the \code{geometry} column
   will remain in the output regardless of the contents of
   \code{keep_columns}.
-  
+
   If there are any missing values, single imputation will be attempted using
   the \code{mice} package. Because of how \code{mice} is coded, the user must
   attach either the \code{sociome} package or the \code{mice} package for
   imputation to work (e.g., run \code{library("sociome")} or
   \code{library("mice")} before running \code{get_adi}). See
   \code{\link{mice.impute.pmm}} for details.
-  
+
   Be advised that if too many missing values are present in \code{acs_data}
   (due to running \code{tidycensus::get_acs} on sparsely populated localities
   or for some other reason), ADIs might not be able to be obtained.
 }
 \examples{
-\dontrun{              
+\dontrun{
 acs_vars <- c("B01003_001", "B19013_001", "B19001_002", "B19001_011",
               "B19001_012", "B19001_013", "B19001_014", "B19001_015",
               "B19001_016", "B19001_017", "B17010_001", "B17010_002",
@@ -106,4 +110,7 @@ connecticut_counties <- tidycensus::get_acs(geography = "county", variables = ac
 calculate_adi(acs_data = connecticut_counties)
 }
 
+}
+\seealso{
+get_adi
 }

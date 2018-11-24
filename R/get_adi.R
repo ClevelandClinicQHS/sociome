@@ -1,8 +1,15 @@
+#' Get area deprivation index (ADI)
+#'
 #' Returns the ADIs of user-specified areas.
 #'
 #' Returns a tibble or sf tibble of the area deprivation indices (ADIs) of
 #' user-specified locations in the United States, utilizing American Community
 #' Survey data.
+#'
+#' The returned tibble or sf tibble is also of class \code{adi}, and it contains
+#' an attribute called \code{loadings}, which contains a named numeric vector of
+#' the PCA loadings of each factor. This is accessible through
+#' \code{attr(name_of_tibble, "loadings")}.
 #'
 #' @param geography A character string denoting the level of census geography
 #'   whose ADIs you'd like to obtain. Must be one of \code{c("state", "county",
@@ -44,13 +51,12 @@
 #' @param ... Additional arguments to be passed onto
 #'   \code{tidycensus::get_acs()}.
 #'
-#' @section Reference area:
-#'   \strong{The concept of "reference area" is important to understand
-#'   when using this function.} The algorithm that produced the original ADIs
-#'   employs factor analysis. As a result, the ADI is a relative measure; the
-#'   ADI of a particular location is dynamic, varying depending on which other
-#'   locations were supplied to the algorithm. In other words, \strong{ADI will
-#'   vary depending on the reference area you specify.}
+#' @section Reference area: \strong{The concept of "reference area" is important
+#'   to understand when using this function.} The algorithm that produced the
+#'   original ADIs employs factor analysis. As a result, the ADI is a relative
+#'   measure; the ADI of a particular location is dynamic, varying depending on
+#'   which other locations were supplied to the algorithm. In other words,
+#'   \strong{ADI will vary depending on the reference area you specify.}
 #'
 #'   For example, the ADI of Orange County, California is \emph{x} when
 #'   calculated alongside all other counties in California, but it is \emph{y}
@@ -61,33 +67,31 @@
 #'   \code{state} and \code{county}). The function then gathers data from those
 #'   specified locations and performs calculations using their data alone.
 #'
-#' @section Default behaviors:
-#'   If \code{geography} is specified but \code{state}, \code{county}, and
-#'   \code{geoid} are all left blank, the function will use the entire US (the
-#'   50 states plus the District of Columbia (DC) and Puerto Rico (PR)) as the
-#'   reference area (see "Reference Area" above). Beware that this will take a
-#'   long time if you set \code{geography = "tract"} or especially if
-#'   \code{geography = "block group"}.
-#'   
-#'   If \code{geography} is left blank, the function will choose the most specific
-#'   level of geography specified by the parameter(s) \code{state},
+#' @section Default behaviors: If \code{geography} is specified but
+#'   \code{state}, \code{county}, and \code{geoid} are all left blank, the
+#'   function will use the entire US (the 50 states plus the District of
+#'   Columbia (DC) and Puerto Rico (PR)) as the reference area (see "Reference
+#'   Area" above). Beware that this will take a long time if you set
+#'   \code{geography = "tract"} or especially if \code{geography = "block
+#'   group"}.
+#'
+#'   If \code{geography} is left blank, the function will choose the most
+#'   specific level of geography specified by the parameter(s) \code{state},
 #'   \code{county}, and/or \code{geoid}.
-#'   
+#'
 #'   If all these parameters are left blank, the function will report the ADIs
 #'   of all census tracts in the United States (the 50 states plus the District
 #'   of Columbia (DC) and Puerto Rico (PR)). Beware: this takes a long time.
 #'
-#' @section The \code{geoid} parameter:
-#'   Elements of \code{geoid} can represent different levels of geography, but
-#'   they all must be either 2 digits (for states), 5 digits (for counties), 11
-#'   digits (for tracts) or 12 digits (for block groups). It must contain
-#'   character strings, so use quotation marks as well as leading zero where
-#'   applicable.
+#' @section The \code{geoid} parameter: Elements of \code{geoid} can represent
+#'   different levels of geography, but they all must be either 2 digits (for
+#'   states), 5 digits (for counties), 11 digits (for tracts) or 12 digits (for
+#'   block groups). It must contain character strings, so use quotation marks as
+#'   well as leading zero where applicable.
 #'
-#' @section Warnings and disclaimers:
-#'   Please note that this function calls data from US Census servers, so
-#'   execution may take a long time depending on the user's internet connection
-#'   and the amount of data requested.
+#' @section Warnings and disclaimers: Please note that this function calls data
+#'   from US Census servers, so execution may take a long time depending on the
+#'   user's internet connection and the amount of data requested.
 #'
 #'   If there are any missing values, single imputation will be attempted using
 #'   the \code{mice} package. Because of how \code{mice} is coded, the user must
@@ -106,23 +110,25 @@
 #'   \url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html.}
 #'   for details.
 #'
+#' @seealso calculate_adi
+#'
 #' @examples
 #' \dontrun{
 #' library("sociome") # Needed for imputation. library("mice") is another option.
 #' get_adi(geography = "tract", state = "OH", county = "Cuyahoga")
-#' 
+#'
 #' get_adi(geography = "county", state = "CT", year = 2015, survey = "acs1", geometry = FALSE)
 #'
 #' delmarva_geoids <- c("10", "51001", "51131", "24015", "24029", "24035",
 #'                      "24011", "24041", "24019", "24045", "24039", "24047")
 #' delmarva <- get_adi(geoid = delmarva_geoids)
-#' 
+#'
 #' # Demonstration of geom_sf integration:
 #' library(ggplot2)
-#' 
+#'
 #' delmarva %>% ggplot() + geom_sf(aes(fill = ADI))
 #' }
-#' 
+#'
 #' @return If \code{geometry = TRUE} (the default), an sf tibble with four
 #'   columns: \code{GEOID}, \code{NAME}, \code{ADI}, and \code{geometry}. If
 #'   \code{geometry = FALSE} is specified, a plain tibble with only the first
@@ -141,7 +147,7 @@ get_adi <- function(geography       = NULL,
                     key             = NULL,
                     ...
                     ) {
-  
+
   dots_names <- names(eval(substitute(alist(...))))
   # If the user used "states", "counties", or "geoids" instead of "state",
   # "county", and "geoid", the function will quietly grab those values.
@@ -154,23 +160,23 @@ get_adi <- function(geography       = NULL,
   if(is.null(geoid) & "geoids" %in% dots_names) {
     geoid <- list(...)$geoids
   }
-  
-  
+
+
   if(!is.null(county)) {
-    
+
     # Throws error if user supples counties but doesn't supply exactly one state
     if(length(state) != 1) {
       stop("If supplying counties, exactly one state must be provided")
     }
-    
+
     # Throws error if user supplies county, state, and geoid
     if(!is.null(geoid)) {
       stop("If supplying geoid, state and county must be NULL")
     }
-    
+
     # Validates user-supplied state and coerces it into its two-digit GEOID
     state <- validate_state(state)
-    
+
     # Validates user-supplied county values and populates geoid with the
     # counties' five-digit GEOIDs
     geoid <-
@@ -179,29 +185,29 @@ get_adi <- function(geography       = NULL,
                       paste0(state,
                              validate_county(state = state, county = x))}))
   }
-  
-  
+
+
   else if(!is.null(state)) {
 
     # Throws error if user supplies both state and geoid
     if(!is.null(geoid)) {
       stop("If supplying geoid, state and county must be NULL")
     }
-    
+
     # Otherwise, populates geoid with states' two-digit geoid.
     else {
       geoid <- unique(sapply(state, validate_state))
     }
-    
+
   }
-  
+
   # Sends geoid and geography to the function get_reference_area, which
   # validates the GEOIDs in geoid and returns a ref_area-class object, which
   # contains all the data needed to produce the ADIs specified by the user.
   # See the comments in get_reference_area.R for more information on this
   # object.
   ref_area <- get_reference_area(geoid, geography)
-  
+
   # Makes a list of all arguments necessary for running tidycensus::get_acs,
   # with the exception of state and county. Notice that the dots (...) are
   # included in this list. This allows the user to pass other arguments to
@@ -226,22 +232,22 @@ get_adi <- function(geography       = NULL,
           "B15003_023","B15003_024","B15003_025","B23008_001","B23008_008",
           "B23008_021"),
       ...)
-  
+
   # Validates the names of the elements of get_acs_args against the formalArgs()
   # of tidycensus::get_acs(), silently keeping only arguments useable by
   # tidycensus::get_acs()
   get_acs_args <- get_acs_args[names(get_acs_args) %in%
                                  methods::formalArgs(tidycensus::get_acs)]
-  
+
   # Saves old tigris_use_cache value and puts it back when function exits
   old <- options(tigris_use_cache = TRUE)
   on.exit(options(old), add = TRUE)
-  
+
   # purrr::map() is used to call tidycensus::get_acs() for each user-specified
   # state or set of user-specified states.
   # purrr::reduce(rbind) puts the results into a single data frame
   acs_data_raw <-
-    ref_area$state_county %>% 
+    ref_area$state_county %>%
     purrr::map(
       function(state_county, get_acs_args) {
         state  <- state_county$state
@@ -251,13 +257,13 @@ get_adi <- function(geography       = NULL,
       },
       get_acs_args = get_acs_args) %>%
     purrr::reduce(rbind)
-  
+
   # Since the call (or calls) to tidycensus::get_acs() above usually gathers
   # data on more places than what the user specified, this pares the data frame
   # down to only include the user-specified reference area.
   acs_ref_area <- acs_data_raw %>%
     dplyr::filter(.data$GEOID %in% ref_area$ref_geoids)
-  
+
   # Passes the filtered tidycensus::get_acs() tibble (or sf tibble) onto
   # calculate_adi(), which produces the tibble (or sf tibble) of ADIs
   acs_adi <- calculate_adi(acs_ref_area, keep_indicators)
@@ -276,9 +282,9 @@ get_adi <- function(geography       = NULL,
 # YEAR: 2017
 # COPYRIGHT HOLDER: Kyle Walker
 ###############################################################################
-validate_state <- function(state, .msg = interactive()) 
+validate_state <- function(state, .msg = interactive())
 {
-  if (is.null(state)) 
+  if (is.null(state))
     return(NULL)
   state <- tolower(stringr::str_trim(state))
   if (grepl("^[[:digit:]]+$", state)) {
@@ -292,7 +298,7 @@ validate_state <- function(state, .msg = interactive())
         message(
           sprintf("Using first two digits of %s - '%s' (%s) - for FIPS code.",
                   state, state_sub,
-                  fips_state_table[fips_state_table$fips == 
+                  fips_state_table[fips_state_table$fips ==
                                      state_sub, "name"]),
           call. = FALSE)
         return(state_sub)
@@ -307,48 +313,48 @@ validate_state <- function(state, .msg = interactive())
   }
   else if (grepl("^[[:alpha:]]+", state)) {
     if (nchar(state) == 2 && state %in% fips_state_table$abb) {
-      if (.msg) 
-        message(sprintf("Using FIPS code '%s' for state '%s'", 
-                        fips_state_table[fips_state_table$abb == state, 
+      if (.msg)
+        message(sprintf("Using FIPS code '%s' for state '%s'",
+                        fips_state_table[fips_state_table$abb == state,
                                          "fips"], toupper(state)))
-      return(fips_state_table[fips_state_table$abb == state, 
+      return(fips_state_table[fips_state_table$abb == state,
                               "fips"])
     }
     else if (nchar(state) > 2 && state %in% fips_state_table$name) {
-      if (.msg) 
-        message(sprintf("Using FIPS code '%s' for state '%s'", 
-                        fips_state_table[fips_state_table$name == state, 
+      if (.msg)
+        message(sprintf("Using FIPS code '%s' for state '%s'",
+                        fips_state_table[fips_state_table$name == state,
                                          "fips"], simpleCapSO(state)))
-      return(fips_state_table[fips_state_table$name == 
+      return(fips_state_table[fips_state_table$name ==
                                 state, "fips"])
     }
     else {
       warning(
-        sprintf("'%s' is not a valid FIPS code or state name/abbreviation", 
+        sprintf("'%s' is not a valid FIPS code or state name/abbreviation",
                       state), call. = FALSE)
       return(NULL)
     }
   }
   else {
-    warning(sprintf("'%s' is not a valid FIPS code or state name/abbreviation", 
+    warning(sprintf("'%s' is not a valid FIPS code or state name/abbreviation",
                     state), call. = FALSE)
     return(NULL)
   }
 }
 
-simpleCapSO <- function(x) 
+simpleCapSO <- function(x)
 {
   s <- strsplit(x, " ")[[1]]
   paste0(toupper(substring(s, 1, 1)), substring(s, 2), collapse = " ")
 }
 
-validate_county <- function (state, county, .msg = interactive()) 
+validate_county <- function (state, county, .msg = interactive())
 {
-  if (is.null(state) || is.null(county)) 
+  if (is.null(state) || is.null(county))
     return(NULL)
   state <- validate_state(state)
   county_table <-
-    tidycensus::fips_codes[tidycensus::fips_codes$state_code == state, 
+    tidycensus::fips_codes[tidycensus::fips_codes$state_code == state,
                              ]
   if (grepl("^[[:digit:]]+$", county)) {
     county <- sprintf("%03d", as.numeric(county))
@@ -356,26 +362,26 @@ validate_county <- function (state, county, .msg = interactive())
       return(county)
     }
     else {
-      warning(sprintf("'%s' is not a valid FIPS code for counties in %s", 
+      warning(sprintf("'%s' is not a valid FIPS code for counties in %s",
                       county, county_table$state_name[1]), call. = FALSE)
       return(NULL)
     }
   }
   else if ((grepl("^[[:alpha:]]+", county))) {
-    county_index <- grepl(sprintf("^%s", county), county_table$county, 
+    county_index <- grepl(sprintf("^%s", county), county_table$county,
                           ignore.case = TRUE)
     matching_counties <- county_table$county[county_index]
     if (length(matching_counties) == 0) {
-      warning(sprintf("'%s' is not a valid name for counties in %s", 
+      warning(sprintf("'%s' is not a valid name for counties in %s",
                       county, county_table$state_name[1]), call. = FALSE)
       return(NULL)
     }
     else if (length(matching_counties) == 1) {
-      if (.msg) 
-        message(sprintf("Using FIPS code '%s' for '%s'", 
-                        county_table[county_table$county == matching_counties, 
+      if (.msg)
+        message(sprintf("Using FIPS code '%s' for '%s'",
+                        county_table[county_table$county == matching_counties,
                                      "county_code"], matching_counties))
-      return(county_table[county_table$county == matching_counties, 
+      return(county_table[county_table$county == matching_counties,
                           "county_code"])
     }
     else if (length(matching_counties) > 1) {
@@ -387,7 +393,7 @@ validate_county <- function (state, county, .msg = interactive())
   }
 }
 
-format_vec <- function(vec) 
+format_vec <- function(vec)
 {
   out <- paste0(vec, ", ")
   l <- length(out)

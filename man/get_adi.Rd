@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_adi.R
 \name{get_adi}
 \alias{get_adi}
-\title{Returns the ADIs of user-specified areas.}
+\title{Get area deprivation index (ADI)}
 \usage{
 get_adi(geography = NULL, state = NULL, county = NULL,
   geoid = NULL, year = 2016, survey = "acs5", geometry = TRUE,
@@ -65,18 +65,25 @@ If \code{geometry = TRUE} (the default), an sf tibble with four
   three columns mentioned above.
 }
 \description{
+Returns the ADIs of user-specified areas.
+}
+\details{
 Returns a tibble or sf tibble of the area deprivation indices (ADIs) of
 user-specified locations in the United States, utilizing American Community
 Survey data.
+
+The returned tibble or sf tibble is also of class \code{adi}, and it contains
+an attribute called \code{loadings}, which contains a named numeric vector of
+the PCA loadings of each factor. This is accessible through
+\code{attr(name_of_tibble, "loadings")}.
 }
 \section{Reference area}{
-
-  \strong{The concept of "reference area" is important to understand
-  when using this function.} The algorithm that produced the original ADIs
-  employs factor analysis. As a result, the ADI is a relative measure; the
-  ADI of a particular location is dynamic, varying depending on which other
-  locations were supplied to the algorithm. In other words, \strong{ADI will
-  vary depending on the reference area you specify.}
+ \strong{The concept of "reference area" is important
+  to understand when using this function.} The algorithm that produced the
+  original ADIs employs factor analysis. As a result, the ADI is a relative
+  measure; the ADI of a particular location is dynamic, varying depending on
+  which other locations were supplied to the algorithm. In other words,
+  \strong{ADI will vary depending on the reference area you specify.}
 
   For example, the ADI of Orange County, California is \emph{x} when
   calculated alongside all other counties in California, but it is \emph{y}
@@ -89,37 +96,35 @@ Survey data.
 }
 
 \section{Default behaviors}{
+ If \code{geography} is specified but
+  \code{state}, \code{county}, and \code{geoid} are all left blank, the
+  function will use the entire US (the 50 states plus the District of
+  Columbia (DC) and Puerto Rico (PR)) as the reference area (see "Reference
+  Area" above). Beware that this will take a long time if you set
+  \code{geography = "tract"} or especially if \code{geography = "block
+  group"}.
 
-  If \code{geography} is specified but \code{state}, \code{county}, and
-  \code{geoid} are all left blank, the function will use the entire US (the
-  50 states plus the District of Columbia (DC) and Puerto Rico (PR)) as the
-  reference area (see "Reference Area" above). Beware that this will take a
-  long time if you set \code{geography = "tract"} or especially if
-  \code{geography = "block group"}.
-  
-  If \code{geography} is left blank, the function will choose the most specific
-  level of geography specified by the parameter(s) \code{state},
+  If \code{geography} is left blank, the function will choose the most
+  specific level of geography specified by the parameter(s) \code{state},
   \code{county}, and/or \code{geoid}.
-  
+
   If all these parameters are left blank, the function will report the ADIs
   of all census tracts in the United States (the 50 states plus the District
   of Columbia (DC) and Puerto Rico (PR)). Beware: this takes a long time.
 }
 
 \section{The \code{geoid} parameter}{
-
-  Elements of \code{geoid} can represent different levels of geography, but
-  they all must be either 2 digits (for states), 5 digits (for counties), 11
-  digits (for tracts) or 12 digits (for block groups). It must contain
-  character strings, so use quotation marks as well as leading zero where
-  applicable.
+ Elements of \code{geoid} can represent
+  different levels of geography, but they all must be either 2 digits (for
+  states), 5 digits (for counties), 11 digits (for tracts) or 12 digits (for
+  block groups). It must contain character strings, so use quotation marks as
+  well as leading zero where applicable.
 }
 
 \section{Warnings and disclaimers}{
-
-  Please note that this function calls data from US Census servers, so
-  execution may take a long time depending on the user's internet connection
-  and the amount of data requested.
+ Please note that this function calls data
+  from US Census servers, so execution may take a long time depending on the
+  user's internet connection and the amount of data requested.
 
   If there are any missing values, single imputation will be attempted using
   the \code{mice} package. Because of how \code{mice} is coded, the user must
@@ -156,4 +161,7 @@ library(ggplot2)
 delmarva \%>\% ggplot() + geom_sf(aes(fill = ADI))
 }
 
+}
+\seealso{
+calculate_adi
 }

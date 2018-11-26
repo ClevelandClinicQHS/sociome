@@ -216,6 +216,43 @@ ohio_ref_US %>%
 
 Notice that there is a middling effect on Ohio ADIs when all US counties are used as the reference population; this implies that Ohio counties are neither among the most deprived nor the least deprived in the US.
 
+## Advanced users: extracting the factor loadings
+
+Advanced users interested in the details of the principal components analysis used to obtain the ADI values can obtain the factor loadings of the measures involved. The factor loadings are stored as an `attribute` of the `tibble` or `sf tibble` that `get_adi()` returns. This `attribute` is a named numeric vector called `loadings`. 
+
+For example, the following code would access and store the factor loadings of the `ohio` ADI table created above:
+
+```
+ohio_loadings <- attr(x = ohio, which = "loadings")
+```
+
+Finally, these loadings code can be turned into a readable table using the following:
+
+```
+tibble::tibble(factor = names(ohio_loadings), loadings = ohio_loadings)
+```
+
+```
+## # A tibble: 15 x 2
+##    factor                                        loadings
+##    <chr>                                            <dbl>
+##  1 medianHouseholdIncome                           -0.967
+##  2 medianMortgage                                  -0.814
+##  3 medianRent                                      -0.779
+##  4 medianHouseValue                                -0.872
+##  5 pctFamiliesInPoverty                             0.889
+##  6 pctOwnerOccupiedHousing                         -0.364
+##  7 ratioThoseMakingUnder10kToThoseMakingOver50k     0.915
+##  8 pctPeopleLivingBelow150PctFederalPovertyLevel    0.934
+##  9 pctChildrenInSingleParentHouseholds              0.619
+## 10 pctHouseholdsWithNoVehicle                       0.462
+## 11 pctPeopleWithWhiteCollarJobs                    -0.616
+## 12 pctPeopleUnemployed                              0.620
+## 13 pctPeopleWithAtLeastHSEducation                 -0.600
+## 14 pctPeopleWithLessThan9thGradeEducation           0.274
+## 15 pctHouseholdsWithOverOnePersonPerRoom            0.311
+```
+
 ## Warning about missing data
 
 While allowing flexibility in specifying reference populations, data from the ACS are masked for sparsely populated places and may have too many missing values to return ADIs in some cases. 

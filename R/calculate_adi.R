@@ -230,6 +230,9 @@ calculate_adi <- function(acs_data,
   # statistics that produces the raw ADI scores
   fit <- psych::principal(acs_data_f)
   
+  # fit <- psych::fa(acs_data_f, nfactors = 1, rotate = "none", fm = "pa",
+  #                  max.iter = 25)
+  
   # Sometimes the PCA produces results that are completely reversed (i.e., it
   # gives deprived areas low ADIs and less deprived areas high ADIs). Therefore,
   # this function performs a check to see if this has occured.

@@ -102,12 +102,19 @@ get_reference_area <- function(user_geoids = NULL, geography = NULL) {
   #           A character string vector of the three-character GEOIDs of the
   #           counties in that state that encompass a portion of the reference
   #           area.
-  ref_area <- list(
-    ref_geoids = unname(as.vector(unique(user_blk_grps[[geography]]))),
-    geography = geography,
+  
+    ref_area <- list(
+    ref_geoids   = unique(user_blk_grps[[geography]]),
+    geography    = geography,
     state_county = NULL)
   
-  if(geography == "tract" | geography == "block group"){
+  # Old way of doing the above.
+  # ref_area <- list(
+  #   ref_geoids   = unname(as.vector(unique(user_blk_grps[[geography]]))),
+  #   geography    = geography,
+  #   state_county = NULL)
+  
+  if(geography == "tract" | geography == "block group") {
     ref_area[["state_county"]] <-
       lapply(unique(user_blk_grps$state),
              function(user_state)
@@ -117,7 +124,7 @@ get_reference_area <- function(user_geoids = NULL, geography = NULL) {
                                            .data$state ==
                                              user_state)$short_county)))
   }
-  else if(geography == "state" | geography == "county"){
+  else if(geography == "state" | geography == "county") {
     
     ref_area[["state_county"]] <- list(list(state = NULL, county = NULL))
     

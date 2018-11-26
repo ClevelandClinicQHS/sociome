@@ -29,7 +29,7 @@ Depends:
     R (>= 3.3.0)
 Imports:
     checkmate (>= 1.8.5),
-    dplyr (>= 0.7.6),
+    dplyr (>= 0.7.5),
     magrittr (>= 1.5),
     methods (>= 3.5.0),
     mice (>= 3.3.0),

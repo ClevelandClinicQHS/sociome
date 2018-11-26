@@ -145,13 +145,13 @@ get_adi <- function(geography       = NULL,
   dots_names <- names(eval(substitute(alist(...))))
   # If the user used "states", "counties", or "geoids" instead of "state",
   # "county", and "geoid", the function will quietly grab those values.
-  if(is.null(state) & "states" %in% dots_names) {
+  if(is.null(state) && "states" %in% dots_names) {
     state <- list(...)$states
   }
-  if(is.null(county) & "counties" %in% dots_names) {
+  if(is.null(county) && "counties" %in% dots_names) {
     county <- list(...)$counties
   }
-  if(is.null(geoid) & "geoids" %in% dots_names) {
+  if(is.null(geoid) && "geoids" %in% dots_names) {
     geoid <- list(...)$geoids
   }
   
@@ -173,11 +173,11 @@ get_adi <- function(geography       = NULL,
     
     # Validates user-supplied county values and populates geoid with the
     # counties' five-digit GEOIDs
-    geoid <-
-      unique(sapply(county,
-                    function(x) {
-                      paste0(state,
-                             validate_county(state = state, county = x))}))
+    geoid <- 
+      county %>% 
+      sapply(function(x) paste0(state, validate_county(state  = state,
+                                                       county = x))) %>% 
+      unique()
   }
   
   
@@ -190,7 +190,7 @@ get_adi <- function(geography       = NULL,
     
     # Otherwise, populates geoid with states' two-digit geoid.
     else {
-      geoid <- unique(sapply(state, validate_state))
+      geoid <- state %>% sapply(validate_state) %>% unique()
     }
     
   }
@@ -237,20 +237,32 @@ get_adi <- function(geography       = NULL,
   old <- options(tigris_use_cache = TRUE)
   on.exit(options(old), add = TRUE)
   
-  # purrr::map() is used to call tidycensus::get_acs() for each user-specified
+  # lapply() is used to call tidycensus::get_acs() for each user-specified
   # state or set of user-specified states.
-  # purrr::reduce(rbind) puts the results into a single data frame
+  # purrr::reduce(rbind) puts the results into a single data frame.
+  # purrr::map_dfr() is not used because it does not preserve shapefile 
+  # attributes, as it uses dplyr::bind_rows() under the hood.
+  
   acs_data_raw <-
-    ref_area$state_county %>% 
-    purrr::map(
-      function(state_county, get_acs_args) {
-        state  <- state_county$state
-        county <- state_county$county
-        do.call(eval(parse(text = "tidycensus::get_acs")),
-                c(list(state = state, county = county), get_acs_args))
-      },
-      get_acs_args = get_acs_args) %>%
+    lapply(ref_area$state_county,
+           function(state_county) {
+             do.call(what = tidycensus::get_acs,
+                     args = c(state_county, get_acs_args))
+           }) %>% 
     purrr::reduce(rbind)
+  
+  # Old way:
+  # acs_data_raw <-
+  #   ref_area$state_county %>% 
+  #   lapply(
+  #     function(state_county, get_acs_args) {
+  #       state  <- state_county$state
+  #       county <- state_county$county
+  #       do.call(eval(parse(text = "tidycensus::get_acs")),
+  #               c(list(state = state, county = county), get_acs_args))
+  #     },
+  #     get_acs_args = get_acs_args) %>%
+  #   purrr::reduce(rbind)
   
   # Since the call (or calls) to tidycensus::get_acs() above usually gathers
   # data on more places than what the user specified, this pares the data frame

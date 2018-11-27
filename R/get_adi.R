@@ -246,9 +246,9 @@ get_adi <- function(geography       = NULL,
   old <- options(tigris_use_cache = TRUE)
   on.exit(options(old), add = TRUE)
   
-  # purrr::map() is used to call tidycensus::get_acs() for each user-specified
-  # state or set of user-specified states.
-  # purrr::reduce(rbind) puts the results into a single data frame
+  # tidycensus::get_acs() is called separately for each user-specified state or
+  # set of states. purrr::reduce(rbind) puts the results into a single data
+  # frame
   acs_data_raw <-
     lapply(ref_area$state_county,
            function(.x) {

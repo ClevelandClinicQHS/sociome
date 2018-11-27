@@ -1,10 +1,11 @@
 ^LICENSE\.md$
-^figures$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^data-raw$
 ^ignore$
-^demonstration$
 ^cran-comments\.md$
 ^NEWS\.md$
 ^README\.md$
+^README\.Rmd$
+^README-.*\.png$
+^README_cache$

@@ -1,7 +1,7 @@
 Type: Package
 Package: sociome
 Title: Operationalizing Social Determinants of Health Data for Researchers
-Version: 0.3.2
+Version: 0.3.4
 Authors@R: 
     c(person(given = "Nik",
              family = "Krieger",

@@ -3,4 +3,5 @@
 .RData
 .Ruserdata
 sociome.Rproj
-ignore/
+ignore
+README_cache

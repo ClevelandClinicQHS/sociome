@@ -271,8 +271,8 @@ calculate_adi <- function(acs_data,
       tibble::as_tibble()
   }
   
-  attr(acs_adi, "loadings") <- setNames(object = as.vector(fit$loadings),
-                                        nm     = row.names(fit$loadings))
+  attr(acs_adi, "loadings") <- stats::setNames(object = as.vector(fit$loadings),
+                                               nm     = row.names(fit$loadings))
   
   class(acs_adi) <- c(class(acs_adi), "adi")
   

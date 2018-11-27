@@ -84,8 +84,7 @@ get_reference_area <- function(user_geoids = NULL, geography = NULL) {
   #        state
   #           If the reference area is the entire country:
   #             NULL. This is to accomodate how tidycensus::get_acs handles the
-  #             optional argument shift_geo (requires that its "state" argument
-  #             to be NULL).
+  #             argument shift_geo (requires that its "state" argument is NULL).
   #           Else:
   #             A character vector of the GEOIDs of the states that encompass a
   #             portion of the reference area.
@@ -103,28 +102,23 @@ get_reference_area <- function(user_geoids = NULL, geography = NULL) {
   #           counties in that state that encompass a portion of the reference
   #           area.
   
-    ref_area <- list(
+  ref_area <- list(
     ref_geoids   = unique(user_blk_grps[[geography]]),
     geography    = geography,
     state_county = NULL)
   
-  # Old way of doing the above.
-  # ref_area <- list(
-  #   ref_geoids   = unname(as.vector(unique(user_blk_grps[[geography]]))),
-  #   geography    = geography,
-  #   state_county = NULL)
-  
-  if(geography == "tract" | geography == "block group") {
+  if(geography == "tract" || geography == "block group") {
     ref_area[["state_county"]] <-
-      lapply(unique(user_blk_grps$state),
-             function(user_state)
+      lapply(X   = unique(user_blk_grps$state),
+             FUN = function(user_state) {
                list(state  = user_state,
                     county =
                       unique(dplyr::filter(user_blk_grps,
                                            .data$state ==
-                                             user_state)$short_county)))
+                                             user_state)$short_county))
+             })
   }
-  else if(geography == "state" | geography == "county") {
+  else if(geography == "state" || geography == "county") {
     
     ref_area[["state_county"]] <- list(list(state = NULL, county = NULL))
     

@@ -138,6 +138,11 @@ calculate_adi <- function(acs_data,
                  missing_vars), collapse = " "))
   }
   
+  if(nrow(acs_data) < 30) {
+    warning("Calculating ADI values from fewer than 30 locations.\nIt is ",
+            "recommended to add more in order to obtain trustworthy results.")
+  }
+  
   # Selects the relevant variables from the tidycensus::get_acs() output", "then
   # wrangles them into a data frame that contains the specific measures that are
   # used to calculate ADI

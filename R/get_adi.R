@@ -41,6 +41,8 @@
 #' @param geometry Logical value indicating whether or not shapefile data should
 #'   be included in the result, making the result an sf tibble instead of a
 #'   plain tibble. Defaults to \code{TRUE}.
+#' @param shift_geo Logical value. See the \code{shift_geo} argument of
+#'   \code{\link[tidycensus]{get_acs}} for details.
 #' @param keep_indicators Logical value indicating whether or not the resulting
 #'   tibble or sf tibble will contain the socioeconomic measures used to
 #'   calculate the ADI values. Defaults to \code{FALSE}.
@@ -133,7 +135,7 @@
 #'   columns: \code{GEOID}, \code{NAME}, \code{ADI}, and \code{geometry}. If
 #'   \code{geometry = FALSE} is specified, a plain tibble with only the first
 #'   three columns mentioned above.
-#'
+#' @importFrom rlang .data
 #' @export
 
 get_adi <- function(geography       = NULL,
@@ -143,6 +145,7 @@ get_adi <- function(geography       = NULL,
                     year            = 2016,
                     survey          = "acs5",
                     geometry        = TRUE,
+                    shift_geo       = FALSE,
                     keep_indicators = FALSE,
                     key             = NULL,
                     ...
@@ -151,13 +154,13 @@ get_adi <- function(geography       = NULL,
   dots_names <- names(eval(substitute(alist(...))))
   # If the user used "states", "counties", or "geoids" instead of "state",
   # "county", and "geoid", the function will quietly grab those values.
-  if(is.null(state) & "states" %in% dots_names) {
+  if(is.null(state) && "states" %in% dots_names) {
     state <- list(...)$states
   }
-  if(is.null(county) & "counties" %in% dots_names) {
+  if(is.null(county) && "counties" %in% dots_names) {
     county <- list(...)$counties
   }
-  if(is.null(geoid) & "geoids" %in% dots_names) {
+  if(is.null(geoid) && "geoids" %in% dots_names) {
     geoid <- list(...)$geoids
   }
   
@@ -211,12 +214,12 @@ get_adi <- function(geography       = NULL,
   # Makes a list of all arguments necessary for running tidycensus::get_acs,
   # with the exception of state and county. Notice that the dots (...) are
   # included in this list. This allows the user to pass other arguments to
-  # tidycensus::get_acs() if desired (e.g., shift_geo).
+  # tidycensus::get_acs() if desired.
   get_acs_args <-
     list(
       geography = ref_area$geography,
       year = year, survey = survey, geometry = geometry, key = key,
-      cache_table = TRUE, output = "wide",
+      cache_table = TRUE, output = "wide", shift_geo = shift_geo,
       variables =
         c("B01003_001","B19013_001","B19001_002","B19001_011","B19001_012",
           "B19001_013","B19001_014","B19001_015","B19001_016","B19001_017",
@@ -247,15 +250,25 @@ get_adi <- function(geography       = NULL,
   # state or set of user-specified states.
   # purrr::reduce(rbind) puts the results into a single data frame
   acs_data_raw <-
-    ref_area$state_county %>%
-    purrr::map(
-      function(state_county, get_acs_args) {
-        state  <- state_county$state
-        county <- state_county$county
-        do.call(eval(parse(text = "tidycensus::get_acs")),
-                c(list(state = state, county = county), get_acs_args))
-      },
-      get_acs_args = get_acs_args) %>%
+    lapply(ref_area$state_county,
+           function(.x) {
+             do.call(what = tidycensus::get_acs,
+                     args = c(list(state  = .x$state,
+                                   county = .x$county),
+                              get_acs_args))
+           }) %>% 
+    # ref_area$state_county %>%
+    # purrr::map(
+    #   function(state_county, get_acs_args) {
+    #     # browser()
+    #     # state  <- state_county$state
+    #     # county <- state_county$county
+    #     do.call(what = tidycensus::get_acs,
+    #             args = c(list(state  = state_county$state,
+    #                           county = state_county$county),
+    #                      get_acs_args))
+    #   },
+    #   get_acs_args = get_acs_args) %>%
     purrr::reduce(rbind)
   
   # Since the call (or calls) to tidycensus::get_acs() above usually gathers

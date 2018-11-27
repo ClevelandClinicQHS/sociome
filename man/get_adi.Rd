@@ -6,7 +6,7 @@
 \usage{
 get_adi(geography = NULL, state = NULL, county = NULL,
   geoid = NULL, year = 2016, survey = "acs5", geometry = TRUE,
-  keep_indicators = FALSE, key = NULL, ...)
+  shift_geo = FALSE, keep_indicators = FALSE, key = NULL, ...)
 }
 \arguments{
 \item{geography}{A character string denoting the level of census geography
@@ -45,6 +45,9 @@ depending on the level of geography and data set chosen. See
 \item{geometry}{Logical value indicating whether or not shapefile data should
 be included in the result, making the result an sf tibble instead of a
 plain tibble. Defaults to \code{TRUE}.}
+
+\item{shift_geo}{Logical value. See the \code{shift_geo} argument of
+\code{\link[tidycensus]{get_acs}} for details.}
 
 \item{keep_indicators}{Logical value indicating whether or not the resulting
 tibble or sf tibble will contain the socioeconomic measures used to

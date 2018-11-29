@@ -1,3 +1,8 @@
+# Sends geoid and geography to the function get_reference_area, which
+# validates the GEOIDs in geoid and returns a ref_area-class object, which
+# contains all the data needed to produce the ADIs specified by the user.
+# See the comments in get_reference_area.R for more information on this
+# object.
 get_reference_area <- function(user_geoids = NULL, geography = NULL) {
 
   # If user_geoids is NULL, all locations in the US are used.

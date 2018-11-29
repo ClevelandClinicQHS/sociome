@@ -93,8 +93,11 @@
 #'
 #' connecticut_counties <- tidycensus::get_acs(geography = "county", variables = acs_vars,
 #'                                             output = "wide", state = "CT")
-#'
+#' 
 #' calculate_adi(acs_data = connecticut_counties)
+#' # This will produce one or more warnings because there are only 8 counties in
+#' # Connecticut, and a warning is produced if ADI values are calculated using 
+#' # less than 30 locations.
 #' }
 #'
 #' @seealso get_adi
@@ -139,8 +142,8 @@ calculate_adi <- function(acs_data,
   }
   
   if(nrow(acs_data) < 30) {
-    warning("Calculating ADI values from fewer than 30 locations.\nIt is ",
-            "recommended to add more in order to obtain trustworthy results.")
+    warning("\n\nCalculating ADI values from fewer than 30 locations.\nIt is ",
+            "recommended to add more in order to obtain trustworthy results.\n")
   }
   
   # Selects the relevant variables from the tidycensus::get_acs() output", "then
@@ -234,7 +237,7 @@ calculate_adi <- function(acs_data,
                  printFlag = FALSE) %>%
       mice::complete()
     
-    message("Single imputation performed")
+    message("\n\nSingle imputation performed\n\n")
   }
   
   # Where the magic happens: a principal-components analysis (PCA) of the

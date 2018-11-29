@@ -108,6 +108,9 @@ connecticut_counties <- tidycensus::get_acs(geography = "county", variables = ac
                                             output = "wide", state = "CT")
 
 calculate_adi(acs_data = connecticut_counties)
+# This will produce one or more warnings because there are only 8 counties in
+# Connecticut, and a warning is produced if ADI values are calculated using 
+# less than 30 locations.
 }
 
 }

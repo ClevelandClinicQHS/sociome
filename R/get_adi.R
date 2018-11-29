@@ -143,7 +143,7 @@ get_adi <- function(geography       = NULL,
                     county          = NULL,
                     geoid           = NULL,
                     year            = 2016,
-                    survey          = "acs5",
+                    data            = c("acs5", "acs3", "acs1", "sf3"),
                     geometry        = TRUE,
                     shift_geo       = FALSE,
                     keep_indicators = FALSE,
@@ -151,266 +151,93 @@ get_adi <- function(geography       = NULL,
                     ...
 ) {
   
-  dots_names <- names(eval(substitute(alist(...))))
-  # If the user used "states", "counties", or "geoids" instead of "state",
-  # "county", and "geoid", the function will quietly grab those values.
-  if(is.null(state) && "states" %in% dots_names) {
-    state <- list(...)$states
-  }
-  if(is.null(county) && "counties" %in% dots_names) {
-    county <- list(...)$counties
-  }
-  if(is.null(geoid) && "geoids" %in% dots_names) {
-    geoid <- list(...)$geoids
-  }
+  geoid    <- validate_geoid(geoid, state, county, ...)
   
-  
-  if(!is.null(county)) {
-    
-    # Throws error if user supples counties but doesn't supply exactly one state
-    if(length(state) != 1) {
-      stop("If supplying counties, exactly one state must be provided")
-    }
-    
-    # Throws error if user supplies county, state, and geoid
-    if(!is.null(geoid)) {
-      stop("If supplying geoid, state and county must be NULL")
-    }
-    
-    # Validates user-supplied state and coerces it into its two-digit GEOID
-    state <- validate_state(state)
-    
-    # Validates user-supplied county values and populates geoid with the
-    # counties' five-digit GEOIDs
-    geoid <-
-      unique(sapply(county,
-                    function(x) {
-                      paste0(state,
-                             validate_county(state = state, county = x))}))
-  }
-  
-  
-  else if(!is.null(state)) {
-    
-    # Throws error if user supplies both state and geoid
-    if(!is.null(geoid)) {
-      stop("If supplying geoid, state and county must be NULL")
-    }
-    
-    # Otherwise, populates geoid with states' two-digit geoid.
-    else {
-      geoid <- unique(sapply(state, validate_state))
-    }
-    
-  }
-  
-  # Sends geoid and geography to the function get_reference_area, which
-  # validates the GEOIDs in geoid and returns a ref_area-class object, which
-  # contains all the data needed to produce the ADIs specified by the user.
-  # See the comments in get_reference_area.R for more information on this
-  # object.
   ref_area <- get_reference_area(geoid, geography)
   
-  # Makes a list of all arguments necessary for running tidycensus::get_acs,
-  # with the exception of state and county. Notice that the dots (...) are
-  # included in this list. This allows the user to pass other arguments to
-  # tidycensus::get_acs() if desired.
-  get_acs_args <-
-    list(
-      geography = ref_area$geography,
-      year = year, survey = survey, geometry = geometry, key = key,
-      cache_table = TRUE, output = "wide", shift_geo = shift_geo,
-      variables =
-        c("B01003_001","B19013_001","B19001_002","B19001_011","B19001_012",
-          "B19001_013","B19001_014","B19001_015","B19001_016","B19001_017",
-          "B17010_001","B17010_002","B25003_001","B25003_002","C17002_001",
-          "C17002_002","C17002_003","C17002_004","C17002_005","B25044_001",
-          "B25044_003","B25044_010","B25014_001","B25014_005","B25014_006",
-          "B25014_007","B25014_011","B25014_012","B25014_013","B25088_001",
-          "B25064_001","B25077_001","C24010_001","C24010_003","C24010_039",
-          "B23025_001","B23025_005","B15003_001","B15003_002","B15003_003",
-          "B15003_004","B15003_005","B15003_006","B15003_007","B15003_008",
-          "B15003_009","B15003_010","B15003_011","B15003_012","B15003_017",
-          "B15003_018","B15003_019","B15003_020","B15003_021","B15003_022",
-          "B15003_023","B15003_024","B15003_025","B23008_001","B23008_008",
-          "B23008_021"),
-      ...)
+  data     <- match.arg(data)
   
-  # Validates the names of the elements of get_acs_args against the formalArgs()
-  # of tidycensus::get_acs(), silently keeping only arguments useable by
-  # tidycensus::get_acs()
-  get_acs_args <- get_acs_args[names(get_acs_args) %in%
-                                 methods::formalArgs(tidycensus::get_acs)]
+  if(geometry) {
+    # Saves old tigris_use_cache value and puts it back when function exits
+    old <- options(tigris_use_cache = TRUE)
+    on.exit(options(old), add = TRUE)
+  }
   
-  # Saves old tigris_use_cache value and puts it back when function exits
-  old <- options(tigris_use_cache = TRUE)
-  on.exit(options(old), add = TRUE)
-  
-  # tidycensus::get_acs() is called separately for each user-specified state or
-  # set of states. purrr::reduce(rbind) puts the results into a single data
-  # frame
-  acs_data_raw <-
-    lapply(ref_area$state_county,
-           function(.x) {
-             do.call(what = tidycensus::get_acs,
-                     args = c(list(state  = .x$state,
-                                   county = .x$county),
-                              get_acs_args))
-           }) %>% 
-    # ref_area$state_county %>%
-    # purrr::map(
-    #   function(state_county, get_acs_args) {
-    #     # browser()
-    #     # state  <- state_county$state
-    #     # county <- state_county$county
-    #     do.call(what = tidycensus::get_acs,
-    #             args = c(list(state  = state_county$state,
-    #                           county = state_county$county),
-    #                      get_acs_args))
-    #   },
-    #   get_acs_args = get_acs_args) %>%
-    purrr::reduce(rbind)
+  raw_data <- get_tidycensus(ref_area  = ref_area,
+                             year      = year,
+                             geometry  = geometry,
+                             shift_geo = shift_geo,
+                             key       = key,
+                             data      = data,
+                             ...)
   
   # Since the call (or calls) to tidycensus::get_acs() above usually gathers
   # data on more places than what the user specified, this pares the data frame
   # down to only include the user-specified reference area.
-  acs_ref_area <- acs_data_raw %>%
-    dplyr::filter(.data$GEOID %in% ref_area$ref_geoids)
+  ref_area_data <- dplyr::filter(raw_data, .data$GEOID %in% ref_area$ref_geoids)
   
   # Passes the filtered tidycensus::get_acs() tibble (or sf tibble) onto
   # calculate_adi(), which produces the tibble (or sf tibble) of ADIs
-  acs_adi <- calculate_adi(acs_ref_area, keep_indicators)
+  acs_adi <- calculate_adi(ref_area_data, keep_indicators)
   
   return(acs_adi)
 }
 
 
-###############################################################################
-# The functions below are copied verbatim or nearly verbatim from the tidycensus
-# package's internal functions with the same names. The license for this code is
-# as follows:
-# License: MIT + the following LICENSE (which can also be found at
-# https://cran.r-project.org/web/packages/tidycensus/LICENSE):
-#
-# YEAR: 2017
-# COPYRIGHT HOLDER: Kyle Walker
-###############################################################################
-validate_state <- function(state, .msg = interactive())
-{
-  if (is.null(state))
-    return(NULL)
-  state <- tolower(stringr::str_trim(state))
-  if (grepl("^[[:digit:]]+$", state)) {
-    state <- sprintf("%02d", as.numeric(state))
-    if (state %in% fips_state_table$fips) {
-      return(state)
-    }
-    else {
-      state_sub <- substr(state, 1, 2)
-      if (state_sub %in% fips_state_table$fips) {
-        message(
-          sprintf("Using first two digits of %s - '%s' (%s) - for FIPS code.",
-                  state, state_sub,
-                  fips_state_table[fips_state_table$fips ==
-                                     state_sub, "name"]),
-          call. = FALSE)
-        return(state_sub)
-      }
-      else {
-        warning(
-          sprintf("'%s' is not a valid FIPS code or state name/abbreviation",
-                  state), call. = FALSE)
-        return(NULL)
-      }
-    }
-  }
-  else if (grepl("^[[:alpha:]]+", state)) {
-    if (nchar(state) == 2 && state %in% fips_state_table$abb) {
-      if (.msg)
-        message(sprintf("Using FIPS code '%s' for state '%s'",
-                        fips_state_table[fips_state_table$abb == state,
-                                         "fips"], toupper(state)))
-      return(fips_state_table[fips_state_table$abb == state,
-                              "fips"])
-    }
-    else if (nchar(state) > 2 && state %in% fips_state_table$name) {
-      if (.msg)
-        message(sprintf("Using FIPS code '%s' for state '%s'",
-                        fips_state_table[fips_state_table$name == state,
-                                         "fips"], simpleCapSO(state)))
-      return(fips_state_table[fips_state_table$name ==
-                                state, "fips"])
-    }
-    else {
-      warning(
-        sprintf("'%s' is not a valid FIPS code or state name/abbreviation",
-                state), call. = FALSE)
-      return(NULL)
-    }
+get_tidycensus <- function(ref_area, year, geometry, shift_geo, key, data,
+                           ...) {
+  
+  args <- list(geography   = ref_area$geography,
+               variables   = NULL,
+               cache_table = TRUE, 
+               year        = year,
+               output      = "wide",
+               geometry    = geometry,
+               shift_geo   = shift_geo,
+               key         = key,
+               survey      = data,
+               sumfile     = data,
+               ...)
+  
+  if(data == "sf3") {
+    fn             <- tidycensus::get_decennial
+    args$variables <- c(`Total population` = "P001001")
+                        
   }
   else {
-    warning(sprintf("'%s' is not a valid FIPS code or state name/abbreviation",
-                    state), call. = FALSE)
-    return(NULL)
+    fn             <- tidycensus::get_acs
+    args$variables <-
+      c("B01003_001", "B19013_001", "B19001_002", "B19001_011", "B19001_012",
+        "B19001_013", "B19001_014", "B19001_015", "B19001_016", "B19001_017",
+        "B17010_001", "B17010_002", "B25003_001", "B25003_002", "C17002_001",
+        "C17002_002", "C17002_003", "C17002_004", "C17002_005", "B25044_001",
+        "B25044_003", "B25044_010", "B25014_001", "B25014_005", "B25014_006",
+        "B25014_007", "B25014_011", "B25014_012", "B25014_013", "B25088_001",
+        "B25064_001", "B25077_001", "C24010_001", "C24010_003", "C24010_039",
+        "B23025_001", "B23025_005", "B15003_001", "B15003_002", "B15003_003",
+        "B15003_004", "B15003_005", "B15003_006", "B15003_007", "B15003_008",
+        "B15003_009", "B15003_010", "B15003_011", "B15003_012", "B15003_017",
+        "B15003_018", "B15003_019", "B15003_020", "B15003_021", "B15003_022",
+        "B15003_023", "B15003_024", "B15003_025", "B23008_001", "B23008_008",
+        "B23008_021")
   }
+  
+  args <- validate_tidycensus_args(args, fn)
+  
+  return(call_tidycensus(fn           = fn,
+                         args         = args,
+                         state_county = ref_area$state_county))
 }
 
-simpleCapSO <- function(x)
-{
-  s <- strsplit(x, " ")[[1]]
-  paste0(toupper(substring(s, 1, 1)), substring(s, 2), collapse = " ")
-}
 
-validate_county <- function (state, county, .msg = interactive())
-{
-  if (is.null(state) || is.null(county))
-    return(NULL)
-  state <- validate_state(state)
-  county_table <-
-    tidycensus::fips_codes[tidycensus::fips_codes$state_code == state,
-                           ]
-  if (grepl("^[[:digit:]]+$", county)) {
-    county <- sprintf("%03d", as.numeric(county))
-    if (county %in% county_table$county_code) {
-      return(county)
-    }
-    else {
-      warning(sprintf("'%s' is not a valid FIPS code for counties in %s",
-                      county, county_table$state_name[1]), call. = FALSE)
-      return(NULL)
-    }
-  }
-  else if ((grepl("^[[:alpha:]]+", county))) {
-    county_index <- grepl(sprintf("^%s", county), county_table$county,
-                          ignore.case = TRUE)
-    matching_counties <- county_table$county[county_index]
-    if (length(matching_counties) == 0) {
-      warning(sprintf("'%s' is not a valid name for counties in %s",
-                      county, county_table$state_name[1]), call. = FALSE)
-      return(NULL)
-    }
-    else if (length(matching_counties) == 1) {
-      if (.msg)
-        message(sprintf("Using FIPS code '%s' for '%s'",
-                        county_table[county_table$county == matching_counties,
-                                     "county_code"], matching_counties))
-      return(county_table[county_table$county == matching_counties,
-                          "county_code"])
-    }
-    else if (length(matching_counties) > 1) {
-      ctys <- format_vec(matching_counties)
-      warning("Your county string matches ", ctys,
-              " Please refine your selection.", call. = FALSE)
-      return(NULL)
-    }
-  }
-}
-
-format_vec <- function(vec)
-{
-  out <- paste0(vec, ", ")
-  l <- length(out)
-  out[l - 1] <- paste0(out[l - 1], "and ")
-  out[l] <- gsub(", ", ".", out[l])
-  return(paste0(out, collapse = ""))
+call_tidycensus <- function(fn, args, state_county) {
+  
+  # tidycensus::get_acs() is called separately for each user-specified state or
+  # set of states. purrr::reduce(rbind) puts the results into a single data
+  # frame
+  return(lapply(state_county,
+                function(state_county) {
+                  rlang::exec(fn, !!!args, !!!state_county)
+                }) %>%
+           purrr::reduce(rbind))
 }

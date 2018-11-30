@@ -105,122 +105,38 @@
 #' @importFrom rlang .data
 #'
 #' @export
-calculate_adi <- function(acs_data,
+calculate_adi <- function(data,
+                          type            = NULL,
                           keep_indicators = FALSE,
-                          keep_columns    = c("GEOID", "NAME")
-) {
+                          keep_columns    = c("GEOID", "NAME")) {
   
-  if(!is.data.frame(acs_data)) {
-    stop("acs_data must be a tibble, sf tibble, or data-frame-like object")
+  if(!is.data.frame(data)) {
+    stop("data must be a tibble, sf tibble, or data-frame-like object")
   }
   
-  if(!all(keep_columns %in% colnames(acs_data))) {
-    stop("Not all columns specified by keep_columns are in acs_data.")
+  if(!all(keep_columns %in% colnames(data))) {
+    stop("Not all columns specified by keep_columns are in data.")
   }
   
-  acs_vars <- c("B01003_001E", "B19013_001E", "B19001_002E", "B19001_011E",
-                "B19001_012E", "B19001_013E", "B19001_014E", "B19001_015E",
-                "B19001_016E", "B19001_017E", "B17010_001E", "B17010_002E",
-                "B25003_001E", "B25003_002E", "C17002_001E", "C17002_002E",
-                "C17002_003E", "C17002_004E", "C17002_005E", "B25044_001E",
-                "B25044_003E", "B25044_010E", "B25014_001E", "B25014_005E",
-                "B25014_006E", "B25014_007E", "B25014_011E", "B25014_012E",
-                "B25014_013E", "B25088_001E", "B25064_001E", "B25077_001E",
-                "C24010_001E", "C24010_003E", "C24010_039E", "B23025_001E",
-                "B23025_005E", "B15003_001E", "B15003_002E", "B15003_003E",
-                "B15003_004E", "B15003_005E", "B15003_006E", "B15003_007E",
-                "B15003_008E", "B15003_009E", "B15003_010E", "B15003_011E",
-                "B15003_012E", "B15003_017E", "B15003_018E", "B15003_019E",
-                "B15003_020E", "B15003_021E", "B15003_022E", "B15003_023E",
-                "B15003_024E", "B15003_025E", "B23008_001E", "B23008_008E",
-                "B23008_021E")
+  type <- validate_type(type, data)
   
-  if(!all(acs_vars %in% colnames(acs_data))) {
-    missing_vars <- acs_vars[!(acs_vars %in% colnames(acs_data))]
-    stop(paste(c("The following variables are missing from acs_data:",
-                 missing_vars), collapse = " "))
+  vars <- validate_data(data, type)
+  
+  if(type == "sf3") {
+    data_f <- factors_from_decennial(data, vars)
   }
-  
-  if(nrow(acs_data) < 30) {
-    warning("\n\nCalculating ADI values from fewer than 30 locations.\nIt is ",
-            "recommended to add more in order to obtain trustworthy results.\n")
+  else {
+    data_f <- factors_from_acs(data, vars)
   }
-  
-  # Selects the relevant variables from the tidycensus::get_acs() output", "then
-  # wrangles them into a data frame that contains the specific measures that are
-  # used to calculate ADI
-  acs_data_f <- acs_data %>%
-    as.data.frame() %>% # In case acs_data is an sf table, this causes the
-    # geometry column to become un-"sticky", allowing it to
-    # be removed by the subsequent dplyr::select() command
-    # so that it doesn't interfere with the imputation that
-    # may follow.
-    dplyr::select(acs_vars) %>%
-    dplyr::mutate(
-      Fpoverty        = .data$B17010_002E / .data$B17010_001E,
-      OwnerOcc        = .data$B25003_002E / .data$B25003_001E,
-      incomegreater50 = .data$B19001_011E + .data$B19001_012E +
-        .data$B19001_013E + .data$B19001_014E +
-        .data$B19001_015E + .data$B19001_016E +
-        .data$B19001_017E,
-      IncomeDisparity = log(100 * (.data$B19001_002E / .data$incomegreater50)),
-      less150poverty  = .data$C17002_002E + .data$C17002_003E +
-        .data$C17002_004E + .data$C17002_005E,
-      less150FPL      = .data$less150poverty / .data$C17002_001E,
-      oneparent       = .data$B23008_008E + .data$B23008_021E,
-      singlePHH       = .data$oneparent / .data$B23008_001E,
-      vehiclesum      = .data$B25044_003E + .data$B25044_010E,
-      pnovehicle      = .data$vehiclesum / .data$B25044_001E,
-      sumprofs        = .data$C24010_003E + .data$C24010_039E,
-      whitecollar     = .data$sumprofs / .data$C24010_001E,
-      unemployed      = .data$B23025_005E / .data$B23025_001E,
-      Nhighschoolup   = .data$B15003_017E + .data$B15003_018E +
-        .data$B15003_019E + .data$B15003_020E +
-        .data$B15003_021E + .data$B15003_022E +
-        .data$B15003_023E + .data$B15003_024E +
-        .data$B15003_025E,
-      Phighschoolup   = .data$Nhighschoolup / .data$B15003_001E,
-      Nless9thgrade   = .data$B15003_002E + .data$B15003_003E +
-        .data$B15003_004E + .data$B15003_005E +
-        .data$B15003_006E + .data$B15003_007E +
-        .data$B15003_008E + .data$B15003_009E +
-        .data$B15003_010E + .data$B15003_011E +
-        .data$B15003_012E,
-      Pless9grade     = .data$Nless9thgrade / .data$B15003_001E,
-      SUMcrowded      = .data$B25014_005E + .data$B25014_006E +
-        .data$B25014_007E + .data$B25014_011E +
-        .data$B25014_012E + .data$B25014_013E,
-      Ocrowded        = .data$SUMcrowded / .data$B25014_001E) %>%
-    dplyr::select(.data$B19013_001E, .data$B25088_001E, .data$B25064_001E,
-                  .data$B25077_001E, .data$Fpoverty, .data$OwnerOcc,
-                  .data$IncomeDisparity, .data$less150FPL, .data$singlePHH,
-                  .data$pnovehicle, .data$whitecollar, .data$unemployed,
-                  .data$Phighschoolup, .data$Pless9grade, .data$Ocrowded) %>%
-    dplyr::rename(
-      "medianHouseholdIncome"                         = .data$B19013_001E,
-      "medianMortgage"                                = .data$B25088_001E,
-      "medianRent"                                    = .data$B25064_001E,
-      "medianHouseValue"                              = .data$B25077_001E ,
-      "pctFamiliesInPoverty"                          = .data$Fpoverty,
-      "pctOwnerOccupiedHousing"                       = .data$OwnerOcc,
-      "ratioThoseMakingUnder10kToThoseMakingOver50k"  = .data$IncomeDisparity,
-      "pctPeopleLivingBelow150PctFederalPovertyLevel" = .data$less150FPL,
-      "pctChildrenInSingleParentHouseholds"           = .data$singlePHH ,
-      "pctHouseholdsWithNoVehicle"                    = .data$pnovehicle,
-      "pctPeopleWithWhiteCollarJobs"                  = .data$whitecollar,
-      "pctPeopleUnemployed"                           = .data$unemployed,
-      "pctPeopleWithAtLeastHSEducation"               = .data$Phighschoolup,
-      "pctPeopleWithLessThan9thGradeEducation"        = .data$Pless9grade,
-      "pctHouseholdsWithOverOnePersonPerRoom"         = .data$Ocrowded)
   
   keep_columns <- c(keep_columns, "ADI")
   if(keep_indicators) {
-    acs_data <- dplyr::bind_cols(acs_data, acs_data_f)
-    keep_columns <- c(keep_columns, names(acs_data_f))
+    data <- dplyr::bind_cols(data, data_f)
+    keep_columns <- c(keep_columns, names(data_f))
   }
   
   # Performs single imputation if there is any missingness in the data.
-  if(anyNA(acs_data_f)) {
+  if(anyNA(data_f)) {
     
     # Error message if user has not attached the sociome and/or mice package.
     # Attaching one of these packages is necessary because of how mice::mice
@@ -230,9 +146,9 @@ calculate_adi <- function(acs_data,
                   'library("mice") and try again.'))
     }
     
-    is.na(acs_data_f) <- do.call(cbind, lapply(acs_data_f, is.infinite))
+    is.na(data_f) <- do.call(cbind, lapply(data_f, is.infinite))
     
-    acs_data_f <- acs_data_f %>%
+    data_f <- data_f %>%
       mice::mice(m = 1, maxit = 50, method = "pmm", seed = 500,
                  printFlag = FALSE) %>%
       mice::complete()
@@ -242,7 +158,7 @@ calculate_adi <- function(acs_data,
   
   # Where the magic happens: a principal-components analysis (PCA) of the
   # statistics that produces the raw ADI scores
-  fit <- psych::principal(acs_data_f)
+  fit <- psych::principal(data_f)
   
   # Sometimes the PCA produces results that are completely reversed (i.e., it
   # gives deprived areas low ADIs and less deprived areas high ADIs). Therefore,
@@ -265,22 +181,171 @@ calculate_adi <- function(acs_data,
   #      (multiplies their scores by -1) if they were reversed, and it keeps
   #      them the same (multiplies their scores by 1) if they were not reversed.
   # The raw ADI scores are standardized to have a mean of 100 and sd of 20
-  acs_adi <- acs_data %>%
+  adi <- data %>%
     dplyr::mutate(ADI = as.numeric(fit$scores * signage_flipper * 20 + 100)) %>%
     dplyr::select(keep_columns)
   
-  if(!("sf" %in% class(acs_adi))) {
-    acs_adi <- acs_adi %>%
+  if(!("sf" %in% class(adi))) {
+    adi <- adi %>%
       tibble::as_tibble()
   }
   
-  attr(acs_adi, "loadings") <- stats::setNames(object = as.vector(fit$loadings),
+  attr(adi, "loadings") <- stats::setNames(object = as.vector(fit$loadings),
                                                nm     = row.names(fit$loadings))
   
-  class(acs_adi) <- c(class(acs_adi), "adi")
+  class(adi) <- c(class(adi), "adi")
   
-  return(acs_adi)
+  return(adi)
 }
+
+
+factors_from_acs <- function(data, vars) {
+  
+  # Selects the relevant variables from the tidycensus::get_acs() output, then
+  # wrangles them into a data frame that contains the specific measures that are
+  # used to calculate ADI
+  data %>%
+    
+    as.data.frame() %>%
+    # In case data is an sf tibble, this causes the geometry column to become
+    # "unsticky", allowing it to be removed by the subsequent dplyr::select()
+    # command so that it doesn't interfere with the imputation that may follow.
+    
+    dplyr::mutate(
+      Fpoverty        = .data$B17010_002E / .data$B17010_001E,
+      OwnerOcc        = .data$B25003_002E / .data$B25003_001E,
+      incomegreater50 = .data$B19001_011E + .data$B19001_012E +
+        .data$B19001_013E + .data$B19001_014E +
+        .data$B19001_015E + .data$B19001_016E +
+        .data$B19001_017E,
+      IncomeDisparity = log(100 * (.data$B19001_002E / .data$incomegreater50)),
+      less150poverty  = .data$C17002_002E + .data$C17002_003E +
+        .data$C17002_004E + .data$C17002_005E,
+      less150FPL      = .data$less150poverty / .data$C17002_001E,
+      oneparent       = .data$B23008_008E + .data$B23008_021E,
+      singlePHH       = .data$oneparent / .data$B23008_001E,
+      vehiclesum      = .data$B25044_003E + .data$B25044_010E,
+      pnovehicle      = .data$vehiclesum / .data$B25044_001E,
+      sumprofs        = .data$C24010_003E + .data$C24010_039E,
+      whitecollar     = .data$sumprofs / .data$C24010_001E,
+      unemployedLabor = .data$B23001_008E + .data$B23001_015E +
+                    .data$B23001_022E + .data$B23001_029E + .data$B23001_036E +
+                    .data$B23001_043E + .data$B23001_050E + .data$B23001_057E +
+                    .data$B23001_064E + .data$B23001_071E + .data$B23001_076E +
+                    .data$B23001_081E + .data$B23001_086E + .data$B23001_094E +
+                    .data$B23001_101E + .data$B23001_108E + .data$B23001_115E +
+                    .data$B23001_122E + .data$B23001_129E + .data$B23001_136E +
+                    .data$B23001_143E + .data$B23001_150E + .data$B23001_157E +
+                    .data$B23001_162E + .data$B23001_167E + .data$B23001_172E,
+      allLabor        = .data$B23001_006E + .data$B23001_013E +
+                    .data$B23001_020E + .data$B23001_027E + .data$B23001_034E +
+        .data$B23001_041E + .data$B23001_048E + .data$B23001_055E +
+        .data$B23001_062E + .data$B23001_069E + .data$B23001_074E +
+        .data$B23001_079E + .data$B23001_084E + .data$B23001_092E +
+        .data$B23001_099E + .data$B23001_106E + .data$B23001_113E +
+        .data$B23001_120E + .data$B23001_127E + .data$B23001_134E +
+        .data$B23001_141E + .data$B23001_148E + .data$B23001_155E +
+        .data$B23001_160E + .data$B23001_165E + .data$B23001_170E,
+      unemployedPct   = unemployedLabor / allLabor,
+      Nhighschoolup   = .data$B15002_011E + .data$B15002_028E +
+        .data$B15002_012E +  .data$B15002_029E + .data$B15002_013E +
+        .data$B15002_030E + .data$B15002_014E + .data$B15002_031E +
+        .data$B15002_015E + .data$B15002_032E + .data$B15002_016E +
+        .data$B15002_033E + .data$B15002_017E + .data$B15002_034E +
+        .data$B15002_018E + .data$B15002_035E,
+      Phighschoolup   = .data$Nhighschoolup / .data$B15002_001E,
+      Nless9thgrade   = .data$B15002_003E +  .data$B15002_020E +
+        .data$B15002_004E +  .data$B15002_021E +  .data$B15002_005E + 
+        .data$B15002_022E +  .data$B15002_006E +  .data$B15002_023E,
+      Pless9grade     = .data$Nless9thgradeE / .data$B15002_001E,
+      SUMcrowded      = .data$B25014_005E + .data$B25014_006E +
+        .data$B25014_007E + .data$B25014_011E +
+        .data$B25014_012E + .data$B25014_013E,
+      Ocrowded        = .data$SUMcrowded / .data$B25014_001E) %>%
+    dplyr::select(
+      "medianHouseholdIncome"                         = .data$B19013_001E,
+      "medianMortgage"                                = .data$B25088_002E,
+      "medianRent"                                    = .data$B25064_001E,
+      "medianHouseValue"                              = .data$B25077_001E ,
+      "pctFamiliesInPoverty"                          = .data$Fpoverty,
+      "pctOwnerOccupiedHousing"                       = .data$OwnerOcc,
+      "ratioThoseMakingUnder10kToThoseMakingOver50k"  = .data$IncomeDisparity,
+      "pctPeopleLivingBelow150PctFederalPovertyLevel" = .data$less150FPL,
+      "pctChildrenInSingleParentHouseholds"           = .data$singlePHH ,
+      "pctHouseholdsWithNoVehicle"                    = .data$pnovehicle,
+      "pctPeopleWithWhiteCollarJobs"                  = .data$whitecollar,
+      "pctPeopleUnemployed"                           = .data$unemployed,
+      "pctPeopleWithAtLeastHSEducation"               = .data$Phighschoolup,
+      "pctPeopleWithLessThan9thGradeEducation"        = .data$Pless9grade,
+      "pctHouseholdsWithOverOnePersonPerRoom"         = .data$Ocrowded)
+}
+ 
+
+
+factors_from_decennial <- function(data, vars) {
+  # Selects the relevant variables from the tidycensus::get_acs() output, then
+  # wrangles them into a data frame that contains the specific measures that are
+  # used to calculate ADI
+  data %>%
+    
+    as.data.frame() %>%
+    # In case data is an sf tibble, this causes the geometry column to become
+    # "unsticky", allowing it to be removed by the subsequent dplyr::select()
+    # command so that it doesn't interfere with the imputation that may follow.
+    
+    dplyr::mutate(
+      Fpoverty        = .data$P090002 / .data$P090001,
+      OwnerOcc        = .data$H007002 / .data$H007001,
+      incomegreater50 = .data$P052011 + .data$P052012 +
+        .data$P052013 + .data$P052014 +
+        .data$P052015 + .data$P052016 +
+        .data$P052017,
+      IncomeDisparity = log(100 * (.data$P052002 / .data$incomegreater50)),
+      less150poverty  = .data$P088002 + .data$P088003 + .data$P088004 +
+        .data$P088005 + .data$P088006,
+      less150FPL      = .data$less150poverty / .data$P088001,
+      oneparent       = .data$P046008 + .data$P046021,
+      singlePHH       = .data$oneparent / .data$P046001,
+      vehiclesum      = .data$H044003 + .data$H044010,
+      pnovehicle      = .data$vehiclesum / .data$H044001,
+      sumprofs        = .data$P050003 + .data$P050050,
+      whitecollar     = .data$sumprofs / .data$P050001,
+      unemployedLabor = .data$P043007 + .data$P043014,
+      allLabor        = .data$P043005 + .data$P043012,
+      unemployedPct   = unemployedLabor / allLabor,
+      Nhighschoolup   = .data$P037011 + .data$P037028 + .data$P037012 +
+        .data$P037029 + .data$P037013 + .data$P037030 +
+        .data$P037014 + .data$P037031 + .data$P037015 +
+        .data$P037032 + .data$P037016 + .data$P037033 +
+        .data$P037017 + .data$P037034 + .data$P037018 +
+        .data$P037035,
+      Phighschoolup   = .data$Nhighschoolup / .data$P037001,
+      Nless9thgrade   = .data$P037003 + .data$P037020 + .data$P037004 +
+        .data$P037021 + .data$P037005 + .data$P037022 +
+        .data$P037006 + .data$P037023,
+      Pless9grade     = .data$Nless9thgrade / .data$P037001,
+      SUMcrowded      = .data$H020005 + .data$H020006 + .data$H020007 +
+        .data$H020011 + .data$H020012 + .data$H020013,
+      Ocrowded        = .data$SUMcrowded / .data$H020001) %>%
+    dplyr::select(
+      "medianHouseholdIncome"                         = .data$P053001,
+      "medianMortgage"                                = .data$H091001,
+      "medianRent"                                    = .data$H063001,
+      "medianHouseValue"                              = .data$H085001 ,
+      "pctFamiliesInPoverty"                          = .data$Fpoverty,
+      "pctOwnerOccupiedHousing"                       = .data$OwnerOcc,
+      "ratioThoseMakingUnder10kToThoseMakingOver50k"  = .data$IncomeDisparity,
+      "pctPeopleLivingBelow150PctFederalPovertyLevel" = .data$less150FPL,
+      "pctChildrenInSingleParentHouseholds"           = .data$singlePHH ,
+      "pctHouseholdsWithNoVehicle"                    = .data$pnovehicle,
+      "pctPeopleWithWhiteCollarJobs"                  = .data$whitecollar,
+      "pctPeopleUnemployed"                           = .data$unemployedPct,
+      "pctPeopleWithAtLeastHSEducation"               = .data$Phighschoolup,
+      "pctPeopleWithLessThan9thGradeEducation"        = .data$Pless9grade,
+      "pctHouseholdsWithOverOnePersonPerRoom"         = .data$Ocrowded)
+}
+
+
 
 #' \code{mice.impute.pmm} from the \code{mice} package
 #'

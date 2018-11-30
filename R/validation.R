@@ -191,3 +191,62 @@ validate_tidycensus_args <- function(args, fn) {
   args[names(args) %in% c(methods::formalArgs(fn),
                           "cb", "resolution", "starts_with")]
 }
+
+
+validate_type <- function(type, data) {
+  
+  if(!checkmate::test_character(type,
+                                pattern     = "(^sf3$|^acs(1|3|5)$)",
+                                any.missing = FALSE,
+                                len         = 1,
+                                null.ok     = TRUE)) {
+    stop('type must be either "acs1", "acs3", "acs5", or "sf3"')
+  }
+  
+  if(is.null(type)) {
+    
+    acs_test <- tidyselect::matches(match       = "(B|C)\\d{5}_\\d{3}E",
+                                    ignore.case = FALSE,
+                                    vars        = names(data))
+    if(length(acs_test) > 0) {
+      type <- "sf3"
+    }
+    else {
+      decennial_test <- tidyselect::matches(match       = "(H|P)\\d{6}",
+                                            ignore.case = FALSE,
+                                            vars        = names(data))
+      if(length(decennial_test) > 0) {
+        type <- "acs"
+      }
+      else {
+        stop("Unable to determine whether data is from ACS or decennial ",
+             "census.\nCheck the variable names.")
+      }
+    }
+  }
+  
+  return(type)
+}
+
+validate_data <- function(data, type) {
+  
+  if(type == "sf3") {
+    vars <- decennial_vars$variable
+  }
+  else {
+    vars <- paste0(acs_vars$variable, "E")
+  }
+  
+  if(!all(vars %in% colnames(data))) {
+    missing_vars <- vars[!(vars %in% colnames(data))]
+    stop(paste(c("The following variables are missing from data:",
+                 missing_vars), collapse = " "))
+  }
+  
+  if(nrow(data) < 30) {
+    warning("\n\nCalculating ADI values from fewer than 30 locations.\nIt is ",
+            "recommended to add more in order to obtain trustworthy results.\n")
+  }
+  
+  return(vars)
+}

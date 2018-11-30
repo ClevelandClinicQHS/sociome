@@ -137,13 +137,12 @@
 #'   three columns mentioned above.
 #' @importFrom rlang .data
 #' @export
-
 get_adi <- function(geography       = NULL,
                     state           = NULL,
                     county          = NULL,
                     geoid           = NULL,
                     year            = 2016,
-                    data            = c("acs5", "acs3", "acs1", "sf3"),
+                    dataset         = c("acs5", "acs3", "acs1", "sf3"),
                     geometry        = TRUE,
                     shift_geo       = FALSE,
                     keep_indicators = FALSE,
@@ -155,7 +154,7 @@ get_adi <- function(geography       = NULL,
   
   ref_area <- get_reference_area(geoid, geography)
   
-  data     <- match.arg(data)
+  data     <- match.arg(dataset)
   
   if(geometry) {
     # Saves old tigris_use_cache value and puts it back when function exits
@@ -168,7 +167,7 @@ get_adi <- function(geography       = NULL,
                              geometry  = geometry,
                              shift_geo = shift_geo,
                              key       = key,
-                             data      = data,
+                             dataset   = dataset,
                              ...)
   
   # Since the call (or calls) to tidycensus::get_acs() above usually gathers
@@ -178,13 +177,15 @@ get_adi <- function(geography       = NULL,
   
   # Passes the filtered tidycensus::get_acs() tibble (or sf tibble) onto
   # calculate_adi(), which produces the tibble (or sf tibble) of ADIs
-  acs_adi <- calculate_adi(ref_area_data, keep_indicators)
+  acs_adi <- calculate_adi(data            = ref_area_data,
+                           type            = dataset,
+                           keep_indicators = keep_indicators)
   
   return(acs_adi)
 }
 
 
-get_tidycensus <- function(ref_area, year, geometry, shift_geo, key, data,
+get_tidycensus <- function(ref_area, year, geometry, shift_geo, key, dataset,
                            ...) {
   
   args <- list(geography   = ref_area$geography,
@@ -195,38 +196,25 @@ get_tidycensus <- function(ref_area, year, geometry, shift_geo, key, data,
                geometry    = geometry,
                shift_geo   = shift_geo,
                key         = key,
-               survey      = data,
-               sumfile     = data,
+               survey      = dataset,
+               sumfile     = dataset,
                ...)
   
-  if(data == "sf3") {
+  if(dataset == "sf3") {
     fn             <- tidycensus::get_decennial
-    args$variables <- c(`Total population` = "P001001")
+    args$variables <- decennial_vars$variable
                         
   }
   else {
     fn             <- tidycensus::get_acs
-    args$variables <-
-      c("B01003_001", "B19013_001", "B19001_002", "B19001_011", "B19001_012",
-        "B19001_013", "B19001_014", "B19001_015", "B19001_016", "B19001_017",
-        "B17010_001", "B17010_002", "B25003_001", "B25003_002", "C17002_001",
-        "C17002_002", "C17002_003", "C17002_004", "C17002_005", "B25044_001",
-        "B25044_003", "B25044_010", "B25014_001", "B25014_005", "B25014_006",
-        "B25014_007", "B25014_011", "B25014_012", "B25014_013", "B25088_001",
-        "B25064_001", "B25077_001", "C24010_001", "C24010_003", "C24010_039",
-        "B23025_001", "B23025_005", "B15003_001", "B15003_002", "B15003_003",
-        "B15003_004", "B15003_005", "B15003_006", "B15003_007", "B15003_008",
-        "B15003_009", "B15003_010", "B15003_011", "B15003_012", "B15003_017",
-        "B15003_018", "B15003_019", "B15003_020", "B15003_021", "B15003_022",
-        "B15003_023", "B15003_024", "B15003_025", "B23008_001", "B23008_008",
-        "B23008_021")
+    args$variables <- acs_vars$variable         
   }
   
   args <- validate_tidycensus_args(args, fn)
   
-  return(call_tidycensus(fn           = fn,
-                         args         = args,
-                         state_county = ref_area$state_county))
+  call_tidycensus(fn           = fn,
+                  args         = args,
+                  state_county = ref_area$state_county)
 }
 
 
@@ -235,9 +223,7 @@ call_tidycensus <- function(fn, args, state_county) {
   # tidycensus::get_acs() is called separately for each user-specified state or
   # set of states. purrr::reduce(rbind) puts the results into a single data
   # frame
-  return(lapply(state_county,
-                function(state_county) {
-                  rlang::exec(fn, !!!args, !!!state_county)
-                }) %>%
-           purrr::reduce(rbind))
+  lapply(state_county,
+         function(state_county) rlang::exec(fn, !!!args, !!!state_county)) %>%
+    purrr::reduce(rbind)
 }

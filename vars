@@ -1,0 +1,239 @@
+`Total population` = "B01003_001",
+`Median household income` = "B19013_001",
+`Households w/ income under $10k` = "B19001_002",
+`Households w/ income $50k-under $60k` = "B19001_011",
+`Households w/ income $60k-under $75k` = "B19001_012",
+`Households w/ income $75k-under $100k` = "B19001_013",
+`Households w/ income $100k-under $125k` = "B19001_014",
+`Households w/ income $125k-under $150k` = "B19001_015",
+`Households w/ income $150k-under $200k` = "B19001_016",
+`Households w/ income $200k or more` = "B19001_017",
+`Total families` = "B17010_001",
+`Families w/ income below poverty level` = "B17010_002",
+`Occupied housing units` = "B25003_001",
+`Owner-occupied housing units` = "B25003_002",
+`Population w/ known poverty status` = "C17002_001",
+`People w/ income to poverty level ratio under .5` = "C17002_002",
+`People w/ income to poverty level ratio .5-.99` = "C17002_003",
+
+`People w/ income to poverty level ratio 1-1.24` = "C17002_004",
+`People w/ income to poverty level ratio 1.25-1.49` = "C17002_005",
+`Occupied housing units (tenure/vehicles)` = "B25044_001",
+`Owner-occupied housing units with no vehicle` = "B25044_003",
+`Renter-occupied housing units with no vehicle` = "B25044_010",
+`Occupied housing units (tenure/people per room)` = "B25014_001",
+`Owner-occupied housing units with 1.01-1.5 per room` = "B25014_005",
+`Owner-occupied housing units with 1.51-2 per room` = "B25014_006",
+`Owner-occupied housing units with over 2 per room` = "B25014_007",
+`Renter-occupied housing units with 1.01-1.5 per room` = "B25014_011",
+`Renter-occupied housing units with 1.51-2 per room` = "B25014_012",
+`Renter-occupied housing units with over 2 per room` = "B25014_013",
+`Median monthly costs - housing units w/ mortgage` = "B25088_002",
+`Median gross rent (cash-paid renter-occupied)` = "B25064_001",
+`Median value of owner-occupied housing units` = "B25077_001",
+`Employed civilians age 16+` = "C24010_001",
+`Civilian males age 16+ in white-collar occupations` = "C24010_003",
+`Civilian females age 16+ in white-collar occupations` = "C24010_039",
+`Male civilian labor force age 16-19 yrs`   = "B23001_006",
+`Male civilian labor force age 20-21 yrs`   = "B23001_013",
+`Male civilian labor force age 22-24 yrs`   = "B23001_020",
+`Male civilian labor force age 25-29 yrs`   = "B23001_027",
+`Male civilian labor force age 30-34 yrs`   = "B23001_034",
+`Male civilian labor force age 35-44 yrs`   = "B23001_041",
+`Male civilian labor force age 45-54 yrs`   = "B23001_048",
+`Male civilian labor force age 55-59 yrs`   = "B23001_055",
+`Male civilian labor force age 60-61 yrs`   = "B23001_062",
+`Male civilian labor force age 62-64 yrs`   = "B23001_069",
+`Male labor force age 65-69`                = "B23001_074",
+`Male labor force age 70-74`                = "B23001_079",
+`Male labor force age 75+`                  = "B23001_084",
+`Female civilian labor force age 16-19 yrs` = "B23001_092",
+`Female civilian labor force age 20-21 yrs` = "B23001_099",
+`Female civilian labor force age 22-24 yrs` = "B23001_106",
+`Female civilian labor force age 25-29 yrs` = "B23001_113",
+`Female civilian labor force age 30-34 yrs` = "B23001_120",
+`Female civilian labor force age 35-44 yrs` = "B23001_127",
+`Female civilian labor force age 45-54 yrs` = "B23001_134",
+`Female civilian labor force age 55-59 yrs` = "B23001_141",
+`Female civilian labor force age 60-61 yrs` = "B23001_148",
+`Female civilian labor force age 62-64 yrs` = "B23001_155",
+`Female labor force age 65-69`              = "B23001_160",
+`Female labor force age 70-74`              = "B23001_165",
+`Female labor force age 75+`                = "B23001_170",
+`Unemployed Male civilian labor force age 16-19 yrs` = "B23001_008",
+`Unemployed Male civilian labor force age 20-21 yrs` = "B23001_015",
+`Unemployed Male civilian labor force age 22-24 yrs` = "B23001_022",
+`Unemployed Male civilian labor force age 25-29 yrs` = "B23001_029",
+`Unemployed Male civilian labor force age 30-34 yrs` = "B23001_036",
+`Unemployed Male civilian labor force age 35-44 yrs` = "B23001_043",
+`Unemployed Male civilian labor force age 45-54 yrs` = "B23001_050",
+`Unemployed Male civilian labor force age 55-59 yrs` = "B23001_057",
+`Unemployed Male civilian labor force age 60-61 yrs` = "B23001_064",
+`Unemployed Male civilian labor force age 62-64 yrs` = "B23001_071",
+`Unemployed Male labor force age 65-69 yrs` = "B23001_076",
+`Unemployed Male labor force age 70-74 yrs` = "B23001_081",
+`Unemployed Male labor force age 75+` = "B23001_086",
+`Unemployed Female civilian labor force age 16-19 yrs` = "B23001_094",
+`Unemployed Female civilian labor force age 20-21 yrs` = "B23001_101",
+`Unemployed Female civilian labor force age 22-24 yrs` = "B23001_108",
+`Unemployed Female civilian labor force age 25-29 yrs` = "B23001_115",
+`Unemployed Female civilian labor force age 30-34 yrs` = "B23001_122",
+`Unemployed Female civilian labor force age 35-44 yrs` = "B23001_129",
+`Unemployed Female civilian labor force age 45-54 yrs` = "B23001_136",
+`Unemployed Female civilian labor force age 55-59 yrs` = "B23001_143",
+`Unemployed Female civilian labor force age 60-61 yrs` = "B23001_150",
+`Unemployed Female civilian labor force age 62-64 yrs` = "B23001_157",
+`Unemployed Female labor force age 65-69 yrs` = "B23001_162",
+`Unemployed Female labor force age 70-74 yrs` = "B23001_167",
+`Unemployed Female labor force age 75+` = "B23001_172",
+`Population age 25+` = "B15002_001",
+`Males 25+ w/ no education` =  "B15002_003",
+`Females 25+ w/ no education` = "B15002_020",
+`Males 25+ w/ nursery-4th grade as highest education` =  "B15002_004",
+`Females 25+ w/ nursery-4th grade as highest education` = "B15002_021",
+`Males 25+ w/ 5th-6th grade as highest education` =  "B15002_005",
+`Females 25+ w/ 5th-6th grade as highest education` = "B15002_022",
+`Males 25+ w/ 7th-8th as highest education` =  "B15002_006",
+`Females 25+ w/ 7th-8th as highest education` = "B15002_023",
+`Males 25+ w/ diploma or alternate as highest education` = "B15002_011",
+`Females 25+ w/ diploma or alternate as highest education` = "B15002_028",
+`Males 25+ w/ <1 yr college as highest education` =  "B15002_012",
+`Females 25+ w/ <1 yr college as highest education` = "B15002_029",
+`Males 25+ w/ 1+ yrs college w/o degree` = "B15002_013",
+`Females 25+ w/ 1+ yrs college w/o degree` = "B15002_030",
+`Males 25+ w/ Associate's as highest degree` = "B15002_014",
+`Females 25+ w/ Associate's as highest degree` = "B15002_031",
+`Males 25+ w/ Bachelor's as highest degree` =  "B15002_015",
+`Females 25+ w/ Bachelor's as highest degree` = "B15002_032",
+`Males 25+ w/ Master's as highest degree` =  "B15002_016",
+`Females 25+ w/ Master's as highest degree` = "B15002_033",
+`Males 25+ w/ Professional degree as highest degree` = "B15002_017",
+`Females 25+ w/ Professional degree as highest degree` = "B15002_034",
+`Males 25+ w/ Doctorate as highest degree` = "B15002_018",
+`Females 25+ w/ Doctorate as highest degree` = "B15002_035",
+`Own children under 18 in families and subfamilies` = "B23008_001",
+`Own children <6 living w/ one parent` = "B23008_008",
+`Own children age 6-17 living w/ one parent` = "B23008_021")
+
+
+
+
+
+
+
+`Total population` = "P001001",
+`Median household income` = "P053001",
+`Households w/ income under $10k` = "P052002",
+`Households w/ income $50k-under $60k` = "P052011",
+`Households w/ income $60k-under $75k` = "P052012",
+`Households w/ income $75k-under $100k` = "P052013",
+`Households w/ income $100k-under $125k` = "P052014",
+`Households w/ income $125k-under $150k` = "P052015",
+`Households w/ income $150k-under $200k` = "P052016",
+`Households w/ income $200k or more` = "P052017",
+`Total families` = "P090001",
+`Families w/ income below poverty level` = "P090002",
+`Occupied housing units` = "H007001",
+`Owner-occupied housing units` = "H007002",
+`Population w/ known poverty status` = "P088001",
+`People w/ income to poverty level ratio under .5` = "P088002",
+`People w/ income to poverty level ratio .5-.74` = "P088003",
+`People w/ income to poverty level ratio .75-.99` = "P088004",
+`People w/ income to poverty level ratio 1-1.24` = "P088005",
+`People w/ income to poverty level ratio 1.25-1.49` = "P088006",
+`Occupied housing units (tenure/vehicles)` = "H044001",
+`Owner-occupied housing units with no vehicle` = "H044003",
+`Renter-occupied housing units with no vehicle` = "H044010",
+`Occupied housing units (tenure/people per room)` = "H020001",
+`Owner-occupied housing units with 1.01-1.5 per room` = "H020005",
+`Owner-occupied housing units with 1.51-2 per room` = "H020006",
+`Owner-occupied housing units with over 2 per room` = "H020007",
+`Renter-occupied housing units with 1.01-1.5 per room` = "H020011",
+`Renter-occupied housing units with 1.51-2 per room` = "H020012",
+`Renter-occupied housing units with over 2 per room` = "H020013",
+`Median monthly costs - housing units w/ mortgage` = "H091001",
+`Median gross rent (cash-paid renter-occupied)` = "H063001",
+`Median value of owner-occupied housing units` = "H085001",
+`Employed civilians age 16+` = "P050001",
+`Civilian males age 16+ in white-collar occupations` = "P050003",
+`Civilian females age 16+ in white-collar occupations` = "P050050",
+`Male civilian labor force age 16+` = "P043005",
+
+
+
+
+
+
+
+
+
+
+
+
+`Female civilian labor force age 16+` = "P043012",
+
+
+
+
+
+
+
+
+
+
+
+
+`Male unemployed civilian labor force age 16+` = "P043007",
+
+
+
+
+
+
+
+
+
+
+
+
+`Female unemployed civilian labor force age 16+` = "P043014",   
+
+
+
+
+
+
+
+
+
+
+
+
+`Population age 25+` = "P037001",
+`Males 25+ w/ no education` =  "P037003",
+`Females 25+ w/ no education` = "P037020",
+`Males 25+ w/ nursery-4th grade as highest education` =  "P037004",
+`Females 25+ w/ nursery-4th grade as highest education` = "P037021",
+`Males 25+ w/ 5th-6th grade as highest education` =  "P037005",
+`Females 25+ w/ 5th-6th grade as highest education` = "P037022",
+`Males 25+ w/ 7th-8th as highest education` =  "P037006",
+`Females 25+ w/ 7th-8th as highest education` = "P037023",
+`Males 25+ w/ diploma or alternate as highest education` = "P037011",
+`Females 25+ w/ diploma or alternate as highest education` = "P037028",
+`Males 25+ w/ <1 yr college as highest education` =  "P037012",
+`Females 25+ w/ <1 yr college as highest education` = "P037029",
+`Males 25+ w/ 1+ yrs college w/o degree` = "P037013",
+`Females 25+ w/ 1+ yrs college w/o degree` = "P037030",
+`Males 25+ w/ Associate's as highest degree` = "P037014",
+`Females 25+ w/ Associate's as highest degree` = "P037031",
+`Males 25+ w/ Bachelor's as highest degree` =  "P037015",
+`Females 25+ w/ Bachelor's as highest degree` = "P037032",
+`Males 25+ w/ Master's as highest degree` =  "P037016",
+`Females 25+ w/ Master's as highest degree` = "P037033",
+`Males 25+ w/ Professional degree as highest degree` = "P037017",
+`Females 25+ w/ Professional degree as highest degree` = "P037034",
+`Males 25+ w/ Doctorate as highest degree` = "P037018",
+`Females 25+ w/ Doctorate as highest degree` = "P037035",
+`Own children under 18 in families and subfamilies` = "P046001",
+`Own children <6 living w/ one parent` = "P046008",
+`Own children age 6-17 living w/ one parent` = "P046021")

@@ -10,8 +10,7 @@ get_reference_area <- function(user_geoids = NULL, geography = NULL) {
 
     user_blk_grps <- fips_table
 
-    # If geography is also NULL, "tract" is chosen as the level of
-    # geography
+    # If geography is also NULL, "tract" is chosen as the level of geography
     if(is.null(geography)) {
       geography <- "tract"
     }
@@ -52,6 +51,7 @@ get_reference_area <- function(user_geoids = NULL, geography = NULL) {
     # granular than the user-specified level of geography
     else {
       geography_granularity <- dplyr::case_when(
+        geography == "block"       ~ 15,
         geography == "block group" ~ 12,
         geography == "tract"       ~ 11,
         geography == "county"      ~  5,
@@ -112,7 +112,7 @@ get_reference_area <- function(user_geoids = NULL, geography = NULL) {
     geography    = geography,
     state_county = NULL)
   
-  if(geography == "tract" || geography == "block group") {
+  if(geography %in% c("tract", "block group", "block")) {
     ref_area[["state_county"]] <-
       lapply(X   = unique(user_blk_grps$state),
              FUN = function(user_state) {

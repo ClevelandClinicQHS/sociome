@@ -4,13 +4,10 @@
 \alias{calculate_adi}
 \title{Calculate area deprivation index (ADI)}
 \usage{
-calculate_adi(acs_data, keep_indicators = FALSE,
+calculate_adi(data, type = NULL, keep_indicators = FALSE,
   keep_columns = c("GEOID", "NAME"))
 }
 \arguments{
-\item{acs_data}{A data-frame-like object of ACS data from the US Census API.
-Must have the variables described in the "Details" section below.}
-
 \item{keep_indicators}{Logical value indicating whether or not the resulting
 tibble (or sf tibble) will contain the socioeconomic measures used to
 calculate the ADI values.}
@@ -19,6 +16,9 @@ calculate the ADI values.}
 acs_data to keep in the final result. Defaults to \code{c("GEOID",
 "NAME")}. If acs_data is of class \code{sf}, the geometry column will be
 kept regardless.}
+
+\item{acs_data}{A data-frame-like object of ACS data from the US Census API.
+Must have the variables described in the "Details" section below.}
 }
 \value{
 A tibble (or an sf tibble if \code{acs_data} is itself an sf tibble)

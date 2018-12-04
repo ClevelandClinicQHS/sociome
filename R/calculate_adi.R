@@ -131,7 +131,7 @@ calculate_adi <- function(data,
   
   keep_columns <- c(keep_columns, "ADI")
   if(keep_indicators) {
-    data <- dplyr::bind_cols(data, data_f)
+    data         <- dplyr::bind_cols(data, data_f)
     keep_columns <- c(keep_columns, names(data_f))
   }
   
@@ -186,12 +186,11 @@ calculate_adi <- function(data,
     dplyr::select(keep_columns)
   
   if(!("sf" %in% class(adi))) {
-    adi <- adi %>%
-      tibble::as_tibble()
+    adi <- tibble::as_tibble(adi)
   }
   
   attr(adi, "loadings") <- stats::setNames(object = as.vector(fit$loadings),
-                                               nm     = row.names(fit$loadings))
+                                           nm     = row.names(fit$loadings))
   
   class(adi) <- c(class(adi), "adi")
   

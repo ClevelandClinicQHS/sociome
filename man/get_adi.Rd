@@ -5,8 +5,9 @@
 \title{Get area deprivation index (ADI)}
 \usage{
 get_adi(geography = NULL, state = NULL, county = NULL,
-  geoid = NULL, year = 2016, survey = "acs5", geometry = TRUE,
-  shift_geo = FALSE, keep_indicators = FALSE, key = NULL, ...)
+  geoid = NULL, year = 2016, dataset = c("acs5", "acs3", "acs1",
+  "decennial"), geometry = TRUE, shift_geo = FALSE,
+  keep_indicators = FALSE, key = NULL, ...)
 }
 \arguments{
 \item{geography}{A character string denoting the level of census geography
@@ -36,12 +37,6 @@ details).}
 \item{year}{Single integer specifying the year of the ACS survey to use.
 Defaults to 2016.}
 
-\item{survey}{The data set used to calculate ADIs. Must be one of
-\code{c("acs5", "acs3", "acs1")}, denoting the 5-, 3-, and 1-year ACS
-estimates. Defaults to \code{"acs5."} Important: data not always available
-depending on the level of geography and data set chosen. See
-\url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html}.}
-
 \item{geometry}{Logical value indicating whether or not shapefile data should
 be included in the result, making the result an sf tibble instead of a
 plain tibble. Defaults to \code{TRUE}.}
@@ -60,6 +55,12 @@ necessary if you have already loaded your key with
 
 \item{...}{Additional arguments to be passed onto
 \code{tidycensus::get_acs()}.}
+
+\item{survey}{The data set used to calculate ADIs. Must be one of
+\code{c("acs5", "acs3", "acs1")}, denoting the 5-, 3-, and 1-year ACS
+estimates. Defaults to \code{"acs5."} Important: data not always available
+depending on the level of geography and data set chosen. See
+\url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html}.}
 }
 \value{
 If \code{geometry = TRUE} (the default), an sf tibble with four

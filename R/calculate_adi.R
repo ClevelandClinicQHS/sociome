@@ -256,7 +256,7 @@ factors_from_acs <- function(data, vars) {
       Nless9thgrade   = .data$B15002_003E +  .data$B15002_020E +
         .data$B15002_004E +  .data$B15002_021E +  .data$B15002_005E + 
         .data$B15002_022E +  .data$B15002_006E +  .data$B15002_023E,
-      Pless9grade     = .data$Nless9thgradeE / .data$B15002_001E,
+      Pless9grade     = .data$Nless9thgrade / .data$B15002_001E,
       SUMcrowded      = .data$B25014_005E + .data$B25014_006E +
         .data$B25014_007E + .data$B25014_011E +
         .data$B25014_012E + .data$B25014_013E,
@@ -273,7 +273,7 @@ factors_from_acs <- function(data, vars) {
       "pctChildrenInSingleParentHouseholds"           = .data$singlePHH ,
       "pctHouseholdsWithNoVehicle"                    = .data$pnovehicle,
       "pctPeopleWithWhiteCollarJobs"                  = .data$whitecollar,
-      "pctPeopleUnemployed"                           = .data$unemployed,
+      "pctPeopleUnemployed"                           = .data$unemployedPct,
       "pctPeopleWithAtLeastHSEducation"               = .data$Phighschoolup,
       "pctPeopleWithLessThan9thGradeEducation"        = .data$Pless9grade,
       "pctHouseholdsWithOverOnePersonPerRoom"         = .data$Ocrowded)

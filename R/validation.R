@@ -196,11 +196,11 @@ validate_tidycensus_args <- function(args, fn) {
 validate_type <- function(type, data) {
   
   if(!checkmate::test_character(type,
-                                pattern     = "(^sf3$|^acs(1|3|5)$)",
+                                pattern     = "(^decennial$|^acs(1|3|5)$)",
                                 any.missing = FALSE,
                                 len         = 1,
                                 null.ok     = TRUE)) {
-    stop('type must be either "acs1", "acs3", "acs5", or "sf3"')
+    stop('type must be either "acs1", "acs3", "acs5", or "decennial"')
   }
   
   if(is.null(type)) {
@@ -209,7 +209,7 @@ validate_type <- function(type, data) {
                                     ignore.case = FALSE,
                                     vars        = names(data))
     if(length(acs_test) > 0) {
-      type <- "sf3"
+      type <- "decennial"
     }
     else {
       decennial_test <- tidyselect::matches(match       = "(H|P)\\d{6}",
@@ -230,7 +230,7 @@ validate_type <- function(type, data) {
 
 validate_data <- function(data, type) {
   
-  if(type == "sf3") {
+  if(type == "decennial") {
     vars <- decennial_vars$variable
   }
   else {

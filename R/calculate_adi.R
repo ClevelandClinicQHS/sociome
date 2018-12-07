@@ -122,7 +122,7 @@ calculate_adi <- function(data,
   
   vars <- validate_data(data, type)
   
-  if(type == "sf3") {
+  if(type == "decennial") {
     data_f <- factors_from_decennial(data, vars)
   }
   else {

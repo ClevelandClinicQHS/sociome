@@ -211,7 +211,19 @@ get_tidycensus <- function(ref_area, year, geometry, shift_geo, key, dataset,
   }
   else {
     fn             <- tidycensus::get_acs
-    args$variables <- acs_vars$variable         
+    
+    if(year > 2011 || year == 2011 && dataset != "acs5") {
+      args$variables <- acs_vars$variable[acs_vars$B23025_and_B15003]
+    }
+    else if(year == 2011 && dataset == "acs5") {
+      args$variables <- acs_vars$variable[acs_vars$B23025_and_B15002]
+    }
+    else if(year == 2010 && dataset != "acs5") {
+      args$variables <- acs_vars$variable[acs_vars$B23001_and_B15003]
+    }
+    else {
+      args$variables <- acs_vars$variable[acs_vars$B23001_and_B15002]
+    }
   }
   
   args <- validate_tidycensus_args(args, fn)

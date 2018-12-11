@@ -120,13 +120,16 @@ calculate_adi <- function(data,
   
   type <- validate_type(type, data)
   
-  vars <- validate_data(data, type)
+  if(nrow(data) < 30) {
+    warning("\n\nCalculating ADI values from fewer than 30 locations.\nIt is ",
+            "recommended to add more in order to obtain trustworthy results.\n")
+  }
   
   if(type == "decennial") {
-    data_f <- factors_from_decennial(data, vars)
+    data_f <- factors_from_decennial(data)
   }
   else {
-    data_f <- factors_from_acs(data, vars)
+    data_f <- factors_from_acs(data)
   }
   
   keep_columns <- c(keep_columns, "ADI")
@@ -197,19 +200,67 @@ calculate_adi <- function(data,
   return(adi)
 }
 
-
-factors_from_acs <- function(data, vars) {
+# Selects the relevant variables from the tidycensus::get_acs() output, then
+# wrangles them into a data frame that contains the specific measures that are
+# used to calculate ADI
+factors_from_acs <- function(data) {
   
-  # Selects the relevant variables from the tidycensus::get_acs() output, then
-  # wrangles them into a data frame that contains the specific measures that are
-  # used to calculate ADI
-  data %>%
-    
-    as.data.frame() %>%
-    # In case data is an sf tibble, this causes the geometry column to become
-    # "unsticky", allowing it to be removed by the subsequent dplyr::select()
-    # command so that it doesn't interfere with the imputation that may follow.
-    
+  data <- as.data.frame(data)
+  # In case data is an sf tibble, this causes the geometry column to become
+  # "unsticky", allowing it to be removed by the subsequent dplyr::select()
+  # command so that it doesn't interfere with the imputation that may follow.
+  
+  if(is.null(data$B23025_005E)) {
+    data <- data %>% 
+      dplyr::mutate(
+        B23025_005E = .data$B23001_008E + .data$B23001_015E +
+          .data$B23001_022E + .data$B23001_029E + .data$B23001_036E +
+          .data$B23001_043E + .data$B23001_050E + .data$B23001_057E +
+          .data$B23001_064E + .data$B23001_071E + .data$B23001_076E +
+          .data$B23001_081E + .data$B23001_086E + .data$B23001_094E +
+          .data$B23001_101E + .data$B23001_108E + .data$B23001_115E +
+          .data$B23001_122E + .data$B23001_129E + .data$B23001_136E +
+          .data$B23001_143E + .data$B23001_150E + .data$B23001_157E +
+          .data$B23001_162E + .data$B23001_167E + .data$B23001_172E,
+        B23025_001E = .data$B23001_006E + .data$B23001_013E +
+          .data$B23001_020E + .data$B23001_027E + .data$B23001_034E +
+          .data$B23001_041E + .data$B23001_048E + .data$B23001_055E +
+          .data$B23001_062E + .data$B23001_069E + .data$B23001_074E +
+          .data$B23001_079E + .data$B23001_084E + .data$B23001_092E +
+          .data$B23001_099E + .data$B23001_106E + .data$B23001_113E +
+          .data$B23001_120E + .data$B23001_127E + .data$B23001_134E +
+          .data$B23001_141E + .data$B23001_148E + .data$B23001_155E +
+          .data$B23001_160E + .data$B23001_165E + .data$B23001_170E)
+  }
+  
+  if(is.null(data$B15002_001E)) {
+    data <- data %>% 
+      dplyr::mutate(
+        Nless9thgrade = .data$B15003_002E +  .data$B15003_003E + 
+          .data$B15003_004E + .data$B15003_005E + .data$B15003_006E + 
+          .data$B15003_007E + .data$B15003_008E + .data$B15003_009E + 
+          .data$B15003_010E + .data$B15003_011E + .data$B15003_012E,
+        Nhighschoolup = .data$B15003_017E + .data$B15003_018E +
+          .data$B15003_019E + .data$B15003_020E + .data$B15003_021E +
+          .data$B15003_022E + .data$B15003_023E + .data$B15003_024E +
+          .data$B15003_025E)
+  }
+  else {
+    data <- data %>% 
+      dplyr::mutate(
+        Nless9thgrade = .data$B15002_003E +  .data$B15002_020E +
+          .data$B15002_004E +  .data$B15002_021E +  .data$B15002_005E + 
+          .data$B15002_022E +  .data$B15002_006E +  .data$B15002_023E,
+        Nhighschoolup = .data$B15002_011E + .data$B15002_028E +
+          .data$B15002_012E +  .data$B15002_029E + .data$B15002_013E +
+          .data$B15002_030E + .data$B15002_014E + .data$B15002_031E +
+          .data$B15002_015E + .data$B15002_032E + .data$B15002_016E +
+          .data$B15002_033E + .data$B15002_017E + .data$B15002_034E +
+          .data$B15002_018E + .data$B15002_035E,
+        B15003_001E   = .data$B15002_001E)
+  }
+  
+  data <- data %>% 
     dplyr::mutate(
       Fpoverty        = .data$B17010_002E / .data$B17010_001E,
       OwnerOcc        = .data$B25003_002E / .data$B25003_001E,
@@ -227,36 +278,9 @@ factors_from_acs <- function(data, vars) {
       pnovehicle      = .data$vehiclesum / .data$B25044_001E,
       sumprofs        = .data$C24010_003E + .data$C24010_039E,
       whitecollar     = .data$sumprofs / .data$C24010_001E,
-      unemployedLabor = .data$B23001_008E + .data$B23001_015E +
-                    .data$B23001_022E + .data$B23001_029E + .data$B23001_036E +
-                    .data$B23001_043E + .data$B23001_050E + .data$B23001_057E +
-                    .data$B23001_064E + .data$B23001_071E + .data$B23001_076E +
-                    .data$B23001_081E + .data$B23001_086E + .data$B23001_094E +
-                    .data$B23001_101E + .data$B23001_108E + .data$B23001_115E +
-                    .data$B23001_122E + .data$B23001_129E + .data$B23001_136E +
-                    .data$B23001_143E + .data$B23001_150E + .data$B23001_157E +
-                    .data$B23001_162E + .data$B23001_167E + .data$B23001_172E,
-      allLabor        = .data$B23001_006E + .data$B23001_013E +
-                    .data$B23001_020E + .data$B23001_027E + .data$B23001_034E +
-        .data$B23001_041E + .data$B23001_048E + .data$B23001_055E +
-        .data$B23001_062E + .data$B23001_069E + .data$B23001_074E +
-        .data$B23001_079E + .data$B23001_084E + .data$B23001_092E +
-        .data$B23001_099E + .data$B23001_106E + .data$B23001_113E +
-        .data$B23001_120E + .data$B23001_127E + .data$B23001_134E +
-        .data$B23001_141E + .data$B23001_148E + .data$B23001_155E +
-        .data$B23001_160E + .data$B23001_165E + .data$B23001_170E,
-      unemployedPct   = unemployedLabor / allLabor,
-      Nhighschoolup   = .data$B15002_011E + .data$B15002_028E +
-        .data$B15002_012E +  .data$B15002_029E + .data$B15002_013E +
-        .data$B15002_030E + .data$B15002_014E + .data$B15002_031E +
-        .data$B15002_015E + .data$B15002_032E + .data$B15002_016E +
-        .data$B15002_033E + .data$B15002_017E + .data$B15002_034E +
-        .data$B15002_018E + .data$B15002_035E,
-      Phighschoolup   = .data$Nhighschoolup / .data$B15002_001E,
-      Nless9thgrade   = .data$B15002_003E +  .data$B15002_020E +
-        .data$B15002_004E +  .data$B15002_021E +  .data$B15002_005E + 
-        .data$B15002_022E +  .data$B15002_006E +  .data$B15002_023E,
-      Pless9grade     = .data$Nless9thgrade / .data$B15002_001E,
+      unemployedPct   = .data$B23025_005E / .data$B23025_001E,
+      Phighschoolup   = .data$Nhighschoolup / .data$B15003_001E,
+      Pless9grade     = .data$Nless9thgrade / .data$B15003_001E,
       SUMcrowded      = .data$B25014_005E + .data$B25014_006E +
         .data$B25014_007E + .data$B25014_011E +
         .data$B25014_012E + .data$B25014_013E,
@@ -281,7 +305,7 @@ factors_from_acs <- function(data, vars) {
  
 
 
-factors_from_decennial <- function(data, vars) {
+factors_from_decennial <- function(data) {
   # Selects the relevant variables from the tidycensus::get_acs() output, then
   # wrangles them into a data frame that contains the specific measures that are
   # used to calculate ADI

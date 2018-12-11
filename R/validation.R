@@ -227,26 +227,3 @@ validate_type <- function(type, data) {
   
   return(type)
 }
-
-validate_data <- function(data, type) {
-  
-  if(type == "decennial") {
-    vars <- decennial_vars$variable
-  }
-  else {
-    vars <- paste0(acs_vars$variable, "E")
-  }
-  
-  if(!all(vars %in% colnames(data))) {
-    missing_vars <- vars[!(vars %in% colnames(data))]
-    stop(paste(c("The following variables are missing from data:",
-                 missing_vars), collapse = " "))
-  }
-  
-  if(nrow(data) < 30) {
-    warning("\n\nCalculating ADI values from fewer than 30 locations.\nIt is ",
-            "recommended to add more in order to obtain trustworthy results.\n")
-  }
-  
-  return(vars)
-}

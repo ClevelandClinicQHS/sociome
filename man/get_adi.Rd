@@ -12,7 +12,7 @@ get_adi(geography = NULL, state = NULL, county = NULL,
 \arguments{
 \item{geography}{A character string denoting the level of census geography
 whose ADIs you'd like to obtain. Must be one of \code{c("state", "county",
-"tract", or "block group")}. Defaults to \code{NULL}. See details for
+"tract", "block group")}. Defaults to \code{NULL}. See details for
 default behaviors when this and other parameters are left blank.}
 
 \item{state}{A vector of character strings specifying the state(s) whose ADI
@@ -76,9 +76,9 @@ Returns a tibble or sf tibble of the area deprivation indices (ADIs) of
 user-specified locations in the United States, utilizing American Community
 Survey data.
 
-The returned tibble or sf tibble is also of class \code{adi}, and it contains
-an attribute called \code{loadings}, which contains a named numeric vector of
-the PCA loadings of each factor. This is accessible through
+The returned \code{tibble} or \code{sf tibble} is also of class \code{adi},
+and it contains an attribute called \code{loadings}, which contains a named
+numeric vector of the PCA loadings of each factor. This is accessible through
 \code{attr(name_of_tibble, "loadings")}.
 }
 \section{Reference area}{

@@ -6,14 +6,14 @@
 #' user-specified locations in the United States, utilizing American Community
 #' Survey data.
 #'
-#' The returned tibble or sf tibble is also of class \code{adi}, and it contains
-#' an attribute called \code{loadings}, which contains a named numeric vector of
-#' the PCA loadings of each factor. This is accessible through
+#' The returned \code{tibble} or \code{sf tibble} is also of class \code{adi},
+#' and it contains an attribute called \code{loadings}, which contains a named
+#' numeric vector of the PCA loadings of each factor. This is accessible through
 #' \code{attr(name_of_tibble, "loadings")}.
 #'
 #' @param geography A character string denoting the level of census geography
 #'   whose ADIs you'd like to obtain. Must be one of \code{c("state", "county",
-#'   "tract", or "block group")}. Defaults to \code{NULL}. See details for
+#'   "tract", "block group")}. Defaults to \code{NULL}. See details for
 #'   default behaviors when this and other parameters are left blank.
 #' @param state A vector of character strings specifying the state(s) whose ADI
 #'   data you're requesting. Defaults to \code{NULL}. Can contain full state
@@ -207,23 +207,10 @@ get_tidycensus <- function(ref_area, year, geometry, shift_geo, key, dataset,
   if(dataset == "decennial") {
     fn             <- tidycensus::get_decennial
     args$variables <- decennial_vars$variable
-                        
   }
   else {
     fn             <- tidycensus::get_acs
-    
-    if(year > 2011 || year == 2011 && dataset != "acs5") {
-      args$variables <- acs_vars$variable[acs_vars$B23025_and_B15003]
-    }
-    else if(year == 2011 && dataset == "acs5") {
-      args$variables <- acs_vars$variable[acs_vars$B23025_and_B15002]
-    }
-    else if(year == 2010 && dataset != "acs5") {
-      args$variables <- acs_vars$variable[acs_vars$B23001_and_B15003]
-    }
-    else {
-      args$variables <- acs_vars$variable[acs_vars$B23001_and_B15002]
-    }
+    args$variables <- choose_acs_variables(year, dataset)
   }
   
   args <- validate_tidycensus_args(args, fn)
@@ -234,6 +221,22 @@ get_tidycensus <- function(ref_area, year, geometry, shift_geo, key, dataset,
 }
 
 
+choose_acs_variables <- function(year, dataset) {
+  
+  if(year > 2011 || year == 2011 && dataset != "acs5") {
+    acs_vars$variable[acs_vars$B23025_and_B15003]
+  }
+  else if(year == 2011 && dataset == "acs5") {
+    acs_vars$variable[acs_vars$B23025_and_B15002]
+  }
+  else if(year == 2010 && dataset != "acs5") {
+    acs_vars$variable[acs_vars$B23001_and_B15003]
+  }
+  else {
+    acs_vars$variable[acs_vars$B23001_and_B15002]
+  }
+}
+
 call_tidycensus <- function(fn, args, state_county) {
   
   # tidycensus::get_acs() is called separately for each user-specified state or
@@ -241,8 +244,6 @@ call_tidycensus <- function(fn, args, state_county) {
   # frame
   lapply(
     state_county,
-    function(state_county) {
-      rlang::exec(fn, !!!args, !!!state_county)
-    }) %>%
+    function(state_county) rlang::exec(fn, !!!args, !!!state_county)) %>%
     purrr::reduce(rbind)
 }

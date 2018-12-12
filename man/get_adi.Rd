@@ -5,15 +5,15 @@
 \title{Get area deprivation index (ADI)}
 \usage{
 get_adi(geography = NULL, state = NULL, county = NULL,
-  geoid = NULL, year = 2016, dataset = c("acs5", "acs3", "acs1",
+  geoid = NULL, year = 2017, dataset = c("acs5", "acs3", "acs1",
   "decennial"), geometry = TRUE, shift_geo = FALSE,
   keep_indicators = FALSE, key = NULL, ...)
 }
 \arguments{
 \item{geography}{A character string denoting the level of census geography
 whose ADIs you'd like to obtain. Must be one of \code{c("state", "county",
-"tract", "block group")}. Defaults to \code{NULL}. See details for
-default behaviors when this and other parameters are left blank.}
+"tract", "block group")}. Defaults to \code{NULL}. See details for default
+behaviors when this and other parameters are left blank.}
 
 \item{state}{A vector of character strings specifying the state(s) whose ADI
 data you're requesting. Defaults to \code{NULL}. Can contain full state
@@ -67,6 +67,10 @@ If \code{geometry = TRUE} (the default), an sf tibble with four
   columns: \code{GEOID}, \code{NAME}, \code{ADI}, and \code{geometry}. If
   \code{geometry = FALSE} is specified, a plain tibble with only the first
   three columns mentioned above.
+
+  If the census data contained too many missing values for imputation to take
+  place, a \code{tibble} of the factors that could not undergo imputation,
+  followed by the raw census data.
 }
 \description{
 Returns the ADIs of user-specified areas.

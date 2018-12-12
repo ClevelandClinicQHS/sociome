@@ -77,7 +77,7 @@ get_adi(geography = "county", state = "NM", geometry = FALSE)
 Setting `geometry = FALSE` as performed above is useful when only a `tibble` of ADI values is needed (i.e., maps need not be drawn) because the default output of `sf tibbles` is verbose. The following is an `sf tibble` of the ADIs of the fifty US states plus the District of Columbia and Puerto Rico, using the 2012 edition of the 1-year ACS estimates:
 
 ```{r usa2012, cache=TRUE, message=FALSE}
-get_adi(geography = "state", year = 2012, survey = "acs1")
+get_adi(geography = "state", year = 2012, dataset = "acs1")
 ```
 
 The user can mix different levels of geography in the `geoid` parameter. The code below stores the ADIs of the census block groups in every county entirely or partially on the Delmarva peninsula:
@@ -197,11 +197,19 @@ tibble::tibble(factor = names(ohio_loadings), loadings = ohio_loadings)
 
 ## Warning about missing data and sample size
 
-While allowing flexibility in specifying reference populations, data from the ACS are masked for sparsely populated places and may have too many missing values to return ADIs in some cases. 
+Calculating ADI values with a reference area containing under thirty locations is not recommended. The user will receive a warning when attempting to do so, but ADI values will be returned nonetheless.
 
-Also, know when to use the ACS1, ACS3, or ACS5. See https://www.census.gov/programs-surveys/acs/guidance/estimates.html.
+While allowing flexibility in specifying reference populations, data from the ACS are masked for sparsely populated places and may have too many missing values to return ADIs in some cases (i.e., too much missingness for imputation). When this happens, `get_adi()` will return a `tibble` of the factors that could not undergo imputation, followed by the raw census data.
 
-Lastly, calculating ADI values with a reference area containing under thirty locations is not recommended. The user will receive a warning when attempting to do so, but ADI values will be returned nonetheless.
+Here is a demonstration of both of the above:
+
+```{r Kalawao, cache=TRUE}
+get_adi("block group", state = "hi", county = "kalawao", year = 2015)
+```
+
+When working with ACS data, it is crucial to know when to use the ACS1, ACS3, or ACS5. See https://www.census.gov/programs-surveys/acs/guidance/estimates.html.
+
+Lastly, the main dependencies of `sociome` (the `tidycensus` package and the Census API) are ongoing, evolving projects. Users may encounter errors having to do with the growing pains of the Census Bureau standardizing its syntax and `tidycensus` accommodating these breaking changes. Generally, until any significant changes to `tidycensus` occur that break backwards compatibility, any errors encountered when using `get_adi()` are a result of flaws in the Census API.
 
 ## Grant information
 The development of this software package was supported by a research grant from the National Institutes of Health/National Institute on Aging, (Principal Investigators: Jarrod E. Dalton, PhD and Adam T. Perzynski, PhD; Grant Number: 5R01AG055480-02).  All of its contents are solely the responsibility of the authors and do not necessarily represent the official views of the NIH.

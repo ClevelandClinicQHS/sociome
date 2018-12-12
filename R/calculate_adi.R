@@ -121,8 +121,8 @@ calculate_adi <- function(data,
   type <- validate_type(type, data)
   
   if(nrow(data) < 30) {
-    warning("\n\nCalculating ADI values from fewer than 30 locations.\nIt is ",
-            "recommended to add more in order to obtain trustworthy results.\n")
+    warning("\nCalculating ADI values from fewer than 30 locations.\nIt is ",
+            "recommended to add more in order to obtain trustworthy results.")
   }
   
   if(type == "decennial") {
@@ -132,12 +132,6 @@ calculate_adi <- function(data,
     data_f <- factors_from_acs(data)
   }
   
-  keep_columns <- c(keep_columns, "ADI")
-  if(keep_indicators) {
-    data         <- dplyr::bind_cols(data, data_f)
-    keep_columns <- c(keep_columns, names(data_f))
-  }
-  
   # Performs single imputation if there is any missingness in the data.
   if(anyNA(data_f)) {
     
@@ -145,18 +139,39 @@ calculate_adi <- function(data,
     # Attaching one of these packages is necessary because of how mice::mice
     # operates. See ?sociome::mice.impute.pmm for details.
     if(!any(c("package:sociome", "package:mice") %in% search())) {
-      stop(paste0('Imputation required. Run library("sociome") or ',
-                  'library("mice") and try again.'))
+      stop(paste0('Imputation required. Run library(sociome) or ',
+                  'library(mice) and try again.'))
     }
     
     is.na(data_f) <- do.call(cbind, lapply(data_f, is.infinite))
     
-    data_f <- data_f %>%
-      mice::mice(m = 1, maxit = 50, method = "pmm", seed = 500,
-                 printFlag = FALSE) %>%
-      mice::complete()
+    impute_attempt <- 
+      try(data_f %>%
+            mice::mice(m = 1, maxit = 50, method = "pmm", seed = 500,
+                       printFlag = FALSE) %>%
+            mice::complete())
     
-    message("\n\nSingle imputation performed\n\n")
+    if(class(impute_attempt) == "try-error") {
+      message("\nImputation unsuccessful.\nReturning factors that could not ",
+              "be imputed followed by raw census data.")
+      return(
+        data %>% 
+          as.data.frame() %>% 
+          dplyr::bind_cols(data_f, .) %>% 
+          dplyr::select(keep_columns, tidyselect::everything()) %>% 
+          tibble::as_tibble()
+      )
+    }
+    
+    data_f <- impute_attempt
+    
+    message("\nSingle imputation performed\n")
+  }
+  
+  keep_columns <- c(keep_columns, "ADI")
+  if(keep_indicators) {
+    data         <- dplyr::bind_cols(data, data_f)
+    keep_columns <- c(keep_columns, names(data_f))
   }
   
   # Where the magic happens: a principal-components analysis (PCA) of the

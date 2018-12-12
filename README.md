@@ -69,23 +69,23 @@ get_adi(geography = "county", state = "NM", geometry = FALSE)
 #> # A tibble: 33 x 3
 #>    GEOID NAME                            ADI
 #>    <chr> <chr>                         <dbl>
-#>  1 35001 Bernalillo County, New Mexico  83.9
-#>  2 35003 Catron County, New Mexico      81.9
-#>  3 35005 Chaves County, New Mexico     106. 
-#>  4 35006 Cibola County, New Mexico     121. 
+#>  1 35001 Bernalillo County, New Mexico  85.9
+#>  2 35003 Catron County, New Mexico      79.4
+#>  3 35005 Chaves County, New Mexico     107. 
+#>  4 35006 Cibola County, New Mexico     120. 
 #>  5 35007 Colfax County, New Mexico     107. 
-#>  6 35009 Curry County, New Mexico       99.7
-#>  7 35011 De Baca County, New Mexico     97.2
-#>  8 35013 Do?a Ana County, New Mexico   108. 
-#>  9 35015 Eddy County, New Mexico        84.0
-#> 10 35017 Grant County, New Mexico       97.7
+#>  6 35009 Curry County, New Mexico      102. 
+#>  7 35011 De Baca County, New Mexico     98.0
+#>  8 35013 Do?a Ana County, New Mexico   109. 
+#>  9 35015 Eddy County, New Mexico        85.6
+#> 10 35017 Grant County, New Mexico       97.9
 #> # ... with 23 more rows
 ```
 
 Setting `geometry = FALSE` as performed above is useful when only a `tibble` of ADI values is needed (i.e., maps need not be drawn) because the default output of `sf tibbles` is verbose. The following is an `sf tibble` of the ADIs of the fifty US states plus the District of Columbia and Puerto Rico, using the 2012 edition of the 1-year ACS estimates:
 
 ``` r
-get_adi(geography = "state", year = 2012, survey = "acs1")
+get_adi(geography = "state", year = 2012, dataset = "acs1")
 #> Simple feature collection with 52 features and 3 fields
 #> geometry type:  MULTIPOLYGON
 #> dimension:      XY
@@ -93,17 +93,17 @@ get_adi(geography = "state", year = 2012, survey = "acs1")
 #> epsg (SRID):    4269
 #> proj4string:    +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs
 #> First 10 features:
-#>    GEOID         NAME       ADI                       geometry
-#> 1     15       Hawaii  68.13433 MULTIPOLYGON (((-155.9633 1...
-#> 2     05     Arkansas 120.10680 MULTIPOLYGON (((-94.46025 3...
-#> 3     35   New Mexico 120.32608 MULTIPOLYGON (((-109.0462 3...
-#> 4     30      Montana  97.76390 MULTIPOLYGON (((-114.3329 4...
-#> 5     36     New York  91.99159 MULTIPOLYGON (((-79.64546 4...
-#> 6     38 North Dakota  91.43404 MULTIPOLYGON (((-104.0484 4...
-#> 7     46 South Dakota  98.74630 MULTIPOLYGON (((-104.0546 4...
-#> 8     49         Utah  84.91030 MULTIPOLYGON (((-112.9793 4...
-#> 9     41       Oregon  97.65418 MULTIPOLYGON (((-122.4012 4...
-#> 10    53   Washington  85.23285 MULTIPOLYGON (((-117.0417 4...
+#>    GEOID                 NAME       ADI                       geometry
+#> 1     06           California  92.63861 MULTIPOLYGON (((-117.3209 3...
+#> 2     08             Colorado  86.21834 MULTIPOLYGON (((-109.0501 4...
+#> 3     09          Connecticut  77.18939 MULTIPOLYGON (((-73.50793 4...
+#> 4     10             Delaware  90.02628 MULTIPOLYGON (((-75.76007 3...
+#> 5     11 District of Columbia  75.43209 MULTIPOLYGON (((-77.11975 3...
+#> 6     12              Florida 108.15988 MULTIPOLYGON (((-87.45002 3...
+#> 7     13              Georgia 111.95943 MULTIPOLYGON (((-84.12944 3...
+#> 8     15               Hawaii  66.41013 MULTIPOLYGON (((-155.9633 1...
+#> 9     16                Idaho 103.48496 MULTIPOLYGON (((-116.8978 4...
+#> 10    17             Illinois  97.36981 MULTIPOLYGON (((-90.71598 3...
 ```
 
 The user can mix different levels of geography in the `geoid` parameter. The code below stores the ADIs of the census block groups in every county entirely or partially on the Delmarva peninsula:
@@ -225,35 +225,35 @@ The following code would access and store the factor loadings of the `ohio` ADI 
 ohio_loadings <- attr(ohio, "loadings")
 ohio_loadings
 #>                         medianHouseholdIncome 
-#>                                    -0.9668347 
+#>                                     0.9670304 
 #>                                medianMortgage 
-#>                                    -0.8135682 
+#>                                     0.8225148 
 #>                                    medianRent 
-#>                                    -0.7794353 
+#>                                     0.7762467 
 #>                              medianHouseValue 
-#>                                    -0.8719119 
+#>                                     0.8761827 
 #>                          pctFamiliesInPoverty 
-#>                                     0.8886643 
+#>                                    -0.8875432 
 #>                       pctOwnerOccupiedHousing 
-#>                                    -0.3639078 
+#>                                     0.3703107 
 #>  ratioThoseMakingUnder10kToThoseMakingOver50k 
-#>                                     0.9145470 
+#>                                    -0.9125100 
 #> pctPeopleLivingBelow150PctFederalPovertyLevel 
-#>                                     0.9338124 
+#>                                    -0.9312437 
 #>           pctChildrenInSingleParentHouseholds 
-#>                                     0.6192786 
+#>                                    -0.6257419 
 #>                    pctHouseholdsWithNoVehicle 
-#>                                     0.4621662 
+#>                                    -0.4569110 
 #>                  pctPeopleWithWhiteCollarJobs 
-#>                                    -0.6158042 
+#>                                     0.6197517 
 #>                           pctPeopleUnemployed 
-#>                                     0.6204516 
+#>                                    -0.6265516 
 #>               pctPeopleWithAtLeastHSEducation 
-#>                                    -0.5998925 
+#>                                     0.5945981 
 #>        pctPeopleWithLessThan9thGradeEducation 
-#>                                     0.2740172 
+#>                                    -0.2666329 
 #>         pctHouseholdsWithOverOnePersonPerRoom 
-#>                                     0.3111982
+#>                                    -0.3085936
 ```
 
 These loadings code can then be converted into a readable `tibble`:
@@ -263,31 +263,90 @@ tibble::tibble(factor = names(ohio_loadings), loadings = ohio_loadings)
 #> # A tibble: 15 x 2
 #>    factor                                        loadings
 #>    <chr>                                            <dbl>
-#>  1 medianHouseholdIncome                           -0.967
-#>  2 medianMortgage                                  -0.814
-#>  3 medianRent                                      -0.779
-#>  4 medianHouseValue                                -0.872
-#>  5 pctFamiliesInPoverty                             0.889
-#>  6 pctOwnerOccupiedHousing                         -0.364
-#>  7 ratioThoseMakingUnder10kToThoseMakingOver50k     0.915
-#>  8 pctPeopleLivingBelow150PctFederalPovertyLevel    0.934
-#>  9 pctChildrenInSingleParentHouseholds              0.619
-#> 10 pctHouseholdsWithNoVehicle                       0.462
-#> 11 pctPeopleWithWhiteCollarJobs                    -0.616
-#> 12 pctPeopleUnemployed                              0.620
-#> 13 pctPeopleWithAtLeastHSEducation                 -0.600
-#> 14 pctPeopleWithLessThan9thGradeEducation           0.274
-#> 15 pctHouseholdsWithOverOnePersonPerRoom            0.311
+#>  1 medianHouseholdIncome                            0.967
+#>  2 medianMortgage                                   0.823
+#>  3 medianRent                                       0.776
+#>  4 medianHouseValue                                 0.876
+#>  5 pctFamiliesInPoverty                            -0.888
+#>  6 pctOwnerOccupiedHousing                          0.370
+#>  7 ratioThoseMakingUnder10kToThoseMakingOver50k    -0.913
+#>  8 pctPeopleLivingBelow150PctFederalPovertyLevel   -0.931
+#>  9 pctChildrenInSingleParentHouseholds             -0.626
+#> 10 pctHouseholdsWithNoVehicle                      -0.457
+#> 11 pctPeopleWithWhiteCollarJobs                     0.620
+#> 12 pctPeopleUnemployed                             -0.627
+#> 13 pctPeopleWithAtLeastHSEducation                  0.595
+#> 14 pctPeopleWithLessThan9thGradeEducation          -0.267
+#> 15 pctHouseholdsWithOverOnePersonPerRoom           -0.309
 ```
 
 Warning about missing data and sample size
 ------------------------------------------
 
-While allowing flexibility in specifying reference populations, data from the ACS are masked for sparsely populated places and may have too many missing values to return ADIs in some cases.
+Calculating ADI values with a reference area containing under thirty locations is not recommended. The user will receive a warning when attempting to do so, but ADI values will be returned nonetheless.
 
-Also, know when to use the ACS1, ACS3, or ACS5. See <https://www.census.gov/programs-surveys/acs/guidance/estimates.html>.
+While allowing flexibility in specifying reference populations, data from the ACS are masked for sparsely populated places and may have too many missing values to return ADIs in some cases (i.e., too much missingness for imputation). When this happens, `get_adi()` will return a `tibble` of the factors that could not undergo imputation, followed by the raw census data.
 
-Lastly, calculating ADI values with a reference area containing under thirty locations is not recommended. The user will receive a warning when attempting to do so, but ADI values will be returned nonetheless.
+Here is a demonstration of both of the above:
+
+``` r
+get_adi("block group", state = "hi", county = "kalawao", year = 2015)
+#> Getting data from the 2011-2015 5-year ACS
+#> Warning in calculate_adi(data = ref_area_data, type = dataset, keep_indicators = keep_indicators): 
+#> Calculating ADI values from fewer than 30 locations.
+#> It is recommended to add more in order to obtain trustworthy results.
+#> 
+#> Imputation unsuccessful.
+#> Returning factors that could not be imputed followed by raw census data.
+#> # A tibble: 2 x 140
+#>   GEOID  NAME  medianHousehold… medianMortgage medianRent medianHouseValue
+#>   <chr>  <chr>            <dbl>          <dbl>      <dbl>            <dbl>
+#> 1 15005… Bloc…            66250             NA        856               NA
+#> 2 15005… Bloc…               NA             NA         NA               NA
+#> # ... with 134 more variables: pctFamiliesInPoverty <dbl>,
+#> #   pctOwnerOccupiedHousing <dbl>,
+#> #   ratioThoseMakingUnder10kToThoseMakingOver50k <dbl>,
+#> #   pctPeopleLivingBelow150PctFederalPovertyLevel <dbl>,
+#> #   pctChildrenInSingleParentHouseholds <dbl>,
+#> #   pctHouseholdsWithNoVehicle <dbl>, pctPeopleWithWhiteCollarJobs <dbl>,
+#> #   pctPeopleUnemployed <dbl>, pctPeopleWithAtLeastHSEducation <dbl>,
+#> #   pctPeopleWithLessThan9thGradeEducation <dbl>,
+#> #   pctHouseholdsWithOverOnePersonPerRoom <dbl>, B01003_001E <dbl>,
+#> #   B01003_001M <dbl>, B15003_001E <dbl>, B15003_001M <dbl>,
+#> #   B15003_002E <dbl>, B15003_002M <dbl>, B15003_003E <dbl>,
+#> #   B15003_003M <dbl>, B15003_004E <dbl>, B15003_004M <dbl>,
+#> #   B15003_005E <dbl>, B15003_005M <dbl>, B15003_006E <dbl>,
+#> #   B15003_006M <dbl>, B15003_007E <dbl>, B15003_007M <dbl>,
+#> #   B15003_008E <dbl>, B15003_008M <dbl>, B15003_009E <dbl>,
+#> #   B15003_009M <dbl>, B15003_010E <dbl>, B15003_010M <dbl>,
+#> #   B15003_011E <dbl>, B15003_011M <dbl>, B15003_012E <dbl>,
+#> #   B15003_012M <dbl>, B15003_017E <dbl>, B15003_017M <dbl>,
+#> #   B15003_018E <dbl>, B15003_018M <dbl>, B15003_019E <dbl>,
+#> #   B15003_019M <dbl>, B15003_020E <dbl>, B15003_020M <dbl>,
+#> #   B15003_021E <dbl>, B15003_021M <dbl>, B15003_022E <dbl>,
+#> #   B15003_022M <dbl>, B15003_023E <dbl>, B15003_023M <dbl>,
+#> #   B15003_024E <dbl>, B15003_024M <dbl>, B15003_025E <dbl>,
+#> #   B15003_025M <dbl>, B17010_001E <dbl>, B17010_001M <dbl>,
+#> #   B17010_002E <dbl>, B17010_002M <dbl>, B19001_002E <dbl>,
+#> #   B19001_002M <dbl>, B19001_011E <dbl>, B19001_011M <dbl>,
+#> #   B19001_012E <dbl>, B19001_012M <dbl>, B19001_013E <dbl>,
+#> #   B19001_013M <dbl>, B19001_014E <dbl>, B19001_014M <dbl>,
+#> #   B19001_015E <dbl>, B19001_015M <dbl>, B19001_016E <dbl>,
+#> #   B19001_016M <dbl>, B19001_017E <dbl>, B19001_017M <dbl>,
+#> #   B19013_001E <dbl>, B19013_001M <dbl>, B23008_001E <dbl>,
+#> #   B23008_001M <dbl>, B23008_008E <dbl>, B23008_008M <dbl>,
+#> #   B23008_021E <dbl>, B23008_021M <dbl>, B23025_001E <dbl>,
+#> #   B23025_001M <dbl>, B23025_005E <dbl>, B23025_005M <dbl>,
+#> #   B25003_001E <dbl>, B25003_001M <dbl>, B25003_002E <dbl>,
+#> #   B25003_002M <dbl>, B25014_001E <dbl>, B25014_001M <dbl>,
+#> #   B25014_005E <dbl>, B25014_005M <dbl>, B25014_006E <dbl>,
+#> #   B25014_006M <dbl>, B25014_007E <dbl>, B25014_007M <dbl>,
+#> #   B25014_011E <dbl>, …
+```
+
+When working with ACS data, it is crucial to know when to use the ACS1, ACS3, or ACS5. See <https://www.census.gov/programs-surveys/acs/guidance/estimates.html>.
+
+Lastly, the main dependencies of `sociome` (the `tidycensus` package and the Census API) are ongoing, evolving projects. Users may encounter errors having to do with the growing pains of the Census Bureau standardizing its syntax and `tidycensus` accommodating these breaking changes. Generally, until any significant changes to `tidycensus` occur that break backwards compatibility, any errors encountered when using `get_adi()` are a result of flaws in the Census API.
 
 Grant information
 -----------------

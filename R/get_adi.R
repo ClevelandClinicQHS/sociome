@@ -13,8 +13,8 @@
 #'
 #' @param geography A character string denoting the level of census geography
 #'   whose ADIs you'd like to obtain. Must be one of \code{c("state", "county",
-#'   "tract", "block group")}. Defaults to \code{NULL}. See details for
-#'   default behaviors when this and other parameters are left blank.
+#'   "tract", "block group")}. Defaults to \code{NULL}. See details for default
+#'   behaviors when this and other parameters are left blank.
 #' @param state A vector of character strings specifying the state(s) whose ADI
 #'   data you're requesting. Defaults to \code{NULL}. Can contain full state
 #'   names, two-letter state abbreviations, or FIPS codes/GEOIDs (must be a
@@ -135,6 +135,10 @@
 #'   columns: \code{GEOID}, \code{NAME}, \code{ADI}, and \code{geometry}. If
 #'   \code{geometry = FALSE} is specified, a plain tibble with only the first
 #'   three columns mentioned above.
+#'
+#'   If the census data contained too many missing values for imputation to take
+#'   place, a \code{tibble} of the factors that could not undergo imputation,
+#'   followed by the raw census data.
 #' @importFrom rlang .data
 #' @export
 get_adi <- function(geography       = NULL,
@@ -223,18 +227,18 @@ get_tidycensus <- function(ref_area, year, geometry, shift_geo, key, dataset,
 
 choose_acs_variables <- function(year, dataset) {
   
-  if(year > 2011 || year == 2011 && dataset != "acs5") {
-    acs_vars$variable[acs_vars$B23025_and_B15003]
+  if(year > 2010) {
+    if(year == 2011 && dataset == "acs5") {
+      return(acs_vars$variable[acs_vars$B23025_and_B15002])
+    }
+    return(acs_vars$variable[acs_vars$B23025_and_B15003])
   }
-  else if(year == 2011 && dataset == "acs5") {
-    acs_vars$variable[acs_vars$B23025_and_B15002]
+  
+  if(dataset == "acs1" && year > 2007 || dataset == "acs3" && year == 2010) {
+    return(acs_vars$variable[acs_vars$B23001_and_B15003])
   }
-  else if(year == 2010 && dataset != "acs5") {
-    acs_vars$variable[acs_vars$B23001_and_B15003]
-  }
-  else {
-    acs_vars$variable[acs_vars$B23001_and_B15002]
-  }
+  
+  return(acs_vars$variable[acs_vars$B23001_and_B15002])
 }
 
 call_tidycensus <- function(fn, args, state_county) {

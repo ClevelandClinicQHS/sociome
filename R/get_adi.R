@@ -141,7 +141,8 @@
 #'   followed by the raw census data.
 #' @importFrom rlang .data
 #' @export
-get_adi <- function(geography       = NULL,
+get_adi <- function(geography       = c("state", "county",
+                                        "tract", "block group"),
                     state           = NULL,
                     county          = NULL,
                     geoid           = NULL,
@@ -151,18 +152,19 @@ get_adi <- function(geography       = NULL,
                     shift_geo       = FALSE,
                     keep_indicators = FALSE,
                     key             = NULL,
-                    ...
-) {
+                    ...) {
   
-  geoid   <- validate_geoid(geoid, state, county, ...)
+  dataset   <- match.arg(dataset)
   
-  dataset <- match.arg(dataset)
+  geography <- match.arg(geography)
+  
+  ref_area  <- validate_location(geoid, state, county, geography, ...)
   
   # if(geography == "block" && dataset != "decennial") {
   #   stop('if geography = "block" then dataset must be "decennial"')
   # }
   
-  ref_area <- get_reference_area(geoid, geography)
+  # ref_area <- get_reference_area(geoid, geography)
   
   if(geometry) {
     # Saves old tigris_use_cache value and puts it back when function exits
@@ -170,7 +172,7 @@ get_adi <- function(geography       = NULL,
     on.exit(options(old), add = TRUE)
   }
   
-  raw_data <- get_tidycensus(ref_area  = ref_area,
+  census_data <- get_tidycensus(ref_area  = ref_area,
                              year      = year,
                              geometry  = geometry,
                              shift_geo = shift_geo,
@@ -181,11 +183,14 @@ get_adi <- function(geography       = NULL,
   # Since the call (or calls) to tidycensus functions usually gathers data on
   # more places than what the user specified, this pares the data frame down to
   # only include the user-specified reference area.
-  ref_area_data <- dplyr::filter(raw_data, .data$GEOID %in% ref_area$ref_geoids)
+  if(!is.null(ref_area$ref_geoids)) {
+    census_data <- dplyr::filter(census_data,
+                                 .data$GEOID %in% ref_area$ref_geoids)
+  }
   
   # Passes the filtered tibble (or sf tibble) onto calculate_adi(), which
   # produces the tibble (or sf tibble) of ADIs
-  acs_adi <- calculate_adi(data            = ref_area_data,
+  acs_adi <- calculate_adi(data            = census_data,
                            type            = dataset,
                            keep_indicators = keep_indicators)
   
@@ -246,8 +251,7 @@ call_tidycensus <- function(fn, args, state_county) {
   # tidycensus::get_acs() is called separately for each user-specified state or
   # set of states. purrr::reduce(rbind) puts the results into a single data
   # frame
-  lapply(
-    state_county,
-    function(state_county) rlang::exec(fn, !!!args, !!!state_county)) %>%
+  state_county %>% 
+    lapply(function(state_county) rlang::exec(fn, !!!args, !!!state_county)) %>%
     purrr::reduce(rbind)
 }

@@ -109,7 +109,6 @@ calculate_adi <- function(data,
                           type            = NULL,
                           keep_indicators = FALSE,
                           keep_columns    = c("GEOID", "NAME")) {
-  
   if(!is.data.frame(data)) {
     stop("data must be a tibble, sf tibble, or data-frame-like object")
   }

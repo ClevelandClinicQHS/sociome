@@ -2,9 +2,9 @@
 #'
 #' Returns the ADIs of user-specified areas.
 #'
-#' Returns a tibble or sf tibble of the area deprivation indices (ADIs) of
-#' user-specified locations in the United States, utilizing American Community
-#' Survey data.
+#' Returns a \code{tibble} or \code{sf tibble} of the area deprivation indices
+#' (ADIs) of user-specified locations in the United States, utilizing US Census
+#' data.
 #'
 #' The returned \code{tibble} or \code{sf tibble} is also of class \code{adi},
 #' and it contains an attribute called \code{loadings}, which contains a named
@@ -13,45 +13,51 @@
 #'
 #' @param geography A character string denoting the level of census geography
 #'   whose ADIs you'd like to obtain. Must be one of \code{c("state", "county",
-#'   "tract", "block group")}. Defaults to \code{NULL}. See details for default
-#'   behaviors when this and other parameters are left blank.
-#' @param state A vector of character strings specifying the state(s) whose ADI
-#'   data you're requesting. Defaults to \code{NULL}. Can contain full state
-#'   names, two-letter state abbreviations, or FIPS codes/GEOIDs (must be a
-#'   string, so use quotation marks and leading zeros). Must contain exactly one
-#'   state if the parameter \code{counties} is also used. Must be blank if
-#'   \code{geoid} is used.
+#'   "tract", "block group", "block")}.
+#' @param state A character strings specifying a single state whose ADI data
+#'   you're requesting. Defaults to \code{NULL}. Can contain a full state name,
+#'   a two-letter state abbreviation, or a two-digit FIPS code/GEOID (must be a
+#'   string, so use quotation marks and a leading zero if necessary). Must be
+#'   left as \code{NULL} blank if using the \code{geoid} parameter.
 #' @param county A vector of character strings specifying the counties whose ADI
-#'   data you're requesting. Defaults to \code{NULL}. County names and
-#'   three-digit FIPS codes are accepted (must contain strings, so use quotation
-#'   marks and leading zeros). All elements must be in the same state;
-#'   therefore, if using \code{county}, \code{state} must contain exactly one
-#'   value. Must be blank if \code{geoid} is used.
+#'   data you're requesting. Defaults to \code{NULL}. If providing a county, the
+#'   \code{state} parameter must also be specified. County names and three-digit
+#'   FIPS codes are accepted (must contain strings, so use quotation marks and
+#'   leading zeros if necessary). Must be blank if using the \code{geoid}
+#'   parameter.
 #' @param geoid A character vector of GEOIDs (use quotation marks and leading
 #'   zeros). Defaults to \code{NULL}. Must be blank if \code{state} and/or
 #'   \code{county} is used. Can contain different levels of geography (see
 #'   details).
-#' @param year Single integer specifying the year of the ACS survey to use.
+#' @param year Single integer specifying the year of US Census data to use.
 #'   Defaults to 2016.
 #' @param survey The data set used to calculate ADIs. Must be one of
-#'   \code{c("acs5", "acs3", "acs1")}, denoting the 5-, 3-, and 1-year ACS
-#'   estimates. Defaults to \code{"acs5."} Important: data not always available
-#'   depending on the level of geography and data set chosen. See
+#'   \code{c("acs5", "acs3", "acs1", "decennial")}, denoting the 5-, 3-, 1-year
+#'   ACS estimate, and decennial census. Defaults to \code{"acs5."}
+#'
+#'   Important: data not always available depending on the level of geography
+#'   and data set chosen. See
 #'   \url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html}.
 #' @param geometry Logical value indicating whether or not shapefile data should
-#'   be included in the result, making the result an sf tibble instead of a
-#'   plain tibble. Defaults to \code{TRUE}.
+#'   be included in the result, making the result an \code{sf tibble} instead of
+#'   a plain \code{tibble}. Defaults to \code{TRUE}.
 #' @param shift_geo Logical value. See the \code{shift_geo} argument of
-#'   \code{\link[tidycensus]{get_acs}} for details.
+#'   \code{tidycensus::\link[tidycensus]{get_acs}()} for details.
 #' @param keep_indicators Logical value indicating whether or not the resulting
-#'   tibble or sf tibble will contain the socioeconomic measures used to
-#'   calculate the ADI values. Defaults to \code{FALSE}.
+#'   \code{tibble} or \code{sf tibble} will contain the socioeconomic measures
+#'   used to calculate the ADI values. Defaults to \code{FALSE}.
+#' @param cache_tables The plural version of the \code{cache_table} argument in
+#'   \code{tidycensus::\link[tidycensus]{get_acs}()} or
+#'   \code{tidycensus::\link[tidycensus]{get_decennial}()} (\code{get_adi()}
+#'   calls the necessary \code{tidycensus} function many times in order to
+#'   return ADIs, so many tables are cached if \code{TRUE}).
 #' @param key Your Census API key as a character string. Obtain one at
 #'   http://api.census.gov/data/key_signup.html. Defaults to \code{NULL}. Not
 #'   necessary if you have already loaded your key with
-#'   \code{\link{census_api_key}}.
+#'   \code{\link{census_api_key}()}.
 #' @param ... Additional arguments to be passed onto
-#'   \code{tidycensus::get_acs()}.
+#'   \code{tidycensus::\link[tidycensus]{get_acs}()} or
+#'   \code{tidycensus::\link[tidycensus]{get_decennial}()}.
 #'
 #' @section Reference area: \strong{The concept of "reference area" is important
 #'   to understand when using this function.} The algorithm that produced the
@@ -65,9 +71,9 @@
 #'   when calculated alongside all counties in the US. The \code{get_adi()}
 #'   function enables the user to define a \strong{reference area} by feeding a
 #'   vector of GEOIDs to its \code{geoid} parameter (or alternatively for
-#'   convenience, a vector of state and county names/abbreviations to
-#'   \code{state} and \code{county}). The function then gathers data from those
-#'   specified locations and performs calculations using their data alone.
+#'   convenience, a state and/or counties to \code{state} and \code{county}).
+#'   The function then gathers data from those specified locations and performs
+#'   calculations using their data alone.
 #'
 #' @section Default behaviors: If \code{geography} is specified but
 #'   \code{state}, \code{county}, and \code{geoid} are all left blank, the
@@ -75,21 +81,13 @@
 #'   Columbia (DC) and Puerto Rico (PR)) as the reference area (see "Reference
 #'   Area" above). Beware that this will take a long time if you set
 #'   \code{geography = "tract"} or especially if \code{geography = "block
-#'   group"}.
-#'
-#'   If \code{geography} is left blank, the function will choose the most
-#'   specific level of geography specified by the parameter(s) \code{state},
-#'   \code{county}, and/or \code{geoid}.
-#'
-#'   If all these parameters are left blank, the function will report the ADIs
-#'   of all census tracts in the United States (the 50 states plus the District
-#'   of Columbia (DC) and Puerto Rico (PR)). Beware: this takes a long time.
+#'   group"} or \code{geography = "block"}.
 #'
 #' @section The \code{geoid} parameter: Elements of \code{geoid} can represent
 #'   different levels of geography, but they all must be either 2 digits (for
-#'   states), 5 digits (for counties), 11 digits (for tracts) or 12 digits (for
-#'   block groups). It must contain character strings, so use quotation marks as
-#'   well as leading zero where applicable.
+#'   states), 5 digits (for counties), 11 digits (for tracts), 12 digits (for
+#'   block groups), or 15 digits (for blocks). It must contain character
+#'   strings, so use quotation marks as well as leading zero where applicable.
 #'
 #' @section Warnings and disclaimers: Please note that this function calls data
 #'   from US Census servers, so execution may take a long time depending on the
@@ -98,28 +96,30 @@
 #'   If there are any missing values, single imputation will be attempted using
 #'   the \code{mice} package. Because of how \code{mice} is coded, the user must
 #'   attach either the \code{sociome} package or the \code{mice} package for
-#'   imputation to work (e.g., run \code{library("sociome")} or
-#'   \code{library("mice")} before running \code{get_adi}). See
+#'   imputation to work (e.g., run \code{library(sociome)} or
+#'   \code{library(mice)} before running \code{get_adi}). See
 #'   \code{\link{mice.impute.pmm}} for details.
 #'
 #'   In the same vein, while this function allows flexibility in specifying
-#'   reference areas (see the "Reference area" section above), data from the ACS
-#'   are masked for sparsely populated places and may have too many missing
-#'   values to return ADIs in some cases.
+#'   reference areas (see the \strong{Reference area} section above), data from
+#'   the US Census are masked for sparsely populated places and may have too
+#'   many missing values to return ADIs in some cases.
 #'
-#'   For advanced users, if changing the \code{survey} argument, be sure to know
-#'   the advantages and limitations of the 1-year and 3-year ACS estimates. See
+#'   For advanced users, if changing the \code{dataset} argument, be sure to
+#'   know the advantages and limitations of the 1-year and 3-year ACS estimates.
+#'   See
 #'   \url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html.}
 #'   for details.
 #'
-#' @seealso calculate_adi
-#'
 #' @examples
-#' \dontrun{
-#' library("sociome") # Needed for imputation. library("mice") is another option.
+#' \donttest{
+#' # Wrapped in \donttest{} because all these examples take >5 seconds.
+#'
+#' library(sociome) # Needed for imputation. library(mice) is another option.
 #' get_adi(geography = "tract", state = "OH", county = "Cuyahoga")
 #'
-#' get_adi(geography = "county", state = "CT", year = 2015, survey = "acs1", geometry = FALSE)
+#' get_adi(geography = "county", state = "CT", year = 2015, survey = "acs1",
+#'         geometry = FALSE)
 #'
 #' delmarva_geoids <- c("10", "51001", "51131", "24015", "24029", "24035",
 #'                      "24011", "24041", "24019", "24045", "24039", "24047")
@@ -130,19 +130,14 @@
 #'
 #' delmarva %>% ggplot() + geom_sf(aes(fill = ADI))
 #' }
-#'
-#' @return If \code{geometry = TRUE} (the default), an sf tibble with four
-#'   columns: \code{GEOID}, \code{NAME}, \code{ADI}, and \code{geometry}. If
-#'   \code{geometry = FALSE} is specified, a plain tibble with only the first
-#'   three columns mentioned above.
+#' @return If \code{geometry = TRUE} (the default), an \code{sf tibble}. If
+#'   \code{geometry = FALSE} is specified, a plain \code{tibble}.
 #'
 #'   If the census data contained too many missing values for imputation to take
 #'   place, a \code{tibble} of the factors that could not undergo imputation,
 #'   followed by the raw census data.
-#' @importFrom rlang .data
 #' @export
-get_adi <- function(geography       = c("state", "county",
-                                        "tract", "block group"),
+get_adi <- function(geography,
                     state           = NULL,
                     county          = NULL,
                     geoid           = NULL,
@@ -151,20 +146,17 @@ get_adi <- function(geography       = c("state", "county",
                     geometry        = TRUE,
                     shift_geo       = FALSE,
                     keep_indicators = FALSE,
+                    cache_tables    = TRUE,
                     key             = NULL,
                     ...) {
   
   dataset   <- match.arg(dataset)
   
-  geography <- match.arg(geography)
-  
   ref_area  <- validate_location(geoid, state, county, geography, ...)
   
-  # if(geography == "block" && dataset != "decennial") {
-  #   stop('if geography = "block" then dataset must be "decennial"')
-  # }
-  
-  # ref_area <- get_reference_area(geoid, geography)
+  if(geography == "block" && dataset != "decennial") {
+    stop('if geography = "block" then dataset must be "decennial"')
+  }
   
   if(geometry) {
     # Saves old tigris_use_cache value and puts it back when function exits
@@ -172,20 +164,23 @@ get_adi <- function(geography       = c("state", "county",
     on.exit(options(old), add = TRUE)
   }
   
-  census_data <- get_tidycensus(ref_area  = ref_area,
-                             year      = year,
-                             geometry  = geometry,
-                             shift_geo = shift_geo,
-                             key       = key,
-                             dataset   = dataset,
-                             ...)
+  census_data <- get_tidycensus(geography    = geography,
+                                year         = year,
+                                state_county = ref_area$state_county,
+                                geometry     = geometry,
+                                shift_geo    = shift_geo,
+                                cache_tables = cache_tables,
+                                key          = key,
+                                dataset      = dataset,
+                                ...)
   
   # Since the call (or calls) to tidycensus functions usually gathers data on
   # more places than what the user specified, this pares the data frame down to
   # only include the user-specified reference area.
-  if(!is.null(ref_area$ref_geoids)) {
-    census_data <- dplyr::filter(census_data,
-                                 .data$GEOID %in% ref_area$ref_geoids)
+  if(!is.null(ref_area$geoid)) {
+    census_data <- filter_ref_area(data       = census_data,
+                                   geoid      = ref_area$geoid,
+                                   geo_length = ref_area$geo_length)
   }
   
   # Passes the filtered tibble (or sf tibble) onto calculate_adi(), which
@@ -198,12 +193,13 @@ get_adi <- function(geography       = c("state", "county",
 }
 
 
-get_tidycensus <- function(ref_area, year, geometry, shift_geo, key, dataset,
-                           ...) {
+
+get_tidycensus <- function(geography, year, state_county, geometry, shift_geo,
+                           cache_tables, key, dataset, ...) {
   
-  args <- list(geography   = ref_area$geography,
+  args <- list(geography   = geography,
                variables   = NULL,
-               cache_table = TRUE, 
+               cache_table = cache_tables, 
                year        = year,
                output      = "wide",
                geometry    = geometry,
@@ -226,7 +222,7 @@ get_tidycensus <- function(ref_area, year, geometry, shift_geo, key, dataset,
   
   call_tidycensus(fn           = fn,
                   args         = args,
-                  state_county = ref_area$state_county)
+                  state_county = state_county)
 }
 
 
@@ -246,6 +242,8 @@ choose_acs_variables <- function(year, dataset) {
   return(acs_vars$variable[acs_vars$B23001_and_B15002])
 }
 
+
+
 call_tidycensus <- function(fn, args, state_county) {
   
   # tidycensus::get_acs() is called separately for each user-specified state or
@@ -254,4 +252,28 @@ call_tidycensus <- function(fn, args, state_county) {
   state_county %>% 
     lapply(function(state_county) rlang::exec(fn, !!!args, !!!state_county)) %>%
     purrr::reduce(rbind)
+}
+
+
+
+#' @importFrom rlang .data
+filter_ref_area <- function(data, geoid, geo_length) {
+  
+  matches <-
+    geoid %>% 
+    stringr::str_sub(1, geo_length) %>% 
+    paste0("^", .) %>% 
+    lapply(FUN = stringr::str_subset, string = data$GEOID)
+  
+  nomatch <- lapply(matches, length) == 0
+  
+  if(any(nomatch)) {
+    warning("The following geoids had no match in census data:\n",
+            paste(geoid[nomatch], collapse = ", "))
+    matches <- matches[!nomatch]
+  }
+  
+  matches <- unique(unlist(matches))
+  
+  return(dplyr::filter(data, .data$GEOID %in% matches))
 }

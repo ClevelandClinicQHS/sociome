@@ -54,8 +54,8 @@ validate_geoid <- function(geoid, geography) {
          "respectively.\nDon't forget leading zeros.")
   }
   
-  geo_length <- dplyr::case_when(geography == "block group" ~ 12,
-                                 # geography == "block"       ~ 15,
+  geo_length <- dplyr::case_when(geography == "block"       ~ 15,
+                                 geography == "block group" ~ 12,
                                  geography == "tract"       ~ 11,
                                  geography == "county"      ~  5,
                                  geography == "state"       ~  2)

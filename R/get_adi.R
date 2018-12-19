@@ -150,6 +150,9 @@ get_adi <- function(geography,
                     key             = NULL,
                     ...) {
   
+  geography <- match.arg(geography,
+                         c("state", "county", "tract", "block group", "block"))
+  
   dataset   <- match.arg(dataset)
   
   ref_area  <- validate_location(geoid, state, county, geography, ...)

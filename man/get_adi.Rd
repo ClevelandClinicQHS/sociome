@@ -5,7 +5,7 @@
 \title{Get area deprivation index (ADI)}
 \usage{
 get_adi(geography, state = NULL, county = NULL, geoid = NULL,
-  year = 2016, dataset = c("acs5", "acs3", "acs1", "decennial"),
+  year = 2017, dataset = c("acs5", "acs3", "acs1", "decennial"),
   geometry = TRUE, shift_geo = FALSE, keep_indicators = FALSE,
   cache_tables = TRUE, key = NULL, ...)
 }
@@ -14,11 +14,11 @@ get_adi(geography, state = NULL, county = NULL, geoid = NULL,
 whose ADIs you'd like to obtain. Must be one of \code{c("state", "county",
 "tract", "block group", "block")}.}
 
-\item{state}{A character strings specifying a single state whose ADI data
-you're requesting. Defaults to \code{NULL}. Can contain a full state name,
-a two-letter state abbreviation, or a two-digit FIPS code/GEOID (must be a
-string, so use quotation marks and a leading zero if necessary). Must be
-left as \code{NULL} blank if using the \code{geoid} parameter.}
+\item{state}{A character string specifying states whose ADI data is desired.
+Defaults to \code{NULL}. Can contain full state names, two-letter state
+abbreviations, or a two-digit FIPS code/GEOID (must be a vector of strings,
+so use quotation marks and leading zeros if necessary). Must be left as
+\code{NULL} blank if using the \code{geoid} parameter.}
 
 \item{county}{A vector of character strings specifying the counties whose ADI
 data you're requesting. Defaults to \code{NULL}. If providing a county, the
@@ -33,7 +33,7 @@ zeros). Defaults to \code{NULL}. Must be blank if \code{state} and/or
 details).}
 
 \item{year}{Single integer specifying the year of US Census data to use.
-Defaults to 2016.}
+Defaults to 2017.}
 
 \item{geometry}{Logical value indicating whether or not shapefile data should
 be included in the result, making the result an \code{sf tibble} instead of
@@ -62,8 +62,8 @@ necessary if you have already loaded your key with
 \code{tidycensus::\link[tidycensus]{get_decennial}()}.}
 
 \item{survey}{The data set used to calculate ADIs. Must be one of
-  \code{c("acs5", "acs3", "acs1", "decennial")}, denoting the 5-, 3-, 1-year
-  ACS estimate, and decennial census. Defaults to \code{"acs5."}
+  \code{c("acs5", "acs3", "acs1", "decennial")}, denoting the 5-, 3-, and
+  1-year ACS along with the decennial census. Defaults to \code{"acs5."}
 
   Important: data not always available depending on the level of geography
   and data set chosen. See

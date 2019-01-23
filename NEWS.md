@@ -1,3 +1,15 @@
+# sociome 0.4.0
+
+## Major updates:
+- Created the function get_geoids(), which allows users to quickly create a table of state, county, tract, block group, and block GEOIDs.
+- Made calculate_adi() an internal function (no longer exported)
+- Made tidycensus 0.9.0 now required (added to Imports)
+
+## Minor updates:
+
+- Updated README.md.
+- Bug fixes.
+
 # sociome 0.3.4
 
 ## Major updates:

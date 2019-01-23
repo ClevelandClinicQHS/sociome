@@ -15,23 +15,23 @@ validate_location <- function(geoid, state, county, geography, ...) {
     geoid <- list(...)$geoids
   }
   
-  if(!is.null(geoid)) {
+  if(is.null(geoid)) {
+    
+    if(!is.null(county) && length(state) != 1) {
+      stop("If supplying counties, exactly one state must be provided")
+    }
+      
+    ref_area <- list(geoid        = NULL,
+                     geo_length   = NULL,
+                     state_county = list(list(state = state, county = county)))
+  }
+  else {
     
     if(!is.null(state) || !is.null(county)) {
       stop("Can't supply both geoid and state/county")
     }
     
     ref_area <- validate_geoid(geoid, geography)
-  }
-  else {
-    
-    if(!is.null(county) && length(state) != 1) {
-      stop("If supplying counties, exactly one state must be provided")
-    }
-    
-    ref_area <- list(geoid        = NULL,
-                     geo_length   = NULL,
-                     state_county = list(list(state = state, county = county)))
   } 
   
   return(ref_area)
@@ -45,12 +45,14 @@ validate_geoid <- function(geoid, geography) {
   
   # user_geoids must be a vector of strings of digits between 2 and 12
   # characters. Otherwise, an error is thrown.
-  if(!checkmate::test_character(x           = geoid,
-                                pattern     = "^(\\d{2}|\\d{5}|\\d{11,12})$",
-                                min.len     = 1,
-                                any.missing = FALSE)) {
-    stop("geoid must have exactly 2, 5, 11, or 12 digits\n",
-         "signifying states, counties, tracts, and block groups, ",
+  if(
+    !checkmate::test_character(
+      x           = geoid,
+      pattern     = "^(\\d{2}|\\d{5}|\\d{11,12}|\\d{15})$",
+      min.len     = 1,
+      any.missing = FALSE)) {
+    stop("\ngeoid must have exactly 2, 5, 11, 12, or 15 digits\n",
+         "signifying states, counties, tracts, block groups, and blocks,",
          "respectively.\nDon't forget leading zeros.")
   }
   

@@ -31,8 +31,8 @@ The output of `get_adi()` can be piped directly into `ggplot2::geom_sf()` for ma
 You can install sociome from github with:
 
 ```{r gh-installation, eval = FALSE}
-# install.packages("devtools")
-devtools::install_github("NikKrieger/sociome")
+# install.packages("remotes")
+remotes::install_github("NikKrieger/sociome")
 ```
 
 ## Background on ADI
@@ -67,7 +67,7 @@ The function then calls the specified ACS data sets and employs the same algorit
 
 ## Examples
 
-The following code returns the ADIs of all counties in New Mexico, using the 2016 edition of the 5-year ACS estimates (the defaults):
+The following code returns the ADIs of all counties in New Mexico, using the 2017 edition of the 5-year ACS estimates (the defaults):
 
 ```{r NM_table, message=FALSE, cache=TRUE}
 library(sociome)
@@ -76,13 +76,13 @@ get_adi(geography = "county", state = "NM", geometry = FALSE)
 
 Setting `geometry = FALSE` as performed above is useful when only a `tibble` of ADI values is needed (i.e., maps need not be drawn) because the default output of `sf tibbles` is verbose. The following is an `sf tibble` of the ADIs of the fifty US states plus the District of Columbia and Puerto Rico, using the 2012 edition of the 1-year ACS estimates:
 
-```{r usa2012, cache=TRUE, message=FALSE}
+```{r usa2012, message=FALSE, cache=TRUE}
 get_adi(geography = "state", year = 2012, dataset = "acs1")
 ```
 
 The user can mix different levels of geography in the `geoid` parameter. The code below stores the ADIs of the census block groups in every county entirely or partially on the Delmarva peninsula:
 
-```{r delmarva_geoids, echo=TRUE, results='hold', cache=TRUE, message=FALSE}
+```{r delmarva_geoids, echo=TRUE, results='hold', message=FALSE, cache=TRUE}
 delmarva_geoids <- c("10", "51001", "51131", "24015", "24029", "24035", "24011",
                      "24041", "24019", "24045", "24039", "24047")
 # The two-digit GEOID stands for the state of Delaware.
@@ -97,7 +97,7 @@ The unique advantage of `sociome`'s `get_adi()` function is that it removes the 
 
 When setting `geometry = TRUE`, `sf` data is gathered from the US census API. This allows `get_adi()` output to be piped directly into `geom_sf()` from the `ggplot2` package. Below is a demonstration of this capability, using the Delmarva peninsula county ADIs created above:
 
-```{r plot_delmarva, cache=TRUE, fig.height=10, fig.width=5}
+```{r plot_delmarva, fig.height=10, fig.width=5, cache=TRUE}
 library(ggplot2)
 
 delmarva %>% ggplot() + geom_sf(aes(fill = ADI))
@@ -107,7 +107,7 @@ Notice that the default behavior of `geom_sf()` is to make high-ADI areas lighte
 
 Furthermore, the gray borders between census block groups are a bit thick and in many cases totally obscure some of the smaller block groups. Borders can be removed by setting `lwd = 0` within the `geom_sf()` function.
 
-```{r plot_delmarva_with_viridis, cache=TRUE, fig.height=10, fig.width=5}
+```{r plot_delmarva_with_viridis, fig.height=10, fig.width=5, cache=TRUE}
 delmarva %>%
   ggplot() +
   geom_sf(aes(fill = ADI), lwd = 0) +
@@ -118,7 +118,7 @@ delmarva %>%
 
 The code below calculates and maps ADIs for Ohio counties. 
 
-```{r ohio, fig.height=7, cache=TRUE, message=FALSE}
+```{r ohio, fig.height=7, message=FALSE, cache=TRUE}
 ohio <- get_adi(geography = "county", state = "OH")
 
 ohio %>%
@@ -129,7 +129,7 @@ ohio %>%
 
 The code below also calculates and maps ADIs for Ohio counties, but it uses a reference population of all counties in the fifty states plus DC and Puerto Rico:
 
-```{r ohio_ref_US, fig.height=7, cache=TRUE, message=FALSE}
+```{r ohio_ref_US, fig.height=7, message=FALSE, cache=TRUE}
 ohio_ref_US <- 
   get_adi(geography = "county") %>%
   dplyr::filter(substr(GEOID, 1, 2) == "39")
@@ -173,7 +173,7 @@ ohio_ref_us_plot <-
   labs(title = "Reference area: US counties (+DC & PR)")
 
 grid.arrange(ohio_plot, ohio_ref_us_plot,
-             nrow = 1, top = "2016 ADIs of Ohio Counties")
+             nrow = 1, top = "2017 ADIs of Ohio Counties")
 ```
 
 Notice that there is a middling effect on Ohio ADIs when all US counties are used as the reference population; this implies that Ohio counties are neither among the most deprived nor the least deprived in the US.

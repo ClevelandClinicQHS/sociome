@@ -14,11 +14,11 @@
 #' @param geography A character string denoting the level of census geography
 #'   whose ADIs you'd like to obtain. Must be one of \code{c("state", "county",
 #'   "tract", "block group", "block")}.
-#' @param state A character strings specifying a single state whose ADI data
-#'   you're requesting. Defaults to \code{NULL}. Can contain a full state name,
-#'   a two-letter state abbreviation, or a two-digit FIPS code/GEOID (must be a
-#'   string, so use quotation marks and a leading zero if necessary). Must be
-#'   left as \code{NULL} blank if using the \code{geoid} parameter.
+#' @param state A character string specifying states whose ADI data is desired.
+#'   Defaults to \code{NULL}. Can contain full state names, two-letter state
+#'   abbreviations, or a two-digit FIPS code/GEOID (must be a vector of strings,
+#'   so use quotation marks and leading zeros if necessary). Must be left as
+#'   \code{NULL} blank if using the \code{geoid} parameter.
 #' @param county A vector of character strings specifying the counties whose ADI
 #'   data you're requesting. Defaults to \code{NULL}. If providing a county, the
 #'   \code{state} parameter must also be specified. County names and three-digit
@@ -30,10 +30,10 @@
 #'   \code{county} is used. Can contain different levels of geography (see
 #'   details).
 #' @param year Single integer specifying the year of US Census data to use.
-#'   Defaults to 2016.
+#'   Defaults to 2017.
 #' @param survey The data set used to calculate ADIs. Must be one of
-#'   \code{c("acs5", "acs3", "acs1", "decennial")}, denoting the 5-, 3-, 1-year
-#'   ACS estimate, and decennial census. Defaults to \code{"acs5."}
+#'   \code{c("acs5", "acs3", "acs1", "decennial")}, denoting the 5-, 3-, and
+#'   1-year ACS along with the decennial census. Defaults to \code{"acs5."}
 #'
 #'   Important: data not always available depending on the level of geography
 #'   and data set chosen. See
@@ -141,7 +141,7 @@ get_adi <- function(geography,
                     state           = NULL,
                     county          = NULL,
                     geoid           = NULL,
-                    year            = 2016,
+                    year            = 2017,
                     dataset         = c("acs5", "acs3", "acs1", "decennial"),
                     geometry        = TRUE,
                     shift_geo       = FALSE,
@@ -167,14 +167,14 @@ get_adi <- function(geography,
     on.exit(options(old), add = TRUE)
   }
   
-  census_data <- get_tidycensus(geography    = geography,
-                                year         = year,
+  census_data <- get_tidycensus(year         = year,
+                                dataset      = dataset,
                                 state_county = ref_area$state_county,
+                                geography    = geography,
                                 geometry     = geometry,
                                 shift_geo    = shift_geo,
                                 cache_tables = cache_tables,
                                 key          = key,
-                                dataset      = dataset,
                                 ...)
   
   # Since the call (or calls) to tidycensus functions usually gathers data on
@@ -197,17 +197,11 @@ get_adi <- function(geography,
 
 
 
-get_tidycensus <- function(geography, year, state_county, geometry, shift_geo,
-                           cache_tables, key, dataset, ...) {
+get_tidycensus <- function(year, dataset, state_county, ...) {
   
-  args <- list(geography   = geography,
+  args <- list(year        = year,
                variables   = NULL,
-               cache_table = cache_tables, 
-               year        = year,
                output      = "wide",
-               geometry    = geometry,
-               shift_geo   = shift_geo,
-               key         = key,
                survey      = dataset,
                sumfile     = "sf3",
                ...)
@@ -249,9 +243,13 @@ choose_acs_variables <- function(year, dataset) {
 
 call_tidycensus <- function(fn, args, state_county) {
   
-  # tidycensus::get_acs() is called separately for each user-specified state or
-  # set of states. purrr::reduce(rbind) puts the results into a single data
-  # frame
+  # If the user did not specify a state nor geoids, the tidycensus
+  # if(identical(state_county, list())) {
+  #   return(do.call(fn, args))
+  # }
+  
+  # The tidycensus function is called separately for each user-specified state
+  # or set of states. purrr::reduce(rbind) puts the results into a single tibble
   state_county %>% 
     lapply(function(state_county) rlang::exec(fn, !!!args, !!!state_county)) %>%
     purrr::reduce(rbind)

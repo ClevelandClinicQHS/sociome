@@ -21,8 +21,8 @@ Installation
 You can install sociome from github with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("NikKrieger/sociome")
+# install.packages("remotes")
+remotes::install_github("NikKrieger/sociome")
 ```
 
 Background on ADI
@@ -61,25 +61,25 @@ The function then calls the specified ACS data sets and employs the same algorit
 Examples
 --------
 
-The following code returns the ADIs of all counties in New Mexico, using the 2016 edition of the 5-year ACS estimates (the defaults):
+The following code returns the ADIs of all counties in New Mexico, using the 2017 edition of the 5-year ACS estimates (the defaults):
 
 ``` r
 library(sociome)
 get_adi(geography = "county", state = "NM", geometry = FALSE)
 #> # A tibble: 33 x 3
-#>    GEOID NAME                            ADI
-#>    <chr> <chr>                         <dbl>
-#>  1 35001 Bernalillo County, New Mexico  85.9
-#>  2 35003 Catron County, New Mexico      79.4
-#>  3 35005 Chaves County, New Mexico     107. 
-#>  4 35006 Cibola County, New Mexico     120. 
-#>  5 35007 Colfax County, New Mexico     107. 
-#>  6 35009 Curry County, New Mexico      102. 
-#>  7 35011 De Baca County, New Mexico     98.0
-#>  8 35013 Do?a Ana County, New Mexico   109. 
-#>  9 35015 Eddy County, New Mexico        85.6
-#> 10 35017 Grant County, New Mexico       97.9
-#> # ... with 23 more rows
+#>    GEOID NAME                           ADI
+#>    <chr> <chr>                        <dbl>
+#>  1 35045 San Juan County, New Mexico   96.6
+#>  2 35037 Quay County, New Mexico      110. 
+#>  3 35027 Lincoln County, New Mexico    82.8
+#>  4 35005 Chaves County, New Mexico    105. 
+#>  5 35025 Lea County, New Mexico        96.3
+#>  6 35049 Santa Fe County, New Mexico   68.7
+#>  7 35059 Union County, New Mexico     102. 
+#>  8 35051 Sierra County, New Mexico    110. 
+#>  9 35053 Socorro County, New Mexico   111. 
+#> 10 35041 Roosevelt County, New Mexico 112. 
+#> # … with 23 more rows
 ```
 
 Setting `geometry = FALSE` as performed above is useful when only a `tibble` of ADI values is needed (i.e., maps need not be drawn) because the default output of `sf tibbles` is verbose. The following is an `sf tibble` of the ADIs of the fifty US states plus the District of Columbia and Puerto Rico, using the 2012 edition of the 1-year ACS estimates:
@@ -207,7 +207,7 @@ ohio_ref_us_plot <-
   labs(title = "Reference area: US counties (+DC & PR)")
 
 grid.arrange(ohio_plot, ohio_ref_us_plot,
-             nrow = 1, top = "2016 ADIs of Ohio Counties")
+             nrow = 1, top = "2017 ADIs of Ohio Counties")
 ```
 
 ![](README-corrected_ohio_color_scales-1.png)
@@ -225,35 +225,35 @@ The following code would access and store the factor loadings of the `ohio` ADI 
 ohio_loadings <- attr(ohio, "loadings")
 ohio_loadings
 #>                         medianHouseholdIncome 
-#>                                     0.9670304 
+#>                                     0.9596532 
 #>                                medianMortgage 
-#>                                     0.8225148 
+#>                                     0.8226823 
 #>                                    medianRent 
-#>                                     0.7762467 
+#>                                     0.7861613 
 #>                              medianHouseValue 
-#>                                     0.8761827 
+#>                                     0.8744697 
 #>                          pctFamiliesInPoverty 
-#>                                    -0.8875432 
+#>                                    -0.8778255 
 #>                       pctOwnerOccupiedHousing 
-#>                                     0.3703107 
+#>                                     0.3796726 
 #>  ratioThoseMakingUnder10kToThoseMakingOver50k 
-#>                                    -0.9125100 
+#>                                    -0.9072936 
 #> pctPeopleLivingBelow150PctFederalPovertyLevel 
-#>                                    -0.9312437 
+#>                                    -0.9266312 
 #>           pctChildrenInSingleParentHouseholds 
-#>                                    -0.6257419 
+#>                                    -0.6401479 
 #>                    pctHouseholdsWithNoVehicle 
-#>                                    -0.4569110 
+#>                                    -0.4684973 
 #>                  pctPeopleWithWhiteCollarJobs 
-#>                                     0.6197517 
+#>                                     0.6387597 
 #>                           pctPeopleUnemployed 
-#>                                    -0.6265516 
+#>                                    -0.5826222 
 #>               pctPeopleWithAtLeastHSEducation 
-#>                                     0.5945981 
+#>                                     0.5730898 
 #>        pctPeopleWithLessThan9thGradeEducation 
-#>                                    -0.2666329 
+#>                                    -0.2449113 
 #>         pctHouseholdsWithOverOnePersonPerRoom 
-#>                                    -0.3085936
+#>                                    -0.2928155
 ```
 
 These loadings code can then be converted into a readable `tibble`:
@@ -263,21 +263,21 @@ tibble::tibble(factor = names(ohio_loadings), loadings = ohio_loadings)
 #> # A tibble: 15 x 2
 #>    factor                                        loadings
 #>    <chr>                                            <dbl>
-#>  1 medianHouseholdIncome                            0.967
+#>  1 medianHouseholdIncome                            0.960
 #>  2 medianMortgage                                   0.823
-#>  3 medianRent                                       0.776
-#>  4 medianHouseValue                                 0.876
-#>  5 pctFamiliesInPoverty                            -0.888
-#>  6 pctOwnerOccupiedHousing                          0.370
-#>  7 ratioThoseMakingUnder10kToThoseMakingOver50k    -0.913
-#>  8 pctPeopleLivingBelow150PctFederalPovertyLevel   -0.931
-#>  9 pctChildrenInSingleParentHouseholds             -0.626
-#> 10 pctHouseholdsWithNoVehicle                      -0.457
-#> 11 pctPeopleWithWhiteCollarJobs                     0.620
-#> 12 pctPeopleUnemployed                             -0.627
-#> 13 pctPeopleWithAtLeastHSEducation                  0.595
-#> 14 pctPeopleWithLessThan9thGradeEducation          -0.267
-#> 15 pctHouseholdsWithOverOnePersonPerRoom           -0.309
+#>  3 medianRent                                       0.786
+#>  4 medianHouseValue                                 0.874
+#>  5 pctFamiliesInPoverty                            -0.878
+#>  6 pctOwnerOccupiedHousing                          0.380
+#>  7 ratioThoseMakingUnder10kToThoseMakingOver50k    -0.907
+#>  8 pctPeopleLivingBelow150PctFederalPovertyLevel   -0.927
+#>  9 pctChildrenInSingleParentHouseholds             -0.640
+#> 10 pctHouseholdsWithNoVehicle                      -0.468
+#> 11 pctPeopleWithWhiteCollarJobs                     0.639
+#> 12 pctPeopleUnemployed                             -0.583
+#> 13 pctPeopleWithAtLeastHSEducation                  0.573
+#> 14 pctPeopleWithLessThan9thGradeEducation          -0.245
+#> 15 pctHouseholdsWithOverOnePersonPerRoom           -0.293
 ```
 
 Warning about missing data and sample size
@@ -292,18 +292,18 @@ Here is a demonstration of both of the above:
 ``` r
 get_adi("block group", state = "hi", county = "kalawao", year = 2015)
 #> Getting data from the 2011-2015 5-year ACS
-#> Warning in calculate_adi(data = ref_area_data, type = dataset, keep_indicators = keep_indicators): 
+#> Warning in calculate_adi(data = census_data, type = dataset, keep_indicators = keep_indicators): 
 #> Calculating ADI values from fewer than 30 locations.
 #> It is recommended to add more in order to obtain trustworthy results.
 #> 
 #> Imputation unsuccessful.
 #> Returning factors that could not be imputed followed by raw census data.
 #> # A tibble: 2 x 140
-#>   GEOID  NAME  medianHousehold… medianMortgage medianRent medianHouseValue
-#>   <chr>  <chr>            <dbl>          <dbl>      <dbl>            <dbl>
-#> 1 15005… Bloc…            66250             NA        856               NA
-#> 2 15005… Bloc…               NA             NA         NA               NA
-#> # ... with 134 more variables: pctFamiliesInPoverty <dbl>,
+#>   GEOID NAME  medianHousehold… medianMortgage medianRent medianHouseValue
+#>   <chr> <chr>            <dbl>          <dbl>      <dbl>            <dbl>
+#> 1 1500… Bloc…            66250             NA        856               NA
+#> 2 1500… Bloc…               NA             NA         NA               NA
+#> # … with 134 more variables: pctFamiliesInPoverty <dbl>,
 #> #   pctOwnerOccupiedHousing <dbl>,
 #> #   ratioThoseMakingUnder10kToThoseMakingOver50k <dbl>,
 #> #   pctPeopleLivingBelow150PctFederalPovertyLevel <dbl>,

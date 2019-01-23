@@ -9,3 +9,4 @@
 ^README\.Rmd$
 ^README-.*\.png$
 ^README_cache$
+^development_code$

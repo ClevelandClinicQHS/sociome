@@ -1,3 +1,13 @@
+# sociome 0.5.0
+
+## Major updates:
+- ZCTAs now supported, with the addition of `zcta` argument.
+
+## Minor updates:
+- Better code efficiency
+- `checkmate` package no longer an Import.
+- Fixed bug in which `cache_tables` argument had been ignored
+
 # sociome 0.4.0
 
 ## Major updates:

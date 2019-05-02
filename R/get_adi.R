@@ -13,12 +13,12 @@
 #'
 #' @param geography A character string denoting the level of census geography
 #'   whose ADIs you'd like to obtain. Must be one of \code{c("state", "county",
-#'   "tract", "block group", "block")}.
+#'   "tract", "block group", "block", or "zcta")}.
 #' @param state A character string specifying states whose ADI data is desired.
 #'   Defaults to \code{NULL}. Can contain full state names, two-letter state
 #'   abbreviations, or a two-digit FIPS code/GEOID (must be a vector of strings,
 #'   so use quotation marks and leading zeros if necessary). Must be left as
-#'   \code{NULL} blank if using the \code{geoid} parameter.
+#'   \code{NULL} blank if using the \code{geoid} or \code{zcta} parameter.
 #' @param county A vector of character strings specifying the counties whose ADI
 #'   data you're requesting. Defaults to \code{NULL}. If providing a county, the
 #'   \code{state} parameter must also be specified. County names and three-digit
@@ -26,9 +26,18 @@
 #'   leading zeros if necessary). Must be blank if using the \code{geoid}
 #'   parameter.
 #' @param geoid A character vector of GEOIDs (use quotation marks and leading
-#'   zeros). Defaults to \code{NULL}. Must be blank if \code{state} and/or
-#'   \code{county} is used. Can contain different levels of geography (see
-#'   details).
+#'   zeros). Defaults to \code{NULL}. Must be blank if \code{state},
+#'   \code{county}, or \code{zcta} is used. Can contain different levels of
+#'   geography (see details).
+#' @param zcta A character vector of ZCTAs or the leading digit(s) of ZCTAs (use
+#'   quotation marks and leading zeros). Defaults to \code{NULL}. Must be blank
+#'   if \code{state}, \code{county}, or \code{geoid} is used.
+#'
+#'   A string under 5 digits long will yield all ZCTAs that begin with those
+#'   digits.
+#'
+#'   Requires that \code{geography = "zcta"}. If \code{geography = "zcta"} and
+#'   \code{zcta = NULL}, all ZCTAs in the US will be used.
 #' @param year Single integer specifying the year of US Census data to use.
 #'   Defaults to 2017.
 #' @param survey The data set used to calculate ADIs. Must be one of
@@ -141,6 +150,7 @@ get_adi <- function(geography,
                     state           = NULL,
                     county          = NULL,
                     geoid           = NULL,
+                    zcta            = NULL,
                     year            = 2017,
                     dataset         = c("acs5", "acs3", "acs1", "decennial"),
                     geometry        = TRUE,
@@ -150,93 +160,140 @@ get_adi <- function(geography,
                     key             = NULL,
                     ...) {
   
-  geography <- match.arg(geography,
-                         c("state", "county", "tract", "block group", "block"))
+  geography <-
+    match.arg(
+      geography,
+      c("state",
+        "county", 
+        "tract",
+        "block group",
+        "block",
+        "zcta",
+        "zip code tabulation area")
+    )
   
   dataset   <- match.arg(dataset)
   
-  ref_area  <- validate_location(geoid, state, county, geography, ...)
-  
-  if(geography == "block" && dataset != "decennial") {
-    stop('if geography = "block" then dataset must be "decennial"')
+  if (geography == "block") {
+    if (dataset != "decennial") {
+      stop('if geography = "block" then dataset must be "decennial"')
+    }
+  } else if (any(c("zip code tabulation area", "zcta") == geography)) {
+    
+    if (dataset == "decennial") {
+      stop(
+        "geogarphy = ", geography,
+        " not supported for the decennial census data.",
+        '\nTry dataset = "acs5" (or acs3 or acs1)'
+      )
+    }
+    
+    if (geography == "zcta") {
+      geography <- "zip code tabulation area"
+    }
   }
   
-  if(geometry) {
+  ref_area  <- validate_location(geoid, state, county, geography, zcta, ...)
+  
+  if (geometry) {
     # Saves old tigris_use_cache value and puts it back when function exits
     old <- options(tigris_use_cache = TRUE)
     on.exit(options(old), add = TRUE)
   }
   
-  census_data <- get_tidycensus(year         = year,
-                                dataset      = dataset,
-                                state_county = ref_area$state_county,
-                                geography    = geography,
-                                geometry     = geometry,
-                                shift_geo    = shift_geo,
-                                cache_tables = cache_tables,
-                                key          = key,
-                                ...)
+  census_data <-
+    get_tidycensus(
+      year         = year,
+      dataset      = dataset,
+      state_county = ref_area$state_county,
+      geography    = geography,
+      geometry     = geometry,
+      shift_geo    = shift_geo,
+      cache_table  = cache_tables,
+      key          = key,
+      ...
+    )
   
   # Since the call (or calls) to tidycensus functions usually gathers data on
   # more places than what the user specified, this pares the data frame down to
   # only include the user-specified reference area.
-  if(!is.null(ref_area$geoid)) {
-    census_data <- filter_ref_area(data       = census_data,
-                                   geoid      = ref_area$geoid,
-                                   geo_length = ref_area$geo_length)
+  if (!is.null(ref_area$geoid)) {
+    census_data <-
+      filter_ref_area(
+        data       = census_data,
+        what       = "GEOID",
+        pattern    = ref_area$geoid,
+        geo_length = ref_area$geo_length
+      )
+  } else if (!is.null(ref_area$zcta)) {
+    census_data <-
+      filter_ref_area(
+        data       = census_data,
+        what       = "ZCTA",
+        pattern    = ref_area$zcta
+      )
   }
   
   # Passes the filtered tibble (or sf tibble) onto calculate_adi(), which
   # produces the tibble (or sf tibble) of ADIs
-  acs_adi <- calculate_adi(data            = census_data,
-                           type            = dataset,
-                           keep_indicators = keep_indicators)
+  acs_adi <-
+    calculate_adi(
+      data            = census_data,
+      type            = dataset,
+      keep_indicators = keep_indicators
+    )
   
-  return(acs_adi)
+  acs_adi
 }
 
 
 
 get_tidycensus <- function(year, dataset, state_county, ...) {
   
-  args <- list(year        = year,
-               variables   = NULL,
-               output      = "wide",
-               survey      = dataset,
-               sumfile     = "sf3",
-               ...)
+  args <-
+    list(
+      year        = year,
+      variables   = NULL,
+      output      = "wide",
+      survey      = dataset,
+      sumfile     = "sf3",
+      ...
+    )
   
-  if(dataset == "decennial") {
+  if (dataset == "decennial") {
     fn             <- tidycensus::get_decennial
     args$variables <- decennial_vars$variable
-  }
-  else {
+  } else {
     fn             <- tidycensus::get_acs
     args$variables <- choose_acs_variables(year, dataset)
   }
   
   args <- validate_tidycensus_args(args, fn)
   
-  call_tidycensus(fn           = fn,
-                  args         = args,
-                  state_county = state_county)
+  call_tidycensus(
+    fn           = fn,
+    args         = args,
+    state_county = state_county
+  )
 }
+
 
 
 choose_acs_variables <- function(year, dataset) {
   
-  if(year > 2010) {
-    if(year == 2011 && dataset == "acs5") {
-      return(acs_vars$variable[acs_vars$B23025_and_B15002])
+  if (year > 2010) {
+    if (year == 2011 && dataset == "acs5") {
+      acs_vars$variable[acs_vars$B23025_and_B15002]
+    } else {
+      acs_vars$variable[acs_vars$B23025_and_B15003]
     }
-    return(acs_vars$variable[acs_vars$B23025_and_B15003])
+  } else if (
+    dataset == "acs1" && year > 2007 || dataset == "acs3" && year == 2010
+    ) {
+    acs_vars$variable[acs_vars$B23001_and_B15003]
+  } else {
+    acs_vars$variable[acs_vars$B23001_and_B15002]
   }
-  
-  if(dataset == "acs1" && year > 2007 || dataset == "acs3" && year == 2010) {
-    return(acs_vars$variable[acs_vars$B23001_and_B15003])
-  }
-  
-  return(acs_vars$variable[acs_vars$B23001_and_B15002])
 }
 
 
@@ -244,7 +301,7 @@ choose_acs_variables <- function(year, dataset) {
 call_tidycensus <- function(fn, args, state_county) {
   
   # If the user did not specify a state nor geoids, the tidycensus
-  # if(identical(state_county, list())) {
+  # if (identical(state_county, list())) {
   #   return(do.call(fn, args))
   # }
   
@@ -257,24 +314,42 @@ call_tidycensus <- function(fn, args, state_county) {
 
 
 
-#' @importFrom rlang .data
-filter_ref_area <- function(data, geoid, geo_length) {
+filter_ref_area <- function(data,
+                            what,
+                            pattern,
+                            geo_length = NULL) {
+  
+  if (is.null(geo_length)) {
+    pattern_sub <- pattern
+  } else {
+    pattern_sub <- stringr::str_sub(pattern, 1L, geo_length)
+  } 
   
   matches <-
-    geoid %>% 
-    stringr::str_sub(1, geo_length) %>% 
-    paste0("^", .) %>% 
-    lapply(FUN = stringr::str_subset, string = data$GEOID)
+    lapply(
+      paste0("^", pattern_sub),
+      stringr::str_which,
+      string = data$GEOID
+    )
   
-  nomatch <- lapply(matches, length) == 0
+  # matches <-
+  #   geoid %>% 
+  #   stringr::str_sub(1L, geo_length) %>% 
+  #   paste0("^", .) %>% 
+  #   lapply(FUN = stringr::str_subset, string = data$GEOID)
   
-  if(any(nomatch)) {
-    warning("The following geoids had no match in census data:\n",
-            paste(geoid[nomatch], collapse = ", "))
-    matches <- matches[!nomatch]
+  nomatch <- lapply(matches, length) == 0L
+  
+  if (any(nomatch)) {
+    warning(
+      "The following ", what, "s had no match in census data:\n",
+      paste(pattern[nomatch], collapse = ",\n")
+    )
   }
   
   matches <- unique(unlist(matches))
   
-  return(dplyr::filter(data, .data$GEOID %in% matches))
+  # dplyr::filter(data, .data$GEOID %in% matches)
+  
+  data[matches, ]
 }

@@ -5,9 +5,9 @@
 \title{Get area deprivation index (ADI)}
 \usage{
 get_adi(geography, state = NULL, county = NULL, geoid = NULL,
-  year = 2017, dataset = c("acs5", "acs3", "acs1", "decennial"),
-  geometry = TRUE, shift_geo = FALSE, keep_indicators = FALSE,
-  cache_tables = TRUE, key = NULL, ...)
+  zcta = NULL, year = 2017, dataset = c("acs5", "acs3", "acs1",
+  "decennial"), geometry = TRUE, shift_geo = FALSE,
+  keep_indicators = FALSE, cache_tables = TRUE, key = NULL, ...)
 }
 \arguments{
 \item{geography}{A character string denoting the level of census geography

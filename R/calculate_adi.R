@@ -1,16 +1,16 @@
 #' @importFrom rlang .data
 calculate_adi <- function(data, type, keep_indicators) {
   
-  if(!is.data.frame(data)) {
+  if (!is.data.frame(data)) {
     stop("data must be a tibble, sf tibble, or data-frame-like object")
   }
   
-  if(nrow(data) < 30) {
+  if (nrow(data) < 30) {
     warning("\nCalculating ADI values from fewer than 30 locations.\nIt is ",
             "recommended to add more in order to obtain trustworthy results.")
   }
   
-  if(type == "decennial") {
+  if (type == "decennial") {
     data_f <- factors_from_decennial(data)
   }
   else {
@@ -18,12 +18,12 @@ calculate_adi <- function(data, type, keep_indicators) {
   }
   
   # Performs single imputation if there is any missingness in the data.
-  if(anyNA(data_f)) {
+  if (anyNA(data_f)) {
     
     # Error message if user has not attached the sociome and/or mice package.
     # Attaching one of these packages is necessary because of how mice::mice
     # operates. See ?sociome::mice.impute.pmm for details.
-    if(!any(c("package:sociome", "package:mice") %in% search())) {
+    if (!any(c("package:sociome", "package:mice") %in% search())) {
       stop(paste0('Imputation required. Run library(sociome) or ',
                   'library(mice) and try again.'))
     }
@@ -36,14 +36,18 @@ calculate_adi <- function(data, type, keep_indicators) {
                        printFlag = FALSE) %>%
             mice::complete())
     
-    if(class(impute_attempt) == "try-error") {
+    if (class(impute_attempt) == "try-error") {
       message("\nImputation unsuccessful.\nReturning factors that could not ",
               "be imputed followed by raw census data.")
       return(
         data %>% 
           as.data.frame() %>% 
           dplyr::bind_cols(data_f, .) %>% 
-          dplyr::select("GEOID", "NAME", tidyselect::everything()) %>% 
+          dplyr::select(
+            "GEOID",
+            dplyr::starts_with("NAME"),
+            dplyr::everything()
+          ) %>% 
           tibble::as_tibble()
       )
     }
@@ -53,12 +57,12 @@ calculate_adi <- function(data, type, keep_indicators) {
     message("\nSingle imputation performed")
   }
   
-  if(keep_indicators) {
+  if (keep_indicators) {
     data         <- dplyr::bind_cols(data, data_f)
     keep_columns <- append(names(data), "ADI", after = 2)
   }
   else {
-    keep_columns <- c("GEOID", "NAME", "ADI")
+    keep_columns <- alist("GEOID", dplyr::starts_with("NAME"), "ADI")
   }
   
   # Where the magic happens: a principal-components analysis (PCA) of the
@@ -79,27 +83,36 @@ calculate_adi <- function(data, type, keep_indicators) {
   #      the factor loadings have the same sign as the original Singh factor
   #      loadings. It will be -1 if not. It will never equal 0 because there is
   #      an odd number of factor loadings.
-  signage_flipper <- sign(sum(sign(fit$loadings) * c(-1, -1, -1, -1, 1, -1, 1,
-                                                     1, 1, 1, -1, 1, -1, 1, 1)))
+  signage_flipper <-
+    sign(
+      sum(
+        sign(fit$loadings) *
+          c(-1L, -1L, -1L, -1L, 1L, -1L, 1L, 1L, 1L, 1L, -1L, 1L, -1L, 1L, 1L)
+      )
+    )
   #   4. The variable signage_flipper is multiplied by the PCA scores before
   #      standardization. In effect, this flips the ADIs in the right direction
   #      (multiplies their scores by -1) if they were reversed, and it keeps
   #      them the same (multiplies their scores by 1) if they were not reversed.
   # The raw ADI scores are standardized to have a mean of 100 and sd of 20
   adi <- data %>%
-    dplyr::mutate(ADI = as.numeric(fit$scores * signage_flipper * 20 + 100)) %>%
-    dplyr::select(keep_columns)
+    dplyr::mutate(
+      ADI = as.numeric(fit$scores * signage_flipper * 20L + 100L)) %>%
+    dplyr::select(!!!keep_columns)
   
-  if(!("sf" %in% class(adi))) {
+  if (!inherits(adi, "sf")) {
     adi <- tibble::as_tibble(adi)
   }
   
-  attr(adi, "loadings") <- stats::setNames(object = as.vector(fit$loadings),
-                                           nm     = row.names(fit$loadings))
+  attr(adi, "loadings") <-
+    stats::setNames(
+      object = as.vector(fit$loadings),
+      nm     = row.names(fit$loadings)
+    )
   
   class(adi) <- c(class(adi), "adi")
   
-  return(adi)
+  adi
 }
 
 # Selects the relevant variables from the tidycensus::get_acs() output, then
@@ -113,7 +126,7 @@ factors_from_acs <- function(data) {
   # "unsticky", allowing it to be removed by the subsequent dplyr::select()
   # command so that it doesn't interfere with the imputation that may follow.
   
-  if(is.null(data$B23025_005E)) {
+  if (is.null(data$B23025_005E)) {
     data <- data %>% 
       dplyr::mutate(
         B23025_005E = .data$B23001_008E + .data$B23001_015E +
@@ -136,7 +149,7 @@ factors_from_acs <- function(data) {
           .data$B23001_160E + .data$B23001_165E + .data$B23001_170E)
   }
   
-  if(is.null(data$B15002_001E)) {
+  if (is.null(data$B15002_001E)) {
     data <- data %>% 
       dplyr::mutate(
         Nless9thgrade = .data$B15003_002E +  .data$B15003_003E + 
@@ -147,8 +160,7 @@ factors_from_acs <- function(data) {
           .data$B15003_019E + .data$B15003_020E + .data$B15003_021E +
           .data$B15003_022E + .data$B15003_023E + .data$B15003_024E +
           .data$B15003_025E)
-  }
-  else {
+  } else {
     data <- data %>% 
       dplyr::mutate(
         Nless9thgrade = .data$B15002_003E +  .data$B15002_020E +

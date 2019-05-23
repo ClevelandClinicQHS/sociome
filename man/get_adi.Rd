@@ -12,13 +12,13 @@ get_adi(geography, state = NULL, county = NULL, geoid = NULL,
 \arguments{
 \item{geography}{A character string denoting the level of census geography
 whose ADIs you'd like to obtain. Must be one of \code{c("state", "county",
-"tract", "block group", "block")}.}
+"tract", "block group", "block", or "zcta")}.}
 
 \item{state}{A character string specifying states whose ADI data is desired.
 Defaults to \code{NULL}. Can contain full state names, two-letter state
 abbreviations, or a two-digit FIPS code/GEOID (must be a vector of strings,
 so use quotation marks and leading zeros if necessary). Must be left as
-\code{NULL} blank if using the \code{geoid} parameter.}
+\code{NULL} blank if using the \code{geoid} or \code{zcta} parameter.}
 
 \item{county}{A vector of character strings specifying the counties whose ADI
 data you're requesting. Defaults to \code{NULL}. If providing a county, the
@@ -28,9 +28,19 @@ leading zeros if necessary). Must be blank if using the \code{geoid}
 parameter.}
 
 \item{geoid}{A character vector of GEOIDs (use quotation marks and leading
-zeros). Defaults to \code{NULL}. Must be blank if \code{state} and/or
-\code{county} is used. Can contain different levels of geography (see
-details).}
+zeros). Defaults to \code{NULL}. Must be blank if \code{state},
+\code{county}, or \code{zcta} is used. Can contain different levels of
+geography (see details).}
+
+\item{zcta}{A character vector of ZCTAs or the leading digit(s) of ZCTAs (use
+  quotation marks and leading zeros). Defaults to \code{NULL}. Must be blank
+  if \code{state}, \code{county}, or \code{geoid} is used.
+
+  A string under 5 digits long will yield all ZCTAs that begin with those
+  digits.
+
+  Requires that \code{geography = "zcta"}. If \code{geography = "zcta"} and
+  \code{zcta = NULL}, all ZCTAs in the US will be used.}
 
 \item{year}{Single integer specifying the year of US Census data to use.
 Defaults to 2017.}

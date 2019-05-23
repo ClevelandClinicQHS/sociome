@@ -32,15 +32,29 @@ validate_location <- function(geoid, state, county, geography, zcta, ...) {
     
   } else if (is.null(geoid)) {
     
-    if (!is.null(county) && length(state) != 1) {
-      stop("If supplying counties, exactly one state must be provided")
-    }
+    if (is.null(county)) {
       
-    ref_area <-
+      if (is.null(state)) {
+        state_county <- list(list(state = NULL, county = NULL))
+      } else {
+        state_county <-
+          lapply(state, function(x) list(state = x, county = NULL))
+      }
+      
+    } else {
+      
+      if (length(state) != 1L) {
+        stop("If supplying counties, exactly one state must be provided")
+      }
+      
+      state_county <- list(list(state = state, county = county))
+    }
+    
+    ref_area <- 
       list(
         geoid        = NULL,
         geo_length   = NULL,
-        state_county = list(list(state = state, county = county)),
+        state_county = state_county,
         zcta         = NULL
       )
     
@@ -141,34 +155,6 @@ sc_from_geoid <- function(geoid) {
       list(state = state, county = county)
     }
   )
-  
-  # user_counties <-
-  #   tibble::tibble(
-  #     state_fips  = stringr::str_sub(geoid, 1L, 2L),
-  #     county_fips = stringr::str_sub(geoid, 3L, 5L)
-  #   ) %>% 
-  #   dplyr::distinct(.data$state_fips, .data$county_fips) %>% 
-  #   dplyr::filter(
-  #     .data$county_fips == "" |
-  #       .data$county_fips != "" &
-  #       !(.data$state_fips %in% .data$state_fips[.data$county_fips == ""])
-  #   )
-  # 
-  # lapply(
-  #   unique(user_counties$state_fips),
-  #   function(state) {
-  #     county <- 
-  #       dplyr::filter(
-  #         user_counties,
-  #         .data$state_fips == state & .data$county_fips != "")$county_fips
-  #     
-  #     if (length(county) == 0) {
-  #       county <- NULL
-  #     }
-  #     
-  #     list(state = state, county = county)
-  #   }
-  # )
 }
 
 

@@ -300,11 +300,6 @@ choose_acs_variables <- function(year, dataset) {
 
 call_tidycensus <- function(fn, args, state_county) {
   
-  # If the user did not specify a state nor geoids, the tidycensus
-  # if (identical(state_county, list())) {
-  #   return(do.call(fn, args))
-  # }
-  
   # The tidycensus function is called separately for each user-specified state
   # or set of states. purrr::reduce(rbind) puts the results into a single tibble
   state_county %>% 

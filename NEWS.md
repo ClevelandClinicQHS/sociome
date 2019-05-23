@@ -1,3 +1,6 @@
+# sociome 0.5.1.9000
+- Made calls to tidycensus functions always broken up by state to accommodate its inconsistent behavior depending on geography and year.
+
 # sociome 0.5.0
 
 ## Major updates:

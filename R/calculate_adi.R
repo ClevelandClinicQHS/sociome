@@ -58,10 +58,9 @@ calculate_adi <- function(data, type, keep_indicators) {
   }
   
   if (keep_indicators) {
+    keep_columns <- append(names(data), c("ADI", names(data_f)), after = 2L)
     data         <- dplyr::bind_cols(data, data_f)
-    keep_columns <- append(names(data), "ADI", after = 2)
-  }
-  else {
+  } else {
     keep_columns <- alist("GEOID", dplyr::starts_with("NAME"), "ADI")
   }
   

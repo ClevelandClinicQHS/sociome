@@ -37,6 +37,13 @@
 #'   \code{tidycensus::\link[tidycensus]{get_decennial}()}. Not recommended; use
 #'   at your own risk.
 #'
+#' @examples 
+#' \donttest{
+#' # Wrapped in \donttest{} because it requires a Census API key.
+#' 
+#' # Get all county GEOIDs for all Connecticut counties
+#' get_geoids(geography = "county", state = "CT")
+#' }
 #' @export
 get_geoids <- function(geography,
                        state        = NULL,

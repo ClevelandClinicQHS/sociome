@@ -129,7 +129,8 @@
 #'
 #' @examples
 #' \donttest{
-#' # Wrapped in \donttest{} because all these examples take >5 seconds.
+#' # Wrapped in \donttest{} because all these examples take >5 seconds
+#' # and require a Census API key.
 #'
 #' get_adi(geography = "tract", state = "OH", county = "Cuyahoga")
 #'
@@ -138,7 +139,7 @@
 #'
 #' delmarva_geoids <- c("10", "51001", "51131", "24015", "24029", "24035",
 #'                      "24011", "24041", "24019", "24045", "24039", "24047")
-#' delmarva <- get_adi(geoid = delmarva_geoids)
+#' delmarva <- get_adi(geography = "tract", geoid = delmarva_geoids)
 #'
 #' # Demonstration of geom_sf integration:
 #' library(ggplot2)
@@ -330,7 +331,7 @@ get_tidycensus <- function(partial_call, state_county, ...) {
 
 tidycensus_call_message <- function(sc) {
   if (!is.null(sc$state)) {
-    message("  State: ", sc$state)
+    message("\nState: ", sc$state)
     if (!is.null(sc$county)) {
       message("  County: ", sc$county)
     }

@@ -54,3 +54,11 @@ else.
 This facilitates calls to \code{\link{get_adi}()} that involve somewhat
 complicated reference areas.
 }
+\examples{
+\donttest{
+# Wrapped in \donttest{} because it requires a Census API key.
+
+# Get all county GEOIDs for all Connecticut counties
+get_geoids(geography = "county", state = "CT")
+}
+}

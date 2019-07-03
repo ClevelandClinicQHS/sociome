@@ -5,7 +5,8 @@
 \title{Obtain GEOIDs of places}
 \usage{
 get_geoids(geography, state = NULL, county = NULL, geoid = NULL,
-  year = 2010, cache_tables = TRUE, key = NULL, ...)
+  year = 2010, geometry = FALSE, cache_tables = TRUE, key = NULL,
+  ...)
 }
 \arguments{
 \item{geography}{A character string denoting the level of census geography
@@ -33,6 +34,13 @@ details).}
 \item{year}{Single integer specifying the year of US Census data to use.
 Defaults to 2010. Based on this year, data from the most recent decennial
 census will be returned.}
+
+\item{geometry, cache_tables, key}{See the descriptions of the arguments in
+\code{\link{get_adi}()}.}
+
+\item{...}{Additional arguments to be passed to
+\code{tidycensus::\link[tidycensus]{get_decennial}()}. Not recommended; use
+at your own risk.}
 }
 \description{
 Returns a \code{tibble} of GEOIDs, names, and decennial census population of
@@ -43,6 +51,6 @@ This allows users to quickly obtain all GEOIDs in a specified location at a
 specific level of geography without having to manually look them up somewhere
 else.
 
-This faciliates calls to \code{\link{get_adi}()} that involve somewhat
+This facilitates calls to \code{\link{get_adi}()} that involve somewhat
 complicated reference areas.
 }

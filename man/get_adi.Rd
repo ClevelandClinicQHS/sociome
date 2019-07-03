@@ -7,12 +7,13 @@
 get_adi(geography, state = NULL, county = NULL, geoid = NULL,
   zcta = NULL, year = 2017, dataset = c("acs5", "acs3", "acs1",
   "decennial"), geometry = TRUE, shift_geo = FALSE,
-  keep_indicators = FALSE, cache_tables = TRUE, key = NULL, ...)
+  keep_indicators = FALSE, raw_data_only = FALSE,
+  cache_tables = TRUE, key = NULL, ...)
 }
 \arguments{
 \item{geography}{A character string denoting the level of census geography
 whose ADIs you'd like to obtain. Must be one of \code{c("state", "county",
-"tract", "block group", "block", or "zcta")}.}
+"tract", "block group", or "zcta")}. Required.}
 
 \item{state}{A character string specifying states whose ADI data is desired.
 Defaults to \code{NULL}. Can contain full state names, two-letter state
@@ -21,11 +22,11 @@ so use quotation marks and leading zeros if necessary). Must be left as
 \code{NULL} blank if using the \code{geoid} or \code{zcta} parameter.}
 
 \item{county}{A vector of character strings specifying the counties whose ADI
-data you're requesting. Defaults to \code{NULL}. If providing a county, the
-\code{state} parameter must also be specified. County names and three-digit
-FIPS codes are accepted (must contain strings, so use quotation marks and
-leading zeros if necessary). Must be blank if using the \code{geoid}
-parameter.}
+data you're requesting. Defaults to \code{NULL}. If not \code{NULL}, the
+\code{state} parameter must have a length of 1. County names and
+three-digit FIPS codes are accepted (must contain strings, so use quotation
+marks and leading zeros if necessary). Must be blank if using the
+\code{geoid} parameter.}
 
 \item{geoid}{A character vector of GEOIDs (use quotation marks and leading
 zeros). Defaults to \code{NULL}. Must be blank if \code{state},
@@ -45,6 +46,16 @@ geography (see details).}
 \item{year}{Single integer specifying the year of US Census data to use.
 Defaults to 2017.}
 
+\item{dataset}{The data set used to calculate ADIs. Must be one of
+  \code{c("acs5", "acs3", "acs1", "decennial")}, denoting the 5-, 3-, and
+  1-year ACS along with the decennial census. Defaults to \code{"acs5"}.
+
+  dataset = "decennial" is currently under development.
+
+  Important: data not always available depending on the level of geography
+  and data set chosen. See
+  \url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html}.}
+
 \item{geometry}{Logical value indicating whether or not shapefile data should
 be included in the result, making the result an \code{sf tibble} instead of
 a plain \code{tibble}. Defaults to \code{TRUE}.}
@@ -56,9 +67,12 @@ a plain \code{tibble}. Defaults to \code{TRUE}.}
 \code{tibble} or \code{sf tibble} will contain the socioeconomic measures
 used to calculate the ADI values. Defaults to \code{FALSE}.}
 
+\item{raw_data_only}{Logical, indicating whether or not to skip calculation
+of the ADI and only return the census variables. Defaults to \code{FALSE}.}
+
 \item{cache_tables}{The plural version of the \code{cache_table} argument in
 \code{tidycensus::\link[tidycensus]{get_acs}()} or
-\code{tidycensus::\link[tidycensus]{get_decennial}()} (\code{get_adi()}
+\code{tidycensus::\link[tidycensus]{get_decennial}()}. (\code{get_adi()}
 calls the necessary \code{tidycensus} function many times in order to
 return ADIs, so many tables are cached if \code{TRUE}).}
 
@@ -70,14 +84,6 @@ necessary if you have already loaded your key with
 \item{...}{Additional arguments to be passed onto
 \code{tidycensus::\link[tidycensus]{get_acs}()} or
 \code{tidycensus::\link[tidycensus]{get_decennial}()}.}
-
-\item{survey}{The data set used to calculate ADIs. Must be one of
-  \code{c("acs5", "acs3", "acs1", "decennial")}, denoting the 5-, 3-, and
-  1-year ACS along with the decennial census. Defaults to \code{"acs5."}
-
-  Important: data not always available depending on the level of geography
-  and data set chosen. See
-  \url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html}.}
 }
 \value{
 If \code{geometry = TRUE} (the default), an \code{sf tibble}. If
@@ -120,12 +126,12 @@ numeric vector of the PCA loadings of each factor. This is accessible through
 
 \section{Default behaviors}{
  If \code{geography} is specified but
-  \code{state}, \code{county}, and \code{geoid} are all left blank, the
-  function will use the entire US (the 50 states plus the District of
-  Columbia (DC) and Puerto Rico (PR)) as the reference area (see "Reference
-  Area" above). Beware that this will take a long time if you set
+  \code{state}, \code{county}, \code{geoid}, and \code{zcta} are all left
+  blank, the function will use the entire US (the 50 states plus the District
+  of Columbia (DC) and Puerto Rico (PR)) as the reference area (see
+  "Reference Area" above). Beware that this will take a long time if you set
   \code{geography = "tract"} or especially if \code{geography = "block
-  group"} or \code{geography = "block"}.
+  group"}.
 }
 
 \section{The \code{geoid} parameter}{
@@ -133,7 +139,16 @@ numeric vector of the PCA loadings of each factor. This is accessible through
   different levels of geography, but they all must be either 2 digits (for
   states), 5 digits (for counties), 11 digits (for tracts), 12 digits (for
   block groups), or 15 digits (for blocks). It must contain character
-  strings, so use quotation marks as well as leading zero where applicable.
+  strings, so use quotation marks as well as leading zeros where applicable.
+}
+
+\section{Error handling}{
+ Depending on user input, this function may call its
+  underlying functions (\code{tidycensus::\link[tidycensus]{get_acs}()} or
+  \code{tidycensus::\link[tidycensus]{get_decennial}()}) many times in order
+  to accommodate their behavior. If any of these calls are unsuccessful,
+  \code{get_adi()} will try them again. The function quits if it attempts a
+  batch of calls ten times without progress.
 }
 
 \section{Warnings and disclaimers}{
@@ -142,11 +157,7 @@ numeric vector of the PCA loadings of each factor. This is accessible through
   user's internet connection and the amount of data requested.
 
   If there are any missing values, single imputation will be attempted using
-  the \code{mice} package. Because of how \code{mice} is coded, the user must
-  attach either the \code{sociome} package or the \code{mice} package for
-  imputation to work (e.g., run \code{library(sociome)} or
-  \code{library(mice)} before running \code{get_adi}). See
-  \code{\link{mice.impute.pmm}} for details.
+  the \code{mice} package.
 
   In the same vein, while this function allows flexibility in specifying
   reference areas (see the \strong{Reference area} section above), data from
@@ -164,7 +175,6 @@ numeric vector of the PCA loadings of each factor. This is accessible through
 \donttest{
 # Wrapped in \donttest{} because all these examples take >5 seconds.
 
-library(sociome) # Needed for imputation. library(mice) is another option.
 get_adi(geography = "tract", state = "OH", county = "Cuyahoga")
 
 get_adi(geography = "county", state = "CT", year = 2015, survey = "acs1",

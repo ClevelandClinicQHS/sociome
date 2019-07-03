@@ -1,9 +1,10 @@
 ## Test environments
 * Platform: x86_64-pc-linux-gnu (64-bit)
   Running under: CentOS Linux 7 (Core)
-  R 3.5.0
+  R version 3.5.0 (2018-04-23)
+* Windows Server 2008 R2 SP1, R-devel, 32/64 bit
 * Platform: x86_64-w64-mingw32 (64-bit)
-  R Under development (unstable) (2018-08-22 r75177)
+  R Under development (unstable) (2019-06-21 r76731)
   using session charset: ISO8859-1
   
 * New submission.
@@ -14,7 +15,7 @@ There were no ERRORs, WARNINGs, or NOTEs.
 
 
 
-devtools::build_win() thinks one of the URLs in my documentation might be invalid, but it works for me on multiple platforms:
+Rhub thinks one of the URLs in my documentation might be invalid, but it works for me on multiple platforms:
 
 "Found the following (possibly) invalid URLs:
   URL: https://www.census.gov/programs-surveys/acs/guidance/estimates.html.

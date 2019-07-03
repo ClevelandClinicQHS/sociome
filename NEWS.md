@@ -1,3 +1,13 @@
+# sociome 0.7.0
+
+## Major updates:
+- Added "try again" feature and improved calls to tidycensus functions.
+- Fixed ACS variable selection for get_adi().
+
+## Minor updates:
+- Made calculate_adi() an exported function again.
+- Added warning() that `dataset = "decennial"` is under development.
+
 # sociome 0.5.1.9000
 - Made calls to tidycensus functions always broken up by state to accommodate its inconsistent behavior depending on geography and year.
 

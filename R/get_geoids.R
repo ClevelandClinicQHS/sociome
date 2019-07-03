@@ -7,7 +7,7 @@
 #' specific level of geography without having to manually look them up somewhere
 #' else.
 #'
-#' This faciliates calls to \code{\link{get_adi}()} that involve somewhat
+#' This facilitates calls to \code{\link{get_adi}()} that involve somewhat
 #' complicated reference areas.
 #'
 #' @param geography A character string denoting the level of census geography
@@ -31,6 +31,11 @@
 #' @param year Single integer specifying the year of US Census data to use.
 #'   Defaults to 2010. Based on this year, data from the most recent decennial
 #'   census will be returned.
+#' @param geometry,cache_tables,key See the descriptions of the arguments in
+#'   \code{\link{get_adi}()}.
+#' @param ... Additional arguments to be passed to
+#'   \code{tidycensus::\link[tidycensus]{get_decennial}()}. Not recommended; use
+#'   at your own risk.
 #'
 #' @export
 get_geoids <- function(geography,
@@ -38,6 +43,7 @@ get_geoids <- function(geography,
                        county       = NULL,
                        geoid        = NULL,
                        year         = 2010,
+                       geometry     = FALSE,
                        cache_tables = TRUE,
                        key          = NULL,
                        ...) {
@@ -48,34 +54,47 @@ get_geoids <- function(geography,
       c("state", "county", "tract", "block group", "block")
     )
   
-  year <- floor(year / 10L) * 10L
+  year <- floor(year / 10) * 10
   
-  if (!any(c(1990L, 2000L, 2010L) == year)) {
+  if (!any(c(1990, 2000, 2010) == year)) {
     stop("year must be between 1990 and 2019")
   }
   
   variables <-
     stats::setNames(
-      ifelse(year == 1990, "P0010001", "P001001"),
+      if (year == 1990) "P0010001" else "P001001",
       paste0("census_", year, "_pop")
     )
   
-  ref_area  <- validate_location(geoid, state, county, geography, ...)
+  args <- 
+    rlang::dots_list(
+      geography = geography,
+      variables = variables,
+      cache_table = cache_tables,
+      year = year,
+      sumfile = "sf1",
+      geometry = geometry,
+      output = "wide",
+      key = key,
+      ...,
+      .homonyms = "first"
+    )
   
-  args <-
-    list(
-      geography    = geography,
-      variables    = variables,
-      cache_table  = cache_tables,
-      key          = key,
-      output       = "wide")
+  partial_call <- rlang::call2(tidycensus::get_decennial, !!!args)
+  
+  ref_area <-
+    validate_location(
+      geoid = geoid,
+      state = state, 
+      county = county, 
+      zcta = NULL, 
+      geography = geography, 
+      dataset = "decennial",
+      partial_call = partial_call
+    )
   
   census_data <-
-    call_tidycensus(
-      fn           = tidycensus::get_decennial,
-      args         = args,
-      state_county = ref_area$state_county
-    )
+    get_tidycensus(partial_call, state_county = ref_area$state_county)
   
   if (!is.null(ref_area$geoid)) {
     census_data <-

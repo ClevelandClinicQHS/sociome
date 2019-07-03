@@ -28,10 +28,9 @@ The output of `get_adi()` can be piped directly into `ggplot2::geom_sf()` for ma
 
 ## Installation
 
-You can install sociome from github with:
+You can install sociome from GitHub with:
 
 ```{r gh-installation, eval = FALSE}
-# install.packages("remotes")
 remotes::install_github("NikKrieger/sociome")
 ```
 
@@ -203,7 +202,7 @@ While allowing flexibility in specifying reference populations, data from the AC
 
 Here is a demonstration of both of the above:
 
-```{r Kalawao, cache=TRUE}
+```{r Kalawao, cache=TRUE, message=F}
 get_adi("block group", state = "hi", county = "kalawao", year = 2015)
 ```
 

@@ -4,7 +4,6 @@
 ^data-raw$
 ^ignore$
 ^cran-comments\.md$
-^NEWS\.md$
 ^README\.md$
 ^README\.Rmd$
 ^README-.*\.png$

@@ -1,3 +1,13 @@
+# sociome 1.0.0
+
+## Major updates:
+- Made the `geometry` argument `FALSE` by default.
+- Overhauled internal code to accommodate `dataset = "decennial"`.
+- Added tests.
+
+## Minor updates:
+- Documentation and README improvements.
+
 # sociome 0.7.0
 
 ## Major updates:

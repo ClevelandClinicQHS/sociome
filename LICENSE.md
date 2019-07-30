@@ -1,6 +1,6 @@
 # MIT License
 
-Copyright (c) 2018 Nik Krieger, Jarrod Dalton, Cindy Wang, and Adam Perzynski
+Copyright (c) 2019 Nik Krieger, Jarrod Dalton, Cindy Wang, and Adam Perzynski
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,4 +22,4 @@ SOFTWARE.
 
 
 
-The development of this software package was supported by a research grant from the National Institutes of Health/National Institute on Aging, (Principal Investigators: Jarrod E. Dalton, PhD and Adam T. Perzynski, PhD; Grant Number: 5R01AG055480-02).  All of its contents are solely the responsibility of the authors and do not necessarily represent the official views of the NIH.
+The development of this software package was supported by a research grant from the National Institutes of Health/National Institute on Aging, (Principal Investigators: Jarrod E. Dalton, PhD and Adam T. Perzynski, PhD; Grant Number: 5R01AG055480-02). All of its contents are solely the responsibility of the authors and do not necessarily represent the official views of the NIH.

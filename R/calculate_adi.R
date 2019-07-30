@@ -4,21 +4,45 @@
 #' Community Survey (ACS) variables.
 #'
 #' This function discerns between ACS, year 2000 decennial census, and year 1990
-#' decennial census data by checking for the existence of the population
-#' variables of each (\code{B01003_001}, \code{P001001}, and \code{P0010001},
-#' respectively).
+#' decennial census data by checking for the existence of
 #'
-#' @param data Raw data obtained via
-#'   \code{tidycensus::\link[tidycensus]{get_acs}(output = "wide")} or
-#'   \code{tidycensus::\link[tidycensus]{get_decennial}(output = "wide")},
-#'   having the variables necessary to compute the indicators of the ADI, which
-#'   can be found in \code{sociome::\link{acs_vars}},
-#'   \code{sociome::decennial_vars_1990}, or
-#'   \code{sociome::decennial_vars_2000}.
+#' @param data A data frame obtained via
+#'   \code{tidycensus::\link[tidycensus]{get_acs}()} or
+#'   \code{tidycensus::\link[tidycensus]{get_decennial}()}, having the data
+#'   necessary to compute the indicators of the ADI.
+#'
+#'   The columns of his data frame must be named according to the elements of
+#'   the \code{variable} column in \code{sociome::\link{acs_vars}} and/or
+#'   \code{sociome::decennial_vars}.
+#'
+#'   The easiest way to obtain data like this is to run
+#'   \code{sociome::\link{get_adi}(raw_data_only = TRUE)}.
 #' @param keep_indicators Logical indicating whether or not to keep the
 #'   component indicators of the ADI as well as the original census variables
 #'   used to calculate them. Defaults to \code{FALSE}.
 #'
+#'   See \code{\link{acs_vars}} and \code{\link{decennial_vars}} for basic
+#'   descriptions of the raw census variables.
+#'
+#' @return A \code{\link[tibble]{tibble}} with the same number of rows as
+#'   \code{data}. Columns include \code{GEOID}, \code{NAME}, and \code{ADI}.
+#'   Further columns containing the indicators and raw values will also be
+#'   present if \code{keep_indicators = TRUE}.
+#'
+#'   If imputation is necessary and unsuccessful, the \code{ADI} column will be
+#'   absent and columns containing the indicators will be present regardless of
+#'   the value of \code{keep_indicators}.
+#'
+#' @examples
+#' \donttest{
+#' # Wrapped in \donttest{} because these examples require a Census API key.
+#'
+#' raw_census <- get_adi("state", raw_data_only = TRUE)
+#'
+#' calculate_adi(raw_census)
+#'
+#' calculate_adi(raw_census, keep_indicators = TRUE)
+#' }
 #' @importFrom rlang .data
 #' @export
 calculate_adi <- function(data, keep_indicators = FALSE) {
@@ -54,7 +78,7 @@ calculate_adi <- function(data, keep_indicators = FALSE) {
           mice::complete()
       )
     
-    if (class(impute_attempt) == "try-error") {
+    if (inherits(impute_attempt, what = "try-error")) {
       message(
         "\nImputation unsuccessful.\nReturning factors that could not ",
         "be imputed followed by raw census data."
@@ -106,7 +130,7 @@ calculate_adi <- function(data, keep_indicators = FALSE) {
     sign(
       sum(
         sign(fit$loadings) *
-          c(-1L, -1L, -1L, -1L, 1L, -1L, 1L, 1L, 1L, 1L, -1L, 1L, -1L, 1L, 1L)
+          c(-1, -1, -1, -1, 1, -1, 1, 1, 1, 1, -1, 1, -1, 1, 1)
       )
     )
   #   4. The variable signage_flipper is multiplied by the PCA scores before
@@ -126,7 +150,7 @@ calculate_adi <- function(data, keep_indicators = FALSE) {
   
   attr(adi, "loadings") <-
     stats::setNames(
-      object = as.vector(fit$loadings),
+      object = as.vector(fit$loadings, mode = "double"),
       nm     = row.names(fit$loadings)
     )
   
@@ -138,11 +162,14 @@ calculate_adi <- function(data, keep_indicators = FALSE) {
 
 
 calculate_indicators <- function(data) {
-  if (!is.null(data$B01003_001E)) {
+  
+  colnames <- colnames(data)
+  
+  if (any(colnames == "B19113_001")) {
     factors_from_acs(data)
-  } else if (!is.null(data$P001001)) {
+  } else if (any(colnames == "P077001")) {
     factors_from_2000_decennial(data)
-  } else if (!is.null(data$P0010001)) {
+  } else if (any(colnames == "P107A001")) {
     factors_from_1990_decennial(data)
   } else {
     stop(
@@ -164,93 +191,106 @@ factors_from_acs <- function(data) {
   # "unsticky", allowing it to be removed by the subsequent dplyr::select()
   # command so that it doesn't interfere with the imputation that may follow.
   
-  if (is.null(data$B23025_005E)) {
+  colnames <- colnames(data)
+  
+  if (!any(colnames == "B23025_005")) {
     data <- data %>% 
       dplyr::mutate(
-        B23025_005E = .data$B23001_008E + .data$B23001_015E +
-          .data$B23001_022E + .data$B23001_029E + .data$B23001_036E +
-          .data$B23001_043E + .data$B23001_050E + .data$B23001_057E +
-          .data$B23001_064E + .data$B23001_071E + .data$B23001_076E +
-          .data$B23001_081E + .data$B23001_086E + .data$B23001_094E +
-          .data$B23001_101E + .data$B23001_108E + .data$B23001_115E +
-          .data$B23001_122E + .data$B23001_129E + .data$B23001_136E +
-          .data$B23001_143E + .data$B23001_150E + .data$B23001_157E +
-          .data$B23001_162E + .data$B23001_167E + .data$B23001_172E,
-        B23025_003E = .data$B23001_006E + .data$B23001_013E +
-          .data$B23001_020E + .data$B23001_027E + .data$B23001_034E +
-          .data$B23001_041E + .data$B23001_048E + .data$B23001_055E +
-          .data$B23001_062E + .data$B23001_069E + .data$B23001_074E +
-          .data$B23001_079E + .data$B23001_084E + .data$B23001_092E +
-          .data$B23001_099E + .data$B23001_106E + .data$B23001_113E +
-          .data$B23001_120E + .data$B23001_127E + .data$B23001_134E +
-          .data$B23001_141E + .data$B23001_148E + .data$B23001_155E +
-          .data$B23001_160E + .data$B23001_165E + .data$B23001_170E
+        B23025_005 = .data$B23001_008 + .data$B23001_015 +
+          .data$B23001_022 + .data$B23001_029 + .data$B23001_036 +
+          .data$B23001_043 + .data$B23001_050 + .data$B23001_057 +
+          .data$B23001_064 + .data$B23001_071 + .data$B23001_076 +
+          .data$B23001_081 + .data$B23001_086 + .data$B23001_094 +
+          .data$B23001_101 + .data$B23001_108 + .data$B23001_115 +
+          .data$B23001_122 + .data$B23001_129 + .data$B23001_136 +
+          .data$B23001_143 + .data$B23001_150 + .data$B23001_157 +
+          .data$B23001_162 + .data$B23001_167 + .data$B23001_172,
+        B23025_003 = .data$B23001_006 + .data$B23001_013 +
+          .data$B23001_020 + .data$B23001_027 + .data$B23001_034 +
+          .data$B23001_041 + .data$B23001_048 + .data$B23001_055 +
+          .data$B23001_062 + .data$B23001_069 + .data$B23001_074 +
+          .data$B23001_079 + .data$B23001_084 + .data$B23001_092 +
+          .data$B23001_099 + .data$B23001_106 + .data$B23001_113 +
+          .data$B23001_120 + .data$B23001_127 + .data$B23001_134 +
+          .data$B23001_141 + .data$B23001_148 + .data$B23001_155 +
+          .data$B23001_160 + .data$B23001_165 + .data$B23001_170
       )
+    
+    # This happens if the user called for 2010 decennial data.
+    if (!any(colnames == "B25003_001")) {
+      data <- data %>% 
+        dplyr::mutate(
+          B25003_001 = .data$H003002,
+          B25003_002 = .data$H014002,
+          B11005_002 = .data$P020002,
+          B11005_005 = .data$P020008
+        )
+    }
   }
   
-  if (is.null(data$B15002_001E)) {
+  if (!any(colnames == "B15002_001")) {
     data <- data %>% 
       dplyr::mutate(
-        Nless9thgrade = .data$B15003_002E +  .data$B15003_003E + 
-          .data$B15003_004E + .data$B15003_005E + .data$B15003_006E + 
-          .data$B15003_007E + .data$B15003_008E + .data$B15003_009E + 
-          .data$B15003_010E + .data$B15003_011E + .data$B15003_012E,
-        Nhighschoolup = .data$B15003_017E + .data$B15003_018E +
-          .data$B15003_019E + .data$B15003_020E + .data$B15003_021E +
-          .data$B15003_022E + .data$B15003_023E + .data$B15003_024E +
-          .data$B15003_025E
+        Nless9thgrade = .data$B15003_002 +  .data$B15003_003 + 
+          .data$B15003_004 + .data$B15003_005 + .data$B15003_006 + 
+          .data$B15003_007 + .data$B15003_008 + .data$B15003_009 + 
+          .data$B15003_010 + .data$B15003_011 + .data$B15003_012,
+        Nhighschoolup = .data$B15003_017 + .data$B15003_018 +
+          .data$B15003_019 + .data$B15003_020 + .data$B15003_021 +
+          .data$B15003_022 + .data$B15003_023 + .data$B15003_024 +
+          .data$B15003_025
       )
   } else {
     data <- data %>% 
       dplyr::mutate(
-        Nless9thgrade = .data$B15002_003E +  .data$B15002_020E +
-          .data$B15002_004E +  .data$B15002_021E +  .data$B15002_005E + 
-          .data$B15002_022E +  .data$B15002_006E +  .data$B15002_023E,
-        Nhighschoolup = .data$B15002_011E + .data$B15002_028E +
-          .data$B15002_012E +  .data$B15002_029E + .data$B15002_013E +
-          .data$B15002_030E + .data$B15002_014E + .data$B15002_031E +
-          .data$B15002_015E + .data$B15002_032E + .data$B15002_016E +
-          .data$B15002_033E + .data$B15002_017E + .data$B15002_034E +
-          .data$B15002_018E + .data$B15002_035E,
-        B15003_001E   = .data$B15002_001E
+        Nless9thgrade = .data$B15002_003 +  .data$B15002_020 +
+          .data$B15002_004 +  .data$B15002_021 +  .data$B15002_005 + 
+          .data$B15002_022 +  .data$B15002_006 +  .data$B15002_023,
+        Nhighschoolup = .data$B15002_011 + .data$B15002_028 +
+          .data$B15002_012 +  .data$B15002_029 + .data$B15002_013 +
+          .data$B15002_030 + .data$B15002_014 + .data$B15002_031 +
+          .data$B15002_015 + .data$B15002_032 + .data$B15002_016 +
+          .data$B15002_033 + .data$B15002_017 + .data$B15002_034 +
+          .data$B15002_018 + .data$B15002_035,
+        B15003_001   = .data$B15002_001
       )
   }
   
   data <- data %>% 
     dplyr::mutate(
-      Fpoverty        = .data$B17010_002E / .data$B17010_001E,
-      OwnerOcc        = .data$B25003_002E / .data$B25003_001E,
-      incomegreater50 = .data$B19001_011E + .data$B19001_012E +
-        .data$B19001_013E + .data$B19001_014E + .data$B19001_015E +
-        .data$B19001_016E + .data$B19001_017E,
-      IncomeDisparity = log(100 * (.data$B19001_002E / .data$incomegreater50)),
-      less150poverty  = .data$C17002_002E + .data$C17002_003E +
-        .data$C17002_004E + .data$C17002_005E,
-      less150FPL      = .data$less150poverty / .data$C17002_001E,
-      singlePchildren = .data$B11005_005E / .data$B11005_002E,
-      novehiclesum      = .data$B25044_003E + .data$B25044_010E,
-      pnovehicle      = .data$novehiclesum / .data$B25044_001E,
-      sumprofs        = .data$C24010_003E + .data$C24010_039E,
-      whitecollar     = .data$sumprofs / .data$C24010_001E,
-      unemployedPct   = .data$B23025_005E / .data$B23025_003E,
-      Phighschoolup   = .data$Nhighschoolup / .data$B15003_001E,
-      Pless9grade     = .data$Nless9thgrade / .data$B15003_001E,
-      SUMcrowded      = .data$B25014_005E + .data$B25014_006E +
-        .data$B25014_007E + .data$B25014_011E + .data$B25014_012E +
-        .data$B25014_013E,
-      Pcrowded        = .data$SUMcrowded / .data$B25014_001E
+      Fpoverty        = .data$B17010_002 / .data$B17010_001,
+      OwnerOcc        = .data$B25003_002 / .data$B25003_001,
+      incomegreater50 = .data$B19001_011 + .data$B19001_012 +
+        .data$B19001_013 + .data$B19001_014 + .data$B19001_015 +
+        .data$B19001_016 + .data$B19001_017,
+      IncomeDisparity = log(100 * (.data$B19001_002 / .data$incomegreater50)),
+      less150poverty  = .data$C17002_002 + .data$C17002_003 +
+        .data$C17002_004 + .data$C17002_005,
+      less150FPL      = .data$less150poverty / .data$C17002_001,
+      singlePchildren = .data$B11005_005 / .data$B11005_002,
+      novehiclesum    = .data$B25044_003 + .data$B25044_010,
+      pnovehicle      = .data$novehiclesum / .data$B25044_001,
+      sumprofs        = .data$C24010_003 + .data$C24010_039,
+      whitecollar     = .data$sumprofs / .data$C24010_001,
+      unemployedPct   = .data$B23025_005 / .data$B23025_003,
+      Phighschoolup   = .data$Nhighschoolup / .data$B15003_001,
+      Pless9grade     = .data$Nless9thgrade / .data$B15003_001,
+      SUMcrowded      = .data$B25014_005 + .data$B25014_006 +
+        .data$B25014_007 + .data$B25014_011 + .data$B25014_012 +
+        .data$B25014_013,
+      Pcrowded        = .data$SUMcrowded / .data$B25014_001
     ) %>%
     
     dplyr::select(
-      "medianFamilyIncome"                            = "B19113_001E",
-      "medianMortgage"                                = "B25088_002E",
-      "medianRent"                                    = "B25064_001E",
-      "medianHouseValue"                              = "B25077_001E" ,
+      "medianFamilyIncome"                            = "B19113_001",
+      "medianMortgage"                                = "B25088_002",
+      "medianRent"                                    = "B25064_001",
+      "medianHouseValue"                              = "B25077_001" ,
       "pctFamiliesInPoverty"                          = "Fpoverty",
       "pctOwnerOccupiedHousing"                       = "OwnerOcc",
       "ratioThoseMakingUnder10kToThoseMakingOver50k"  = "IncomeDisparity",
       "pctPeopleLivingBelow150PctFederalPovertyLevel" = "less150FPL",
-      "pctChildrenInSingleParentHouseholds"           = "singlePchildren",
+      "pctHouseholdsWithChildrenThatAreSingleParent"  = "singlePchildren",
       "pctHouseholdsWithNoVehicle"                    = "pnovehicle",
       "pctPeopleWithWhiteCollarJobs"                  = "whitecollar",
       "pctPeopleUnemployed"                           = "unemployedPct",
@@ -275,16 +315,15 @@ factors_from_2000_decennial <- function(data) {
     
     dplyr::mutate(
       Fpoverty        = .data$P090002 / .data$P090001,
-      OwnerOcc        = .data$H007002 / .data$H007001,
+      OwnerOcc        = .data$H004002 / .data$H004001,
       incomegreater50 = .data$P052011 + .data$P052012 + .data$P052013 +
         .data$P052014 + .data$P052015 + .data$P052016 + .data$P052017,
       IncomeDisparity = log(100 * (.data$P052002 / .data$incomegreater50)),
       less150poverty  = .data$P088002 + .data$P088003 + .data$P088004 +
         .data$P088005 + .data$P088006,
       less150FPL      = .data$less150poverty / .data$P088001,
-      oneparent       = .data$P046008 + .data$P046021,
-      singlePchildren = .data$oneparent / .data$P046001,
-      novehiclesum      = .data$H044003 + .data$H044010,
+      singlePchildren = .data$P019005 / .data$P019002,
+      novehiclesum    = .data$H044003 + .data$H044010,
       pnovehicle      = .data$novehiclesum / .data$H044001,
       sumprofs        = .data$P050003 + .data$P050050,
       whitecollar     = .data$sumprofs / .data$P050001,
@@ -315,7 +354,7 @@ factors_from_2000_decennial <- function(data) {
       "pctOwnerOccupiedHousing"                       = "OwnerOcc",
       "ratioThoseMakingUnder10kToThoseMakingOver50k"  = "IncomeDisparity",
       "pctPeopleLivingBelow150PctFederalPovertyLevel" = "less150FPL",
-      "pctChildrenInSingleParentHouseholds"           = "singlePchildren",
+      "pctHouseholdsWithChildrenThatAreSingleParent"  = "singlePchildren",
       "pctHouseholdsWithNoVehicle"                    = "pnovehicle",
       "pctPeopleWithWhiteCollarJobs"                  = "whitecollar",
       "pctPeopleUnemployed"                           = "unemployedPct",
@@ -329,6 +368,7 @@ factors_from_2000_decennial <- function(data) {
 #' @importFrom rlang .data
 factors_from_1990_decennial <- function(data) {
   data %>% 
+    
     as.data.frame() %>% 
     
     dplyr::mutate(
@@ -337,7 +377,7 @@ factors_from_1990_decennial <- function(data) {
         .data$P1230020 + .data$P1230021 + .data$P1230022 + .data$P1230023 +
         .data$P1230024,
       Fpoverty = .data$familybelowpoverty / .data$P0040001,
-      OwnerOcc = .data$H0080001 / .data$H0040001,
+      OwnerOcc = .data$H0030001 / .data$H0020001,
       incomeunder10 = .data$P0800001 + .data$P0800002,
       incomeover50 = .data$P0800019 + .data$P0800020 + .data$P0800021 +
         .data$P0800022 + .data$P0800023 + .data$P0800024 + .data$P0800025,
@@ -347,13 +387,9 @@ factors_from_1990_decennial <- function(data) {
       personspovertydetermined = .data$less150poverty + .data$P1210006 +
         .data$P1210007 + .data$P1210008 + .data$P1210009,
       less150FPL = .data$less150poverty / .data$personspovertydetermined,
-      oneparent = .data$P0230008 + .data$P0230009 + .data$P0230010 +
-        .data$P0230011 + .data$P0230012 + .data$P0230013 + .data$P0230014 +
-        .data$P0230015 + .data$P0230016 + .data$P0230017 + .data$P0230018 +
-        .data$P0230019 + .data$P0230020 + .data$P0230021,
-      allchildren = .data$oneparent + .data$P0230001 + .data$P0230002 +
-        .data$P0230003 + .data$P0230004 + .data$P0230005 + .data$P0230006 +
-        .data$P0230007,
+      oneparent = .data$P0180002 + .data$P0180003,
+      allchildren = .data$oneparent + .data$P0180001 + .data$P0180004 +
+        .data$P0180005,
       singlePchildren = .data$oneparent / .data$allchildren,
       novehiclesum = .data$H0410001 + .data$H0410003,
       vehiclesdetermined = .data$novehiclesum + .data$H0410002 + .data$H0410004,
@@ -362,23 +398,23 @@ factors_from_1990_decennial <- function(data) {
       allcivilianemployed = .data$P0700002 + .data$P0700006,
       whitecollar = .data$sumprofs / .data$allcivilianemployed,
       unemployedlabor = .data$P0700003 + .data$P0700007,
-      allLabor = .data$unemployedlabor + .data$P0700002 + .data$P0700006,
+      allLabor = .data$unemployedlabor + .data$allcivilianemployed,
       unemployedPct = .data$unemployedlabor / .data$allLabor,
       Nhighschoolup = .data$P0570003 + .data$P0570004 + .data$P0570005 +
         .data$P0570006 + .data$P0570007,
       people25andover = .data$Nhighschoolup + .data$P0570001 + .data$P0570002,
       Phighschoolup = .data$Nhighschoolup / .data$people25andover,
       Pless9grade = .data$P0570001 / .data$people25andover,
-      SUMcrowded = .data$H0710003 + .data$H0710004 + .data$H0710007 +
-        .data$H0710008,
-      Pcrowded = .data$SUMcrowsed / .data$H0040001
+      SUMcrowded = .data$H0210003 + .data$H0210004 + .data$H0210005,
+      crowdingdetermined = .data$SUMcrowded + .data$H0210001 + .data$H0210002,
+      Pcrowded = .data$SUMcrowsed / .data$crowdingdetermined
     ) %>% 
     
     dplyr::select(
-      "medianHouseholdIncome"                         = "P080A001",
+      "medianFamilyIncome"                            = "P107A001",
       "medianMortgage"                                = "H052A001",
       "medianRent"                                    = "H043A001",
-      "medianHouseValue"                              = "H061A001",
+      "medianHouseValue"                              = "H023B001",
       "pctFamiliesInPoverty"                          = "Fpoverty",
       "pctOwnerOccupiedHousing"                       = "OwnerOcc",
       "ratioThoseMakingUnder10kToThoseMakingOver50k"  = "IncomeDisparity",

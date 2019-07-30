@@ -1,3 +1,14 @@
+
+## Resubmission
+This is a resubmission. In this version I have:
+
+* Changed the LICENSE file so that it has the standard two lines.
+
+* Added the National Institutes of Health/National Institute on Aging as authors in the DESCRIPTION file.
+
+* Added more features and tests and changed the default of an important argument in the get_adi() function.
+
+
 ## Test environments
 * Platform: x86_64-pc-linux-gnu (64-bit)
   Running under: CentOS Linux 7 (Core)
@@ -12,8 +23,6 @@
 
 ## R CMD check results
 There were no ERRORs, WARNINGs, or NOTEs. 
-
-
 
 Rhub thinks one of the URLs in my documentation might be invalid, but it works for me on multiple platforms:
 

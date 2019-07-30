@@ -1,7 +1,6 @@
 ^LICENSE\.md$
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^data-raw$
 ^ignore$
 ^cran-comments\.md$
 ^README\.md$

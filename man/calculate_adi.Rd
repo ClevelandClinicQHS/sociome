@@ -7,17 +7,34 @@
 calculate_adi(data, keep_indicators = FALSE)
 }
 \arguments{
-\item{data}{Raw data obtained via
-\code{tidycensus::\link[tidycensus]{get_acs}(output = "wide")} or
-\code{tidycensus::\link[tidycensus]{get_decennial}(output = "wide")},
-having the variables necessary to compute the indicators of the ADI, which
-can be found in \code{sociome::\link{acs_vars}},
-\code{sociome::decennial_vars_1990}, or
-\code{sociome::decennial_vars_2000}.}
+\item{data}{A data frame obtained via
+  \code{tidycensus::\link[tidycensus]{get_acs}()} or
+  \code{tidycensus::\link[tidycensus]{get_decennial}()}, having the data
+  necessary to compute the indicators of the ADI.
+
+  The columns of his data frame must be named according to the elements of
+  the \code{variable} column in \code{sociome::\link{acs_vars}} and/or
+  \code{sociome::decennial_vars}.
+
+  The easiest way to obtain data like this is to run
+  \code{sociome::\link{get_adi}(raw_data_only = TRUE)}.}
 
 \item{keep_indicators}{Logical indicating whether or not to keep the
-component indicators of the ADI as well as the original census variables
-used to calculate them. Defaults to \code{FALSE}.}
+  component indicators of the ADI as well as the original census variables
+  used to calculate them. Defaults to \code{FALSE}.
+
+  See \code{\link{acs_vars}} and \code{\link{decennial_vars}} for basic
+  descriptions of the raw census variables.}
+}
+\value{
+A \code{\link[tibble]{tibble}} with the same number of rows as
+  \code{data}. Columns include \code{GEOID}, \code{NAME}, and \code{ADI}.
+  Further columns containing the indicators and raw values will also be
+  present if \code{keep_indicators = TRUE}.
+
+  If imputation is necessary and unsuccessful, the \code{ADI} column will be
+  absent and columns containing the indicators will be present regardless of
+  the value of \code{keep_indicators}.
 }
 \description{
 Calculate the area deprivation index using decennial Census or American
@@ -25,7 +42,16 @@ Community Survey (ACS) variables.
 }
 \details{
 This function discerns between ACS, year 2000 decennial census, and year 1990
-decennial census data by checking for the existence of the population
-variables of each (\code{B01003_001}, \code{P001001}, and \code{P0010001},
-respectively).
+decennial census data by checking for the existence of
+}
+\examples{
+\donttest{
+# Wrapped in \donttest{} because these examples require a Census API key.
+
+raw_census <- get_adi("state", raw_data_only = TRUE)
+
+calculate_adi(raw_census)
+
+calculate_adi(raw_census, keep_indicators = TRUE)
+}
 }

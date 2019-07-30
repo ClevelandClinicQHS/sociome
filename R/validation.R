@@ -17,6 +17,17 @@ validate_geography <- function(geography = c("state",
 
 
 
+validate_year <- function(year) {
+  
+  if (!rlang::is_scalar_integerish(year) ||
+      !any(c(1990, 2000, 2005:2019) == year)) {
+    stop("year must be a single number")
+  }
+  
+  as.numeric(year)
+}
+
+
 
 validate_dataset <- function(dataset = c("acs5", "acs3", "acs1", "decennial"),
                              year,
@@ -26,9 +37,7 @@ validate_dataset <- function(dataset = c("acs5", "acs3", "acs1", "decennial"),
   
   if (dataset == "decennial") {
     
-    warning('dataset = "decennial" is still under development')
-    
-    if (!any(c(1990L, 2000L) == year)) {
+    if (!any(c(1990, 2000, 2010) == year)) {
       stop(
         'When setting dataset = "decennial", year must be 1990 or 2000.',
         "\n(The 2010 Decennial Census did not include the long-form survey",
@@ -59,7 +68,7 @@ validate_location <- function(geoid,
                               zcta, 
                               geography,
                               dataset,
-                              partial_call) {
+                              exec_arg_tibble) {
   
   if (geography == "zip code tabulation area") {
     
@@ -84,7 +93,7 @@ validate_location <- function(geoid,
     if (is.null(geoid)) {
       
       ref_area <-
-        ref_area_from_sc(state, county, geography, dataset, partial_call)
+        ref_area_from_sc(state, county, geography, dataset, exec_arg_tibble)
       
     } else {
       
@@ -93,7 +102,7 @@ validate_location <- function(geoid,
       }
       
       ref_area <-
-        ref_area_from_geoid(geoid, geography, dataset, partial_call)
+        ref_area_from_geoid(geoid, geography, dataset, exec_arg_tibble)
     }
     
   }
@@ -125,14 +134,18 @@ ref_area_from_zcta <- function(zcta) {
   list(
     geoid        = NULL,
     geo_length   = NULL,
-    state_county = list(list(state = NULL, county = NULL)),
+    state_county = tibble::tibble(state = list(NULL), county = list(NULL)),
     zcta         = zcta
   )
 }
 
 
 
-ref_area_from_sc <- function(state, county, geography, dataset, partial_call) {
+ref_area_from_sc <- function(state, 
+                             county, 
+                             geography, 
+                             dataset, 
+                             exec_arg_tibble) {
   
   if (!is.null(county) && length(state) != 1L) {
     stop(
@@ -146,23 +159,23 @@ ref_area_from_sc <- function(state, county, geography, dataset, partial_call) {
   state_county <-
     if (any(c("state", "county") == geography)) {
       
-      list(list(state = state, county = county))
+      tibble::tibble(state = list(state), county = list(county))
       
     } else if (is.null(county)) {
       
       if (geography == "tract" && dataset == "decennial") {
         
-        lapply(state, function(.x) list(state = .x, county = NULL))
+        tibble::tibble(state = state) #, county = list(NULL))
         
       } else {
         
-        sc_from_preliminary_call(partial_call, state)
+        sc_from_preliminary_call(exec_arg_tibble, state)
         
       }
       
     } else {
       
-      lapply(county, function(.x) list(state = state, county = .x))
+      tibble::tibble(state = state, county = county)
       
     }
   
@@ -176,73 +189,55 @@ ref_area_from_sc <- function(state, county, geography, dataset, partial_call) {
 
 
 
-sc_from_preliminary_call <- function(partial_call, state) {
+sc_from_preliminary_call <- function(exec_arg_tibble, state) {
   
-  county_geoids <- county_geoids_from_state(partial_call, state)
+  county_geoids <- county_geoids_from_state(exec_arg_tibble, state)
     
   sc_from_county_geoids(county_geoids)
 }
 
 
 
-county_geoids_from_state <- function(partial_call, state) {
+county_geoids_from_state <- function(exec_arg_tibble, state) {
   
-  call <-
-    partial_call %>% 
-    rlang::call_modify(
-      geography = "county",
-      variables = .$variables[1L],
-      state = state,
-      county = NULL,
-      geometry = FALSE,
-      shift_geo = FALSE,
-      summary_var = NULL
+  exec_args <- purrr::map(exec_arg_tibble, 1L)
+  
+  exec_args$geography   <- "county"
+  exec_args$variables   <- exec_args$variables[1L]
+  exec_args$geometry    <- FALSE
+  exec_args$shift_geo   <- FALSE
+  exec_args$summary_var <- NULL
+  
+  counties <-
+    exec_insistently(
+      .fn = exec_args$.fn,
+      !!!exec_args[-1L],
+      state = state
     )
   
-  attempt <- try(eval(call), silent = TRUE)
-  
-  if (inherits(attempt, what = "try-error")) {
-    give_up_counter <- 1L
-    while (inherits(attempt, what = "try-error")) {
-      give_up_counter <- give_up_counter + 1L
-      if (give_up_counter > 10L) {
-        stop(
-          "Maximum number of futile attempts (10) reached."
-        )
-      }
-      attempt <- try(eval(call), silent = TRUE)
-    }
-  }
-  
-  attempt$GEOID
+  counties$GEOID
 }
 
 
 
 
 sc_from_county_geoids <- function(county_geoids) {
-  
-  lapply(
-    county_geoids,
-    function(county_geoid) {
-      list(
-        state  = substr(county_geoid, 1L, 2L),
-        county = substr(county_geoid, 3L, 5L)
-      )
-    }
+  tibble::tibble(
+    state  = substr(county_geoids, 1L, 2L),
+    county = substr(county_geoids, 3L, 5L)
   )
 }
 
 
 
 
-ref_area_from_geoid <- function(geoid, geography, dataset, partial_call) {
+ref_area_from_geoid <- function(geoid, geography, dataset, exec_arg_tibble) {
   
   geoid <- validate_geoid(geoid)
   
   geo_length <- validate_geo_length(geography, geoid)
   
-  state_county <- sc_from_geoid(geoid, geography, dataset, partial_call)
+  state_county <- sc_from_geoid(geoid, geography, dataset, exec_arg_tibble)
   
   list(
     geoid = geoid,
@@ -256,7 +251,6 @@ ref_area_from_geoid <- function(geoid, geography, dataset, partial_call) {
 
 validate_geoid <- function(geoid) {
   
-  # Trim whitespace
   geoid <- stringr::str_trim(geoid)
   
   # user_geoids must be a vector of strings of digits between 2 and 12
@@ -282,12 +276,17 @@ validate_geoid <- function(geoid) {
 validate_geo_length <- function(geography, geoid) {
   
   geo_length <-
-    dplyr::case_when(
-      # geography == "block"       ~ 15L,
-      geography == "block group" ~ 12L,
-      geography == "tract"       ~ 11L,
-      geography == "county"      ~  5L,
-      geography == "state"       ~  2L
+    switch(
+      geography, 
+      "block"       = 15L,
+      "block group" = 12L,
+      "tract"       = 11L,
+      "county"      =  5L,
+      "state"       =  2L,
+      stop(
+        'geography does not match any of:\n',
+        'c("block", "block group", "tract", "county", "state")'
+      )
     )
   
   if (max(nchar(geoid)) > geo_length) {
@@ -304,20 +303,25 @@ validate_geo_length <- function(geography, geoid) {
 
 
 # @importFrom rlang .data
-sc_from_geoid <- function(geoid, geography, dataset, partial_call) {
+sc_from_geoid <- function(geoid, geography, dataset, exec_arg_tibble) {
   
   first_two <- substr(geoid, 1L, 2L)
   
   if (any(c("state", "county") == geography)) {
     
-    list(list(state = unique(first_two), county = NULL))
+    tibble::tibble(state = list(unique(first_two)))
+    
+    # list(list(state = unique(first_two), county = NULL))
     
   } else if (geography == "tract" && dataset == "decennial") {
     
-    lapply(
-      unique(first_two),
-      function(state) list(state = state, county = NULL)
-    )
+    tibble::tibble(state = unique(first_two))
+    
+    # lapply(
+    #   unique(first_two),
+    #   function(state) list(state = state, county = NULL)
+    # )
+    
   } else {
     
     state_geoids_lgl <- geoid == first_two
@@ -327,7 +331,7 @@ sc_from_geoid <- function(geoid, geography, dataset, partial_call) {
         c(
           geoid[!state_geoids_lgl],
           county_geoids_from_state(
-            partial_call = partial_call,
+            exec_arg_tibble = exec_arg_tibble,
             state = unique(geoid[state_geoids_lgl])
           )
         )
@@ -339,3 +343,4 @@ sc_from_geoid <- function(geoid, geography, dataset, partial_call) {
     
   }
 }
+

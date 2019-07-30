@@ -2,14 +2,15 @@
 #'
 #' Returns the ADIs of user-specified areas.
 #'
-#' Returns a \code{tibble} or \code{sf tibble} of the area deprivation indices
-#' (ADIs) of user-specified locations in the United States, utilizing US Census
-#' data.
+#' Returns a \code{\link[tibble]{tibble}} or \code{\link[sf]{sf}} \code{tibble}
+#' of the area deprivation indices (ADIs) of user-specified locations in the
+#' United States, utilizing US Census data.
 #'
-#' The returned \code{tibble} or \code{sf tibble} is also of class \code{adi},
-#' and it contains an attribute called \code{loadings}, which contains a named
-#' numeric vector of the PCA loadings of each factor. This is accessible through
-#' \code{attr(name_of_tibble, "loadings")}.
+#' The returned \code{\link[tibble]{tibble}} or \code{\link[sf]{sf}}
+#' \code{tibble} is also of class \code{adi}, and it contains an attribute
+#' called \code{loadings}, which contains a named numeric vector of the PCA
+#' loadings of each factor. This is accessible through
+#' \code{\link{attr}(name_of_tibble, "loadings")}.
 #'
 #' @param geography A character string denoting the level of census geography
 #'   whose ADIs you'd like to obtain. Must be one of \code{c("state", "county",
@@ -33,7 +34,7 @@
 #'   quotation marks and leading zeros). Defaults to \code{NULL}. Must be blank
 #'   if \code{state}, \code{county}, or \code{geoid} is used.
 #'
-#'   A string under 5 digits long will yield all ZCTAs that begin with those
+#'   Strings under 5 digits long will yield all ZCTAs that begin with those
 #'   digits.
 #'
 #'   Requires that \code{geography = "zcta"}. If \code{geography = "zcta"} and
@@ -44,27 +45,41 @@
 #'   \code{c("acs5", "acs3", "acs1", "decennial")}, denoting the 5-, 3-, and
 #'   1-year ACS along with the decennial census. Defaults to \code{"acs5"}.
 #'
-#'   dataset = "decennial" is currently under development.
+#'   When \code{dataset = "decennial"}, \code{year} must be in \code{c(1990,
+#'   2000, 2010)}.
 #'
-#'   Important: data not always available depending on the level of geography
-#'   and data set chosen. See
+#'   The 2010 decennial census did not include the long-form questionnaire used
+#'   in the 1990 and 2000 censuses, so this function uses the 5-year estimates
+#'   from the 2010 ACS to supply the data not included in the 2010 decennial
+#'   census. In fact, the only 2010 decennial variables used are H003002,
+#'   H014002, P020002, and P020008.
+#'
+#'   Important: data are not always available depending on the level of
+#'   geography and data set chosen. See
 #'   \url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html}.
 #' @param geometry Logical value indicating whether or not shapefile data should
-#'   be included in the result, making the result an \code{sf tibble} instead of
-#'   a plain \code{tibble}. Defaults to \code{TRUE}.
+#'   be included in the result, making the result an \code{\link[sf]{sf}}
+#'   \code{tibble} instead of a plain \code{\link[tibble]{tibble}}. Defaults to
+#'   \code{FALSE}.
 #' @param shift_geo Logical value. See the \code{shift_geo} argument of
-#'   \code{tidycensus::\link[tidycensus]{get_acs}()} for details.
+#'   \code{tidycensus::\link[tidycensus]{get_acs}()} or
+#'   \code{tidycensus::\link[tidycensus]{get_decennial}()} for details.
 #' @param keep_indicators Logical value indicating whether or not the resulting
-#'   \code{tibble} or \code{sf tibble} will contain the socioeconomic measures
-#'   used to calculate the ADI values. Defaults to \code{FALSE}.
+#'   \code{\link[tibble]{tibble}} or \code{\link[sf]{sf}} \code{tibble} will
+#'   contain the socioeconomic measures used to calculate the ADI values.
+#'   Defaults to \code{FALSE}.
+#'   
+#'   See \code{\link{acs_vars}} and \code{\link{decennial_vars}} for basic
+#'   descriptions of the raw census variables.
 #' @param cache_tables The plural version of the \code{cache_table} argument in
 #'   \code{tidycensus::\link[tidycensus]{get_acs}()} or
 #'   \code{tidycensus::\link[tidycensus]{get_decennial}()}. (\code{get_adi()}
 #'   calls the necessary \code{tidycensus} function many times in order to
-#'   return ADIs, so many tables are cached if \code{TRUE}).
+#'   return ADIs, so many tables are cached if \code{TRUE}). Defaults to
+#'   \code{TRUE}.
 #' @param key Your Census API key as a character string. Obtain one at
-#'   http://api.census.gov/data/key_signup.html. Defaults to \code{NULL}. Not
-#'   necessary if you have already loaded your key with
+#'   \url{http://api.census.gov/data/key_signup.html}. Defaults to \code{NULL}.
+#'   Not necessary if you have already loaded your key with
 #'   \code{\link{census_api_key}()}.
 #' @param raw_data_only Logical, indicating whether or not to skip calculation
 #'   of the ADI and only return the census variables. Defaults to \code{FALSE}.
@@ -88,26 +103,18 @@
 #'   The function then gathers data from those specified locations and performs
 #'   calculations using their data alone.
 #'
-#' @section Default behaviors: If \code{geography} is specified but
-#'   \code{state}, \code{county}, \code{geoid}, and \code{zcta} are all left
-#'   blank, the function will use the entire US (the 50 states plus the District
-#'   of Columbia (DC) and Puerto Rico (PR)) as the reference area (see
-#'   "Reference Area" above). Beware that this will take a long time if you set
-#'   \code{geography = "tract"} or especially if \code{geography = "block
-#'   group"}.
-#'
 #' @section The \code{geoid} parameter: Elements of \code{geoid} can represent
 #'   different levels of geography, but they all must be either 2 digits (for
-#'   states), 5 digits (for counties), 11 digits (for tracts), 12 digits (for
-#'   block groups), or 15 digits (for blocks). It must contain character
-#'   strings, so use quotation marks as well as leading zeros where applicable.
+#'   states), 5 digits (for counties), 11 digits (for tracts), or 12 digits (for
+#'   block groups). It must contain character strings, so use quotation marks as
+#'   well as leading zeros where applicable.
 #'
 #' @section Error handling: Depending on user input, this function may call its
 #'   underlying functions (\code{tidycensus::\link[tidycensus]{get_acs}()} or
 #'   \code{tidycensus::\link[tidycensus]{get_decennial}()}) many times in order
-#'   to accommodate their behavior. If any of these calls are unsuccessful,
-#'   \code{get_adi()} will try them again. The function quits if it attempts a
-#'   batch of calls ten times without progress.
+#'   to accommodate their behavior. These calls are wrapped in
+#'   \code{purrr::\link[purrr]{insistently}(rate =
+#'   purrr::\link[purrr]{rate_delay}())}.
 #'
 #' @section Warnings and disclaimers: Please note that this function calls data
 #'   from US Census servers, so execution may take a long time depending on the
@@ -132,26 +139,42 @@
 #' # Wrapped in \donttest{} because all these examples take >5 seconds
 #' # and require a Census API key.
 #'
+#' # ADI of all census tracts in Cuyahoga County, Ohio
 #' get_adi(geography = "tract", state = "OH", county = "Cuyahoga")
 #'
-#' get_adi(geography = "county", state = "CT", year = 2015, survey = "acs1",
-#'         geometry = FALSE)
+#' # ADI of all counties in Connecticut.
+#' # Returns a warning because there are only 8 counties.
+#' # A minimum of 30 locations is recommended.
+#' get_adi(geography = "county", state = "CT", year = 2015, dataset = "acs1")
 #'
+#' # ADI of all census tracts in the GEOIDs below.
+#' # Notice the mixing of state- ("10") and county-level GEOIDs (the others).
 #' delmarva_geoids <- c("10", "51001", "51131", "24015", "24029", "24035",
 #'                      "24011", "24041", "24019", "24045", "24039", "24047")
-#' delmarva <- get_adi(geography = "tract", geoid = delmarva_geoids)
+#' delmarva <-
+#'   get_adi(
+#'     geography = "tract",
+#'     geoid = delmarva_geoids,
+#'     dataset = "decennial",
+#'     year = 2000,
+#'     geometry = TRUE
+#'   )
 #'
 #' # Demonstration of geom_sf integration:
-#' library(ggplot2)
+#' require(ggplot2)
 #'
 #' delmarva %>% ggplot() + geom_sf(aes(fill = ADI))
+#'
+#' # Return the loadings of the indicators used to calculate the delmarva ADIs
+#' attr(delmarva, "loadings")
 #' }
-#' @return If \code{geometry = TRUE} (the default), an \code{sf tibble}. If
-#'   \code{geometry = FALSE} is specified, a plain \code{tibble}.
+#' @return If \code{geometry = FALSE}, (the default) a
+#'   \code{\link[tibble]{tibble}}. If \code{geometry = TRUE} is specified, an
+#'   \code{\link[sf]{sf}} \code{tibble}.
 #'
 #'   If the census data contained too many missing values for imputation to take
-#'   place, a \code{tibble} of the factors that could not undergo imputation,
-#'   followed by the raw census data.
+#'   place, a \code{\link[tibble]{tibble}} of the factors that could not undergo
+#'   imputation, followed by the raw census data.
 #' @export
 get_adi <- function(geography,
                     state           = NULL,
@@ -160,7 +183,7 @@ get_adi <- function(geography,
                     zcta            = NULL,
                     year            = 2017,
                     dataset         = c("acs5", "acs3", "acs1", "decennial"),
-                    geometry        = TRUE,
+                    geometry        = FALSE,
                     shift_geo       = FALSE,
                     keep_indicators = FALSE,
                     raw_data_only   = FALSE,
@@ -169,11 +192,11 @@ get_adi <- function(geography,
                     ...) {
   
   geography <- validate_geography(geography)
+  year      <- validate_year(year)
+  dataset   <- validate_dataset(dataset, year, geography)
   
-  dataset <- validate_dataset(dataset, year, geography)
-  
-  partial_call <-
-    partial_tidycensus_call(
+  exec_arg_tibble <-
+    exec_arg_tibble(
       dataset,
       year, 
       geography = geography,
@@ -192,8 +215,10 @@ get_adi <- function(geography,
       zcta, 
       geography, 
       dataset,
-      partial_call
+      exec_arg_tibble
     )
+  
+  exec_arg_tibble <- tidyr::crossing(exec_arg_tibble, ref_area$state_county)
   
   if (geometry) {
     # Saves old tigris_use_cache value and puts it back when function exits
@@ -201,8 +226,7 @@ get_adi <- function(geography,
     on.exit(options(old), add = TRUE)
   }
   
-  census_data <-
-    get_tidycensus(partial_call, state_county = ref_area$state_county)
+  census_data <- get_tidycensus(exec_arg_tibble)
   
   # Since the call (or calls) to tidycensus functions usually gathers data on
   # more places than what the user specified, this pares the data frame down to
@@ -233,119 +257,90 @@ get_adi <- function(geography,
 
 
 
-partial_tidycensus_call <- function(dataset, year, ...) {
+#' @importFrom rlang .data
+exec_arg_tibble <- function(dataset, year, ...) {
+  
+  dots <- lapply(list(...), list)
   
   if (dataset == "decennial") {
-    .fn  <- tidycensus::get_decennial
-    args <-
-      rlang::dots_list(
-        variables = choose_decennial_variables(year),
-        sumfile = "sf3",
-        year = year,
-        table = NULL,
-        output = "wide",
-        ...,
-        .homonyms = "first"
-      )
-  } else {
-    .fn  <- tidycensus::get_acs
-    args <-
-      rlang::dots_list(
-        variables = choose_acs_variables(year, dataset),
-        survey = dataset,
-        year = year,
-        table = NULL,
-        output = "wide",
-        ...,
-        .homonyms = "first"
-      )
-  }
-  
-  rlang::call_standardise(rlang::call2(.fn, !!!args))
-}
-
-
-
-get_tidycensus <- function(partial_call, state_county, ...) {
-  
-  message(length(state_county), " call(s) to tidycensus remaining.")
-  
-  d <- 
-    lapply(
-      state_county,
-      function(sc) {
-        tidycensus_call_message(sc)
-        try(
-          partial_call %>% rlang::call_modify(!!!sc) %>% eval(),
-          silent = FALSE
-        )
-      }
-    )
-  
-  error_indices <- 
-    d %>% 
-    vapply(inherits, FUN.VALUE = logical(1L), what = "try-error") %>% 
-    which()
-  
-  if (length(error_indices) > 0L) {
-    give_up_counter <- 1L
     
-    while (length(error_indices) > 0L) {
+    if (year == 2010) {
       
-      message("Retrying ", length(error_indices), " call(s) to tidycensus.")
+      variables <- 
+        list(
+          sociome::decennial_vars %>% 
+            dplyr::filter(.data$year == 2010) %>% 
+            dplyr::pull("variable"),
+          sociome::acs_vars %>% 
+            dplyr::filter(.data$decennial2010) %>% 
+            dplyr::pull("variable")
+        )
       
-      for (i in error_indices) {
-        tidycensus_call_message(state_county[[i]])
-        d[[i]] <-
-          try(
-            partial_call %>%
-              rlang::call_modify(!!!state_county[[i]]) %>%
-              eval(),
-            silent = TRUE
-          )
-      }
+      rlang::dots_list(
+        .fn = list(tidycensus::get_decennial, tidycensus::get_acs),
+        variables = variables,
+        sumfile = list("sf1", NULL),
+        year = year,
+        output = "tidy",
+        !!!dots,
+        .homonyms = "first"
+      ) %>% 
+        tibble::as_tibble(.rows = 2L)
       
-      previous_errors <- error_indices
+    } else {
+      variables <- 
+        sociome::decennial_vars %>%
+        dplyr::filter(.data$year == !!year) %>% 
+        split(.$sumfile) %>% 
+        lapply(dplyr::pull, var = "variable")
       
-      error_indices <- 
-        d %>% 
-        vapply(inherits, FUN.VALUE = logical(1L), what = "try-error") %>% 
-        which()
-      
-      if (identical(previous_errors, error_indices)) {
-        give_up_counter <- give_up_counter + 1L
-        if (give_up_counter > 10L) {
-          stop(
-            "Maximum number of futile attempts (10) reached."
-          )
-        }
-      }
+      rlang::dots_list(
+        .fn = list(tidycensus::get_decennial),
+        variables = variables,
+        sumfile = c("sf1", "sf3"),
+        year = year,
+        output = "tidy",
+        !!!dots,
+        .homonyms = "first"
+      ) %>% 
+        tibble::as_tibble(.rows = 2L)
     }
+    
+  } else {
+    rlang::dots_list(
+      .fn = list(tidycensus::get_acs),
+      variables = list(choose_acs_variables(year = year, dataset = dataset)),
+      year = year,
+      survey = dataset,
+      output = "tidy",
+      !!!dots,
+      .homonyms = "first"
+    ) %>% 
+      tibble::as_tibble(.rows = 1L)
+  }
+}
+
+
+#' @importFrom rlang .data
+get_tidycensus <- function(exec_arg_tibble) {
+  
+  message(nrow(exec_arg_tibble), " call(s) to tidycensus beginning.")
+  
+  result <-
+    exec_arg_tibble %>% 
+    purrr::pmap(exec_insistently) %>% 
+    lapply(dplyr::select, "GEOID", "NAME", "key" = 3L, "value" = 4L) %>% 
+    Reduce(f = rbind)
+  
+  geoid_match <- result$GEOID %>% match(., .)
+  
+  result$NAME <- result$NAME[geoid_match]
+  
+  if (any(colnames(result) == "geometry")) {
+    result$geometry <- result$geometry[geoid_match]
   }
   
-  d %>% purrr::reduce(rbind)
-}
-
-
-
-
-tidycensus_call_message <- function(sc) {
-  if (!is.null(sc$state)) {
-    message("\nState: ", sc$state)
-    if (!is.null(sc$county)) {
-      message("  County: ", sc$county)
-    }
-  }
-}
-
-
-
-choose_decennial_variables <- function(year) {
-  if (year == 1990) {
-    decennial_vars_1990$variable
-  } else {
-    decennial_vars_2000$variable
-  }
+  tidyr::spread(result, key = "key", value = "value")
 }
 
 
@@ -375,6 +370,10 @@ choose_acs_variables <- function(year, dataset) {
       dplyr::pull("variable")
   }
 }
+
+
+
+exec_insistently <- purrr::insistently(rlang::exec, rate = purrr::rate_delay())
 
 
 

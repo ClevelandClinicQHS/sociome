@@ -4,7 +4,7 @@
 \name{acs_vars}
 \alias{acs_vars}
 \title{ACS variable names for ADI calculation}
-\format{A \code{\link[tibble]{tibble}} with 137 rows and 6 variables:
+\format{A \code{\link[tibble]{tibble}} with 136 rows and 7 variables:
   \describe{ \item{variable}{ACS variable name} \item{description}{Brief
   description of the data the variable contains}
   \item{B23025_and_B15003}{Logical, indicating the variables to be used when
@@ -16,12 +16,18 @@
   calculating ADI using the 2008-2010 1-year estimates or the 2010 3-year
   estimates} \item{B23001_and_B15002}{Logical, indicating the variables to be
   used when calculating ADI using the pre-2008 1-year estimates, the pre-2010
-  3-year estimates, or the pre-2011 5-year estimates} }}
+  3-year estimates, or the pre-2011 5-year estimates}
+  \item{decennial2010}{Logical, indicating the variables to use in
+  conjunction with the few actual 2010 decennial census variables when
+  running \code{\link{get_adi}(year = 2010, dataset = "decennial")}}}}
 \usage{
 acs_vars
 }
 \description{
 A dataset of the ACS variable names used to calculate the Area Deprivation
 Index (ADI).
+}
+\seealso{
+\code{\link{decennial_vars}}
 }
 \keyword{datasets}

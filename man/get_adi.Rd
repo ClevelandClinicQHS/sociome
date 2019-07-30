@@ -6,7 +6,7 @@
 \usage{
 get_adi(geography, state = NULL, county = NULL, geoid = NULL,
   zcta = NULL, year = 2017, dataset = c("acs5", "acs3", "acs1",
-  "decennial"), geometry = TRUE, shift_geo = FALSE,
+  "decennial"), geometry = FALSE, shift_geo = FALSE,
   keep_indicators = FALSE, raw_data_only = FALSE,
   cache_tables = TRUE, key = NULL, ...)
 }
@@ -37,7 +37,7 @@ geography (see details).}
   quotation marks and leading zeros). Defaults to \code{NULL}. Must be blank
   if \code{state}, \code{county}, or \code{geoid} is used.
 
-  A string under 5 digits long will yield all ZCTAs that begin with those
+  Strings under 5 digits long will yield all ZCTAs that begin with those
   digits.
 
   Requires that \code{geography = "zcta"}. If \code{geography = "zcta"} and
@@ -50,22 +50,35 @@ Defaults to 2017.}
   \code{c("acs5", "acs3", "acs1", "decennial")}, denoting the 5-, 3-, and
   1-year ACS along with the decennial census. Defaults to \code{"acs5"}.
 
-  dataset = "decennial" is currently under development.
+  When \code{dataset = "decennial"}, \code{year} must be in \code{c(1990,
+  2000, 2010)}.
 
-  Important: data not always available depending on the level of geography
-  and data set chosen. See
+  The 2010 decennial census did not include the long-form questionnaire used
+  in the 1990 and 2000 censuses, so this function uses the 5-year estimates
+  from the 2010 ACS to supply the data not included in the 2010 decennial
+  census. In fact, the only 2010 decennial variables used are H003002,
+  H014002, P020002, and P020008.
+
+  Important: data are not always available depending on the level of
+  geography and data set chosen. See
   \url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html}.}
 
 \item{geometry}{Logical value indicating whether or not shapefile data should
-be included in the result, making the result an \code{sf tibble} instead of
-a plain \code{tibble}. Defaults to \code{TRUE}.}
+be included in the result, making the result an \code{\link[sf]{sf}}
+\code{tibble} instead of a plain \code{\link[tibble]{tibble}}. Defaults to
+\code{FALSE}.}
 
 \item{shift_geo}{Logical value. See the \code{shift_geo} argument of
-\code{tidycensus::\link[tidycensus]{get_acs}()} for details.}
+\code{tidycensus::\link[tidycensus]{get_acs}()} or
+\code{tidycensus::\link[tidycensus]{get_decennial}()} for details.}
 
 \item{keep_indicators}{Logical value indicating whether or not the resulting
-\code{tibble} or \code{sf tibble} will contain the socioeconomic measures
-used to calculate the ADI values. Defaults to \code{FALSE}.}
+\code{\link[tibble]{tibble}} or \code{\link[sf]{sf}} \code{tibble} will
+contain the socioeconomic measures used to calculate the ADI values.
+Defaults to \code{FALSE}.
+
+See \code{\link{acs_vars}} and \code{\link{decennial_vars}} for basic
+descriptions of the raw census variables.}
 
 \item{raw_data_only}{Logical, indicating whether or not to skip calculation
 of the ADI and only return the census variables. Defaults to \code{FALSE}.}
@@ -74,11 +87,12 @@ of the ADI and only return the census variables. Defaults to \code{FALSE}.}
 \code{tidycensus::\link[tidycensus]{get_acs}()} or
 \code{tidycensus::\link[tidycensus]{get_decennial}()}. (\code{get_adi()}
 calls the necessary \code{tidycensus} function many times in order to
-return ADIs, so many tables are cached if \code{TRUE}).}
+return ADIs, so many tables are cached if \code{TRUE}). Defaults to
+\code{TRUE}.}
 
 \item{key}{Your Census API key as a character string. Obtain one at
-http://api.census.gov/data/key_signup.html. Defaults to \code{NULL}. Not
-necessary if you have already loaded your key with
+\url{http://api.census.gov/data/key_signup.html}. Defaults to \code{NULL}.
+Not necessary if you have already loaded your key with
 \code{\link{census_api_key}()}.}
 
 \item{...}{Additional arguments to be passed onto
@@ -86,25 +100,27 @@ necessary if you have already loaded your key with
 \code{tidycensus::\link[tidycensus]{get_decennial}()}.}
 }
 \value{
-If \code{geometry = TRUE} (the default), an \code{sf tibble}. If
-  \code{geometry = FALSE} is specified, a plain \code{tibble}.
+If \code{geometry = FALSE}, (the default) a
+  \code{\link[tibble]{tibble}}. If \code{geometry = TRUE} is specified, an
+  \code{\link[sf]{sf}} \code{tibble}.
 
   If the census data contained too many missing values for imputation to take
-  place, a \code{tibble} of the factors that could not undergo imputation,
-  followed by the raw census data.
+  place, a \code{\link[tibble]{tibble}} of the factors that could not undergo
+  imputation, followed by the raw census data.
 }
 \description{
 Returns the ADIs of user-specified areas.
 }
 \details{
-Returns a \code{tibble} or \code{sf tibble} of the area deprivation indices
-(ADIs) of user-specified locations in the United States, utilizing US Census
-data.
+Returns a \code{\link[tibble]{tibble}} or \code{\link[sf]{sf}} \code{tibble}
+of the area deprivation indices (ADIs) of user-specified locations in the
+United States, utilizing US Census data.
 
-The returned \code{tibble} or \code{sf tibble} is also of class \code{adi},
-and it contains an attribute called \code{loadings}, which contains a named
-numeric vector of the PCA loadings of each factor. This is accessible through
-\code{attr(name_of_tibble, "loadings")}.
+The returned \code{\link[tibble]{tibble}} or \code{\link[sf]{sf}}
+\code{tibble} is also of class \code{adi}, and it contains an attribute
+called \code{loadings}, which contains a named numeric vector of the PCA
+loadings of each factor. This is accessible through
+\code{\link{attr}(name_of_tibble, "loadings")}.
 }
 \section{Reference area}{
  \strong{The concept of "reference area" is important
@@ -124,31 +140,21 @@ numeric vector of the PCA loadings of each factor. This is accessible through
   calculations using their data alone.
 }
 
-\section{Default behaviors}{
- If \code{geography} is specified but
-  \code{state}, \code{county}, \code{geoid}, and \code{zcta} are all left
-  blank, the function will use the entire US (the 50 states plus the District
-  of Columbia (DC) and Puerto Rico (PR)) as the reference area (see
-  "Reference Area" above). Beware that this will take a long time if you set
-  \code{geography = "tract"} or especially if \code{geography = "block
-  group"}.
-}
-
 \section{The \code{geoid} parameter}{
  Elements of \code{geoid} can represent
   different levels of geography, but they all must be either 2 digits (for
-  states), 5 digits (for counties), 11 digits (for tracts), 12 digits (for
-  block groups), or 15 digits (for blocks). It must contain character
-  strings, so use quotation marks as well as leading zeros where applicable.
+  states), 5 digits (for counties), 11 digits (for tracts), or 12 digits (for
+  block groups). It must contain character strings, so use quotation marks as
+  well as leading zeros where applicable.
 }
 
 \section{Error handling}{
  Depending on user input, this function may call its
   underlying functions (\code{tidycensus::\link[tidycensus]{get_acs}()} or
   \code{tidycensus::\link[tidycensus]{get_decennial}()}) many times in order
-  to accommodate their behavior. If any of these calls are unsuccessful,
-  \code{get_adi()} will try them again. The function quits if it attempts a
-  batch of calls ten times without progress.
+  to accommodate their behavior. These calls are wrapped in
+  \code{purrr::\link[purrr]{insistently}(rate =
+  purrr::\link[purrr]{rate_delay}())}.
 }
 
 \section{Warnings and disclaimers}{
@@ -176,18 +182,33 @@ numeric vector of the PCA loadings of each factor. This is accessible through
 # Wrapped in \donttest{} because all these examples take >5 seconds
 # and require a Census API key.
 
+# ADI of all census tracts in Cuyahoga County, Ohio
 get_adi(geography = "tract", state = "OH", county = "Cuyahoga")
 
-get_adi(geography = "county", state = "CT", year = 2015, survey = "acs1",
-        geometry = FALSE)
+# ADI of all counties in Connecticut.
+# Returns a warning because there are only 8 counties.
+# A minimum of 30 locations is recommended.
+get_adi(geography = "county", state = "CT", year = 2015, dataset = "acs1")
 
+# ADI of all census tracts in the GEOIDs below.
+# Notice the mixing of state- ("10") and county-level GEOIDs (the others).
 delmarva_geoids <- c("10", "51001", "51131", "24015", "24029", "24035",
                      "24011", "24041", "24019", "24045", "24039", "24047")
-delmarva <- get_adi(geography = "tract", geoid = delmarva_geoids)
+delmarva <-
+  get_adi(
+    geography = "tract",
+    geoid = delmarva_geoids,
+    dataset = "decennial",
+    year = 2000,
+    geometry = TRUE
+  )
 
 # Demonstration of geom_sf integration:
-library(ggplot2)
+require(ggplot2)
 
 delmarva \%>\% ggplot() + geom_sf(aes(fill = ADI))
+
+# Return the loadings of the indicators used to calculate the delmarva ADIs
+attr(delmarva, "loadings")
 }
 }

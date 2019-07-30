@@ -10,33 +10,23 @@ get_geoids(geography, state = NULL, county = NULL, geoid = NULL,
 }
 \arguments{
 \item{geography}{A character string denoting the level of census geography
-whose GEOIDs you'd like to obtain. Must be one of \code{c("state",
-"county", "tract", "block group", "block")}.}
+  whose GEOIDs you'd like to obtain. Must be one of \code{c("state",
+  "county", "tract", "block group", "block")}.
 
-\item{state}{A character string specifying states containing the desired
-GEOIDs. Defaults to \code{NULL}. Can contain full state names, two-letter
-state abbreviations, or two-digit FIPS codes/GEOIDs (must be vector of
-strings, so use quotation marks and leading zeros if necessary). Must be
-left as \code{NULL} blank if using the \code{geoid} parameter.}
+  Note that block-level data cannot be obtained from 1990 and 2000 decennial
+  census data due to limitations in
+  \code{tidycensus::\link[tidycensus]{get_decennial}()}. Whereas block-level
+  2010 decennial census data are available, block-level ADIs cannot be
+  calculated due to the removal of the long-form questionnaire from the 2010
+  decennial census.}
 
-\item{county}{A vector of character strings specifying the counties
-containing the desired GEOIDs. Defaults to \code{NULL}. If specified, the
-\code{state} parameter must contain exactly one state. County names and
-three-digit FIPS codes are accepted (must contain strings, so use quotation
-marks and leading zeros if necessary). Must be blank if using the
-\code{geoid} parameter.}
-
-\item{geoid}{A character vector of GEOIDs (use quotation marks and leading
-zeros). Defaults to \code{NULL}. Must be blank if \code{state} and/or
-\code{county} is used. Can contain different levels of geography (see
-details).}
+\item{state, county, geoid, geometry, cache_tables, key}{See the descriptions of
+the arguments in \code{\link{get_adi}()}.}
 
 \item{year}{Single integer specifying the year of US Census data to use.
 Defaults to 2010. Based on this year, data from the most recent decennial
-census will be returned.}
-
-\item{geometry, cache_tables, key}{See the descriptions of the arguments in
-\code{\link{get_adi}()}.}
+census will be returned (specifically, \code{year <- floor(year / 10) * 10}
+is run).}
 
 \item{...}{Additional arguments to be passed to
 \code{tidycensus::\link[tidycensus]{get_decennial}()}. Not recommended; use
@@ -58,7 +48,11 @@ complicated reference areas.
 \donttest{
 # Wrapped in \donttest{} because it requires a Census API key.
 
-# Get all county GEOIDs for all Connecticut counties
-get_geoids(geography = "county", state = "CT")
+# Get all tract GEOIDs for all Connecticut counties
+tracts <- get_geoids(geography = "tract", state = "New York", county = "New York")
+tracts
+
+# Get all block GEOIDs for the first tract on that list
+get_geoids(geography = "block", geoid = tracts$GEOID[1])
 }
 }

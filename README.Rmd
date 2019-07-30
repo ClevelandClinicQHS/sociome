@@ -62,39 +62,82 @@ The `get_adi()` function returns a table (viz., a `tibble` or `sf tibble`) of *l
 - the ACS estimates (viz. the one-, three-, or five-year estimates)
 - the **reference population** (see above).
 
-The function then calls the specified ACS data sets and employs the same algorithms that were used to calculate the *original* ADIs, resulting in *localized* ADIs. It stands on the shoulders of the `get_acs()` function in Kyle Walker's `tidycensus` package (see https://walkerke.github.io/tidycensus), which is what enables the user to so easily select specific years and specific ACS estimates. `get_adi()` also benefits from the shapefile-gathering capabilities of `get_acs()`, which enables the user to create maps depicting ADI values with relative ease, thanks to `geom_sf()` in `ggplot2`.
+The function then calls the specified ACS data sets and employs the same algorithms that were used to calculate the *original* ADIs, resulting in *localized* ADIs. It stands on the shoulders of the `get_acs()` and `get_decennial()` functions in Kyle Walker's `tidycensus` package (see https://walkerke.github.io/tidycensus), which is what enables the user to so easily select specific years and specific ACS estimates. `get_adi()` also benefits from the `sf` (**s**hape**f**ile)-gathering capabilities of `get_acs()` and `get_decennial()`, which enables the user to create maps depicting ADI values with relative ease, thanks to `geom_sf()` in `ggplot2`.
 
 ## Examples
 
-The following code returns the ADIs of all counties in New Mexico, using the 2017 edition of the 5-year ACS estimates (the defaults):
+The following code returns the ADIs of the fifty US states plus the District of Columbia and Puerto Rico, using the 2017 edition of the 5-year ACS estimates (the defaults):
 
-```{r NM_table, message=FALSE, cache=TRUE}
+```{r usa2017, message=FALSE, cache=TRUE}
 library(sociome)
-get_adi(geography = "county", state = "NM", geometry = FALSE)
+get_adi(geography = "state")
 ```
 
-Setting `geometry = FALSE` as performed above is useful when only a `tibble` of ADI values is needed (i.e., maps need not be drawn) because the default output of `sf tibbles` is verbose. The following is an `sf tibble` of the ADIs of the fifty US states plus the District of Columbia and Puerto Rico, using the 2012 edition of the 1-year ACS estimates:
-
-```{r usa2012, message=FALSE, cache=TRUE}
-get_adi(geography = "state", year = 2012, dataset = "acs1")
+```{r include=FALSE}
+library(sociome)
 ```
 
-The user can mix different levels of geography in the `geoid` parameter. The code below stores the ADIs of the census block groups in every county entirely or partially on the Delmarva peninsula:
+Setting `geometry = TRUE` returns the same data along with **s**hape**f**ile data: an `sf tibble`. Its default output is verbose, so it is only recommended to set `geometry = TRUE` when a map may be produced. The following is an `sf tibble` of the ADIs of the counties of Connecticut, using the 2013 edition of the 1-year ACS estimates:
+
+```{r ct2013_download_cache, include=FALSE, cache=TRUE}
+get_adi(
+  geography = "county",
+  state = "CT",
+  year = 2013, 
+  dataset = "acs1",
+  geometry = TRUE
+)
+```
+
+```{r ct2013, message=FALSE, cache=TRUE, results='hold'}
+get_adi(
+  geography = "county",
+  state = "CT",
+  year = 2013, 
+  dataset = "acs1",
+  geometry = TRUE
+)
+```
+
+Notice the warning to the user that it is not recommended to calculate ADIs for fewer than 30 locations. This warning occurred in this case because Connecticut only has eight counties.
+
+The user can mix different levels of geography in the `geoid` parameter. Employing 2000 decennial census data, the code below stores the ADIs of the census block groups in every county entirely or partially on the Delmarva peninsula:
+
+```{r delmarva_geoids_download_cache, include=FALSE, cache=TRUE}
+get_adi(
+  geography = "block group",
+  geoid = c("10", "51001", "51131", "24015", "24029", "24035", "24011", "24041",
+            "24019", "24045", "24039", "24047"), 
+  dataset = "decennial",
+  year = 2000,
+  geometry = TRUE
+)
+```
 
 ```{r delmarva_geoids, echo=TRUE, results='hold', message=FALSE, cache=TRUE}
-delmarva_geoids <- c("10", "51001", "51131", "24015", "24029", "24035", "24011",
-                     "24041", "24019", "24045", "24039", "24047")
-# The two-digit GEOID stands for the state of Delaware.
-# The five-digit GEOIDs stand for specific counties in Virginia and Maryland
+delmarva_geoids <-
+  c("10",
+    # The two-digit GEOID above stands for the state of Delaware.
+    
+    # The five-digit GEOIDs stand for specific counties in Virginia and Maryland
+    "51001", "51131", "24015", "24029", "24035", "24011", "24041", "24019",
+    "24045", "24039", "24047")
 
-delmarva <- get_adi(geography = "block group", geoid = delmarva_geoids)
+delmarva <-
+  get_adi(
+    geography = "block group",
+    geoid = delmarva_geoids, 
+    dataset = "decennial",
+    year = 2000,
+    geometry = TRUE
+  )
 # The Delmarva peninsula lies on the east coast of the US
 # and is split between DELaware, MARyland, and VirginiA.
 ```
 
 The unique advantage of `sociome`'s `get_adi()` function is that it removes the need for researchers to separately download, merge, and filter different data files for each state or county. A single call to `get_adi()` automatically downloads, filters, and merges each necessary data set.
 
-When setting `geometry = TRUE`, `sf` data is gathered from the US census API. This allows `get_adi()` output to be piped directly into `geom_sf()` from the `ggplot2` package. Below is a demonstration of this capability, using the Delmarva peninsula county ADIs created above:
+When setting `geometry = TRUE`, `sf` (**s**hape**f**ile) data is gathered from the US census API. This allows `get_adi()` output to be piped directly into `geom_sf()` from the `ggplot2` package. Below is a demonstration of this capability, using the Delmarva peninsula county ADIs created above:
 
 ```{r plot_delmarva, fig.height=10, fig.width=5, cache=TRUE}
 library(ggplot2)
@@ -118,7 +161,7 @@ delmarva %>%
 The code below calculates and maps ADIs for Ohio counties. 
 
 ```{r ohio, fig.height=7, message=FALSE, cache=TRUE}
-ohio <- get_adi(geography = "county", state = "OH")
+ohio <- get_adi(geography = "county", state = "OH", geometry = TRUE)
 
 ohio %>%
   ggplot() +
@@ -130,7 +173,7 @@ The code below also calculates and maps ADIs for Ohio counties, but it uses a re
 
 ```{r ohio_ref_US, fig.height=7, message=FALSE, cache=TRUE}
 ohio_ref_US <- 
-  get_adi(geography = "county") %>%
+  get_adi(geography = "county", geometry = TRUE) %>%
   dplyr::filter(substr(GEOID, 1, 2) == "39")
   # Ohio's GEOID is 39, so the GEOIDs of all Ohio counties begin with 39.
 
@@ -171,8 +214,12 @@ ohio_ref_us_plot <-
   scale_fill_viridis_c(direction = -1, limits = color_range) +
   labs(title = "Reference area: US counties (+DC & PR)")
 
-grid.arrange(ohio_plot, ohio_ref_us_plot,
-             nrow = 1, top = "2017 ADIs of Ohio Counties")
+grid.arrange(
+  ohio_plot,
+  ohio_ref_us_plot, 
+  nrow = 1,
+  top = "2017 ADIs of Ohio Counties"
+)
 ```
 
 Notice that there is a middling effect on Ohio ADIs when all US counties are used as the reference population; this implies that Ohio counties are neither among the most deprived nor the least deprived in the US.
@@ -211,4 +258,4 @@ When working with ACS data, it is crucial to know when to use the ACS1, ACS3, or
 Lastly, the main dependencies of `sociome` (the `tidycensus` package and the Census API) are ongoing, evolving projects. Users may encounter errors having to do with the growing pains of the Census Bureau standardizing its syntax and `tidycensus` accommodating these breaking changes. Generally, until any significant changes to `tidycensus` occur that break backwards compatibility, any errors encountered when using `get_adi()` are a result of flaws in the Census API.
 
 ## Grant information
-The development of this software package was supported by a research grant from the National Institutes of Health/National Institute on Aging, (Principal Investigators: Jarrod E. Dalton, PhD and Adam T. Perzynski, PhD; Grant Number: 5R01AG055480-02).  All of its contents are solely the responsibility of the authors and do not necessarily represent the official views of the NIH.
+The development of this software package was supported by a research grant from the National Institutes of Health/National Institute on Aging, (Principal Investigators: Jarrod E. Dalton, PhD and Adam T. Perzynski, PhD; Grant Number: 5R01AG055480-02). All of its contents are solely the responsibility of the authors and do not necessarily represent the official views of the NIH.

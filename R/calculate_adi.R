@@ -407,7 +407,7 @@ factors_from_1990_decennial <- function(data) {
       Pless9grade = .data$P0570001 / .data$people25andover,
       SUMcrowded = .data$H0210003 + .data$H0210004 + .data$H0210005,
       crowdingdetermined = .data$SUMcrowded + .data$H0210001 + .data$H0210002,
-      Pcrowded = .data$SUMcrowsed / .data$crowdingdetermined
+      Pcrowded = .data$SUMcrowded / .data$crowdingdetermined
     ) %>% 
     
     dplyr::select(

@@ -1,3 +1,11 @@
+# sociome 1.0.2
+
+## Minor updates:
+
+- Fixed bug with 1990 decennial calls.
+- Added `install.packages("sociome")` to README's installation instructions.
+- Added CRAN version number and download counter badges to README.
+
 # sociome 1.0.0
 
 ## Major updates:

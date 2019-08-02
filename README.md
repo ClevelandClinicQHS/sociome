@@ -3,6 +3,9 @@
 
 # sociome
 
+[![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/sociome)](https://cran.r-project.org/package=sociome)
+![CRAN\_Download\_Counter](http://cranlogs.r-pkg.org/badges/grand-total/sociome)
+
 > The dimensions of existence that are social.
 
 The goal of the `sociome` package is to help the user to operationalize
@@ -31,7 +34,13 @@ The output of `get_adi()` can be piped directly into
 
 ## Installation
 
-You can install sociome from GitHub with:
+You can install `sociome` from CRAN with:
+
+``` r
+install.packages("sociome")
+```
+
+You can install the development version of `sociome` from GitHub with:
 
 ``` r
 remotes::install_github("NikKrieger/sociome")

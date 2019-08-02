@@ -34,7 +34,6 @@ Depends:
 Imports:
     dplyr (>= 0.8.1),
     magrittr (>= 1.5),
-    methods,
     mice (>= 3.5.0),
     psych (>= 1.8.12),
     purrr (>= 0.3.2),

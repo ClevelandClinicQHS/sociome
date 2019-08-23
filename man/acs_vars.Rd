@@ -4,7 +4,7 @@
 \name{acs_vars}
 \alias{acs_vars}
 \title{ACS variable names for ADI calculation}
-\format{A \code{\link[tibble]{tibble}} with 136 rows and 7 variables:
+\format{A \code{\link[tibble]{tibble}} with 137 rows and 7 variables:
   \describe{ \item{variable}{ACS variable name} \item{description}{Brief
   description of the data the variable contains}
   \item{B23025_and_B15003}{Logical, indicating the variables to be used when

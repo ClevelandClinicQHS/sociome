@@ -2,7 +2,7 @@ Type: Package
 Package: sociome
 Title: Operationalizing Social Determinants of Health Data for
     Researchers
-Version: 1.0.2
+Version: 1.1.0.9000
 Authors@R: 
     c(person(given = "Nik",
              family = "Krieger",
@@ -45,7 +45,8 @@ Imports:
 Suggests:
     ggplot2 (>= 3.2.0),
     sf (>= 0.7.4),
-    testthat (>= 2.1.1)
+    testthat (>= 2.1.1),
+    tigris (>= 0.7)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1

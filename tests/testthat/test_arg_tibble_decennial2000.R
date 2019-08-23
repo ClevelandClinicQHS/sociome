@@ -1,4 +1,4 @@
-context("Test validate_location for 2000 decennial")
+context("Test get_adi() calls for 2000 decennial")
 
 test_get_adi_arg_tibble <- function(geography,
                                     dataset,
@@ -46,7 +46,7 @@ vars2000 <-
   lapply(dplyr::pull, var = "variable")
 
 
-test_that("tibble for geoids", {
+test_that("call tibble for geoids is correct", {
   
   expect_identical(
     test_get_adi_arg_tibble(
@@ -64,6 +64,7 @@ test_that("tibble for geoids", {
       sumfile = c("sf1", "sf3"),
       year = 2000,
       output = "tidy",
+      keep_geo_vars = FALSE,
       geography = list("state"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),
@@ -89,6 +90,7 @@ test_that("tibble for geoids", {
       sumfile = c("sf1", "sf3"),
       year = 2000,
       output = "tidy",
+      keep_geo_vars = FALSE,
       geography = list("county"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),
@@ -114,6 +116,7 @@ test_that("tibble for geoids", {
       sumfile = c(rep("sf1", 4), rep("sf3", 4)),
       year = 2000,
       output = "tidy",
+      keep_geo_vars = FALSE,
       geography = list("tract"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),
@@ -143,6 +146,7 @@ test_that("tibble for geoids", {
       sumfile = c(rep("sf1", 72L), rep("sf3", 72L)),
       year = 2000,
       output = "tidy",
+      keep_geo_vars = FALSE,
       geography = list("block group"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),
@@ -173,7 +177,7 @@ test_that("tibble for geoids", {
 
 
 
-test_that("tibble for state only", {
+test_that("call tibble for state only is correct", {
 
   expect_identical(
     test_get_adi_arg_tibble(
@@ -191,6 +195,7 @@ test_that("tibble for state only", {
       sumfile = c("sf1", "sf3"),
       year = 2000,
       output = "tidy",
+      keep_geo_vars = FALSE,
       geography = list("state"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),
@@ -217,6 +222,7 @@ test_that("tibble for state only", {
       sumfile = c("sf1", "sf3"),
       year = 2000,
       output = "tidy",
+      keep_geo_vars = FALSE,
       geography = list("county"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),
@@ -243,6 +249,7 @@ test_that("tibble for state only", {
       sumfile = c(rep("sf1", 3L), rep("sf3", 3L)),
       year = 2000,
       output = "tidy",
+      keep_geo_vars = FALSE,
       geography = list("tract"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),
@@ -273,6 +280,7 @@ test_that("tibble for state only", {
       sumfile = c(rep("sf1", 12L), rep("sf3", 12L)),
       year = 2000,
       output = "tidy",
+      keep_geo_vars = FALSE,
       geography = list("block group"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),
@@ -296,7 +304,7 @@ test_that("tibble for state only", {
 
 
 
-test_that("tibble for one state and multiple counties", {
+test_that("call tibble for one state and multiple counties is correct", {
 
   expect_identical(
     test_get_adi_arg_tibble(
@@ -314,6 +322,7 @@ test_that("tibble for one state and multiple counties", {
       sumfile = c("sf1", "sf3"),
       year = 2000,
       output = "tidy",
+      keep_geo_vars = FALSE,
       geography = list("state"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),
@@ -340,6 +349,7 @@ test_that("tibble for one state and multiple counties", {
       sumfile = c("sf1", "sf3"),
       year = 2000,
       output = "tidy",
+      keep_geo_vars = FALSE,
       geography = list("county"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),
@@ -366,6 +376,7 @@ test_that("tibble for one state and multiple counties", {
       sumfile = c(rep("sf1", 4L), rep("sf3", 4L)),
       year = 2000,
       output = "tidy",
+      keep_geo_vars = FALSE,
       geography = list("tract"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),
@@ -397,6 +408,7 @@ test_that("tibble for one state and multiple counties", {
       sumfile = c(rep("sf1", 4L), rep("sf3", 4L)),
       year = 2000,
       output = "tidy",
+      keep_geo_vars = FALSE,
       geography = list("block group"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),

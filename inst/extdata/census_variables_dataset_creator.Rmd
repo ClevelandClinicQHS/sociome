@@ -8,6 +8,8 @@ decennial_vars <-
     ~variable, ~sumfile, ~year, ~description,
     
     # 2010 Decennial Census
+    "P018001", "sf1",    2010L, "Total households",
+    
     "H003002", "sf1",    2010L, "Occupied housing units",
     "H014002", "sf1",    2010L, "Owner-occupied housing units",
     
@@ -16,6 +18,8 @@ decennial_vars <-
     
     
     # 2000 Decennial Census
+    "P015001", "sf1",    2000L, "Total households",
+    
     "H004001", "sf1",    2000L, "Occupied housing units",
     "H004002", "sf1",    2000L, "Owner-occupied housing units",
     
@@ -98,6 +102,8 @@ decennial_vars <-
     
     
     # 1990 Decennial Census
+    "P0030001", "sf1",   1990L, "Total households",
+    
     "H0020001", "sf1",   1990L, "Occupied housing units",
     "H0030001", "sf1",   1990L, "Owner-occupied housing units",
     
@@ -180,6 +186,7 @@ decennial_vars <-
 acs_vars <-
   tibble::tribble(
     ~variable,    ~description,                                               ~B23025_and_B15003, ~B23025_and_B15002, ~B23001_and_B15003, ~B23001_and_B15002, ~decennial2010,
+    "B11005_001",	"Total households",                                 	      TRUE,	              TRUE,	              TRUE,	              TRUE,               FALSE,
     "B15002_001",	"Population age 25+",	                                      FALSE,	            TRUE,	              FALSE,	            TRUE,               TRUE,
     "B15002_003",	"Males 25+ w/ no education",	                              FALSE,	            TRUE,	              FALSE,	            TRUE,               TRUE,
     "B15002_004",	"Males 25+ w/ nursery-4th grade as highest education",	    FALSE,	            TRUE,	              FALSE,	            TRUE,               TRUE,
@@ -320,3 +327,55 @@ acs_vars <-
 
 usethis::use_data(acs_vars, decennial_vars, overwrite = TRUE)
 ```
+
+```{r}
+nmcounties2017 <-
+  get_adi(
+    geography = "county",
+    state = "NM",
+    keep_indicators = TRUE,
+    geometry = FALSE,
+    year = 2017, 
+    raw_data_only = TRUE
+  )
+
+nmcounties2010 <-
+  get_adi(
+    geography = "county",
+    state = "NM",
+    keep_indicators = TRUE,
+    geometry = FALSE,
+    year = 2010,
+    raw_data_only = TRUE,
+    dataset = "decennial"
+  )
+
+nmcounties2000 <-
+  get_adi(
+    geography = "county",
+    state = "NM",
+    keep_indicators = TRUE,
+    geometry = FALSE,
+    year = 2000,
+    raw_data_only = TRUE,
+    dataset = "decennial"
+  )
+
+nmcounties1990 <-
+  get_adi(
+    geography = "county",
+    state = "NM",
+    keep_indicators = TRUE,
+    geometry = FALSE,
+    year = 1990,
+    raw_data_only = TRUE,
+    dataset = "decennial"
+  )
+
+usethis::use_data(
+  nmcounties2017, nmcounties2010, nmcounties2000, nmcounties1990,
+  internal = TRUE,
+  overwrite = TRUE
+)
+```
+

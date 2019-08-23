@@ -4,7 +4,7 @@
 \name{decennial_vars}
 \alias{decennial_vars}
 \title{Decennial census variable names for ADI calculation}
-\format{A \code{\link[tibble]{tibble}} with 134 rows and 4 variables:
+\format{A \code{\link[tibble]{tibble}} with 137 rows and 4 variables:
   \describe{ \item{variable}{Decennial census variable name}
   \item{sumfile}{The summary tape file of the decennial census variable}
   \item{year}{The year of the decennial census variable}

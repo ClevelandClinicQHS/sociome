@@ -4,13 +4,9 @@
 #'
 #' Returns a \code{\link[tibble]{tibble}} or \code{\link[sf]{sf}} \code{tibble}
 #' of the area deprivation indices (ADIs) of user-specified locations in the
-#' United States, utilizing US Census data.
-#'
-#' The returned \code{\link[tibble]{tibble}} or \code{\link[sf]{sf}}
-#' \code{tibble} is also of class \code{adi}, and it contains an attribute
-#' called \code{loadings}, which contains a named numeric vector of the PCA
-#' loadings of each factor. This is accessible through
-#' \code{\link{attr}(name_of_tibble, "loadings")}.
+#' United States, utilizing US Census data. Locations that are listed as having
+#' zero households are excluded from ADI calculation: their ADI values will be
+#' \code{NA}.
 #'
 #' @param geography A character string denoting the level of census geography
 #'   whose ADIs you'd like to obtain. Must be one of \code{c("state", "county",
@@ -61,14 +57,20 @@
 #'   be included in the result, making the result an \code{\link[sf]{sf}}
 #'   \code{tibble} instead of a plain \code{\link[tibble]{tibble}}. Defaults to
 #'   \code{FALSE}.
+#'
+#'   The shapefile data that is returned is somewhat customizable: see the
+#'   \code{shift_geo} and \code{...} arguments.
 #' @param shift_geo Logical value. See the \code{shift_geo} argument of
 #'   \code{tidycensus::\link[tidycensus]{get_acs}()} or
 #'   \code{tidycensus::\link[tidycensus]{get_decennial}()} for details.
+#'
+#'   See \code{...} below for other ways to customize the shapefile data
+#'   returned.
 #' @param keep_indicators Logical value indicating whether or not the resulting
 #'   \code{\link[tibble]{tibble}} or \code{\link[sf]{sf}} \code{tibble} will
 #'   contain the socioeconomic measures used to calculate the ADI values.
 #'   Defaults to \code{FALSE}.
-#'   
+#'
 #'   See \code{\link{acs_vars}} and \code{\link{decennial_vars}} for basic
 #'   descriptions of the raw census variables.
 #' @param cache_tables The plural version of the \code{cache_table} argument in
@@ -85,7 +87,17 @@
 #'   of the ADI and only return the census variables. Defaults to \code{FALSE}.
 #' @param ... Additional arguments to be passed onto
 #'   \code{tidycensus::\link[tidycensus]{get_acs}()} or
-#'   \code{tidycensus::\link[tidycensus]{get_decennial}()}.
+#'   \code{tidycensus::\link[tidycensus]{get_decennial}()}. Currently, none of
+#'   these functions' formal arguments can be meaningfully customized (doing so
+#'   will either throw an error or have no effect). However, when setting
+#'   \code{geometry = TRUE}, the \code{tidycensus} functions do pass meaningful
+#'   arguments onto the appropriate
+#'   \code{\link[tigris:tigris-package]{tigris}} function (namely, one of
+#'   \code{\link[tigris]{states}()}, \code{\link[tigris]{counties}()},
+#'   \code{\link[tigris]{tracts}()}, \code{\link[tigris]{block_groups}()}, or
+#'   \code{\link[tigris]{zctas}()}, according to the the value of
+#'   \code{geography}). This enables the user to somewhat customize the
+#'   shapefile data obtained.
 #'
 #' @section Reference area: \strong{The concept of "reference area" is important
 #'   to understand when using this function.} The algorithm that produced the
@@ -99,9 +111,12 @@
 #'   when calculated alongside all counties in the US. The \code{get_adi()}
 #'   function enables the user to define a \strong{reference area} by feeding a
 #'   vector of GEOIDs to its \code{geoid} parameter (or alternatively for
-#'   convenience, a state and/or counties to \code{state} and \code{county}).
-#'   The function then gathers data from those specified locations and performs
+#'   convenience, states and/or counties to \code{state} and \code{county}). The
+#'   function then gathers data from those specified locations and performs
 #'   calculations using their data alone.
+#'
+#'   Areas listed as having zero households are excluded from the reference
+#'   area, and their ADI values will be \code{NA}.
 #'
 #' @section The \code{geoid} parameter: Elements of \code{geoid} can represent
 #'   different levels of geography, but they all must be either 2 digits (for
@@ -109,8 +124,29 @@
 #'   block groups). It must contain character strings, so use quotation marks as
 #'   well as leading zeros where applicable.
 #'
-#' @section Error handling: Depending on user input, this function may call its
-#'   underlying functions (\code{tidycensus::\link[tidycensus]{get_acs}()} or
+#' @section ADI factor loadings: The returned \code{\link[tibble]{tibble}} or
+#'   \code{\link[sf]{sf}} \code{tibble} is of class \code{adi}, and it contains
+#'   an attribute called \code{loadings}, which contains a tibble of the PCA
+#'   loadings of each factor. This is accessible through
+#'   \code{\link{attr}(name_of_tibble, "loadings")}.
+#'
+#' @section Missingness and imputation: While this function allows flexibility
+#'   in specifying reference areas (see the \strong{Reference area} section
+#'   above), data from the US Census are masked for sparsely populated places,
+#'   resulting in many missing values.
+#'
+#'   Imputation is attempted via \code{mice::\link[mice]{mice}(m = 1, maxit =
+#'   50, method = "pmm", seed = 500)}. If imputation is unsuccessful, an error
+#'   is thrown, but the dataset of indicators on which imputation was
+#'   unsuccessful is available via
+#'   \code{rlang::\link[rlang]{last_error}()$adi_indicators} and the raw census
+#'   data are available via
+#'   \code{rlang::\link[rlang]{last_error}()$adi_raw_data}. The former excludes
+#'   areas with zero households, but the latter includes them.
+#'
+#' @section API-related error handling: Depending on user input, this function
+#'   may call its underlying functions
+#'   (\code{tidycensus::\link[tidycensus]{get_acs}()} or
 #'   \code{tidycensus::\link[tidycensus]{get_decennial}()}) many times in order
 #'   to accommodate their behavior. These calls are wrapped in
 #'   \code{purrr::\link[purrr]{insistently}(rate =
@@ -119,14 +155,6 @@
 #' @section Warnings and disclaimers: Please note that this function calls data
 #'   from US Census servers, so execution may take a long time depending on the
 #'   user's internet connection and the amount of data requested.
-#'
-#'   If there are any missing values, single imputation will be attempted using
-#'   the \code{mice} package.
-#'
-#'   In the same vein, while this function allows flexibility in specifying
-#'   reference areas (see the \strong{Reference area} section above), data from
-#'   the US Census are masked for sparsely populated places and may have too
-#'   many missing values to return ADIs in some cases.
 #'
 #'   For advanced users, if changing the \code{dataset} argument, be sure to
 #'   know the advantages and limitations of the 1-year and 3-year ACS estimates.
@@ -142,12 +170,28 @@
 #' # ADI of all census tracts in Cuyahoga County, Ohio
 #' get_adi(geography = "tract", state = "OH", county = "Cuyahoga")
 #'
-#' # ADI of all counties in Connecticut.
+#' # ADI of all counties in Connecticut, using the 2014 ACS1 survey.
 #' # Returns a warning because there are only 8 counties.
 #' # A minimum of 30 locations is recommended.
-#' get_adi(geography = "county", state = "CT", year = 2015, dataset = "acs1")
-#'
-#' # ADI of all census tracts in the GEOIDs below.
+#' get_adi(geography = "county", state = "CT", year = 2014, dataset = "acs1")
+#' 
+#' # Areas with zero households will have an ADI of NA:
+#' queens <-
+#'   get_adi(
+#'     "tract",
+#'     state = "NY",
+#'     county = "Queens",
+#'     keep_indicators = TRUE,
+#'     geometry = TRUE
+#'   )
+#' queens %>%
+#'   dplyr::as_tibble() %>% 
+#'   dplyr::select(GEOID, NAME, ADI, households = B11005_001) %>%
+#'   dplyr::filter(is.na(ADI) | households == 0) %>% 
+#'   print(n = Inf)
+#' 
+#' # geoid argument allows for highly customized reference populations.
+#' # ADI of all census tracts in the GEOIDs stored in "delmarva" below:
 #' # Notice the mixing of state- ("10") and county-level GEOIDs (the others).
 #' delmarva_geoids <- c("10", "51001", "51131", "24015", "24029", "24035",
 #'                      "24011", "24041", "24019", "24045", "24039", "24047")
@@ -160,21 +204,25 @@
 #'     geometry = TRUE
 #'   )
 #'
-#' # Demonstration of geom_sf integration:
+#' # Demonstration of geom_sf() integration:
 #' require(ggplot2)
 #'
-#' delmarva %>% ggplot() + geom_sf(aes(fill = ADI))
-#'
-#' # Return the loadings of the indicators used to calculate the delmarva ADIs
-#' attr(delmarva, "loadings")
+#' # The na.value argument changes the fill of NA ADI areas.
+#' delmarva %>% ggplot() + geom_sf(aes(fill = ADI), lwd = 0)
+#' 
+#' # Setting direction = -1 makes the less deprived areas the lighter ones
+#' # The argument na.value changes the color of zero-household areas
+#' queens %>%
+#'   ggplot() +
+#'   geom_sf(aes(fill = ADI), lwd = 0) +
+#'   scale_fill_viridis_c(na.value = "red", direction = -1)
+#'   
+#' # Obtain factor loadings:
+#' attr(queens, "loadings")
 #' }
 #' @return If \code{geometry = FALSE}, (the default) a
 #'   \code{\link[tibble]{tibble}}. If \code{geometry = TRUE} is specified, an
 #'   \code{\link[sf]{sf}} \code{tibble}.
-#'
-#'   If the census data contained too many missing values for imputation to take
-#'   place, a \code{\link[tibble]{tibble}} of the factors that could not undergo
-#'   imputation, followed by the raw census data.
 #' @export
 get_adi <- function(geography,
                     state           = NULL,
@@ -271,6 +319,7 @@ exec_arg_tibble <- function(dataset, year, ...) {
           sociome::decennial_vars %>% 
             dplyr::filter(.data$year == 2010) %>% 
             dplyr::pull("variable"),
+          
           sociome::acs_vars %>% 
             dplyr::filter(.data$decennial2010) %>% 
             dplyr::pull("variable")
@@ -282,6 +331,8 @@ exec_arg_tibble <- function(dataset, year, ...) {
         sumfile = list("sf1", NULL),
         year = year,
         output = "tidy",
+        keep_geo_vars = FALSE,
+        endyear = list(NULL),
         !!!dots,
         .homonyms = "first"
       ) %>% 
@@ -300,6 +351,7 @@ exec_arg_tibble <- function(dataset, year, ...) {
         sumfile = c("sf1", "sf3"),
         year = year,
         output = "tidy",
+        keep_geo_vars = FALSE,
         !!!dots,
         .homonyms = "first"
       ) %>% 
@@ -313,6 +365,8 @@ exec_arg_tibble <- function(dataset, year, ...) {
       year = year,
       survey = dataset,
       output = "tidy",
+      keep_geo_vars = FALSE,
+      endyear = list(NULL),
       !!!dots,
       .homonyms = "first"
     ) %>% 
@@ -377,23 +431,17 @@ exec_insistently <- purrr::insistently(rlang::exec, rate = purrr::rate_delay())
 
 
 
-filter_ref_area <- function(data,
-                            what,
-                            pattern,
-                            geo_length = NULL) {
+filter_ref_area <- function(data, what, pattern, geo_length = NULL) {
   
-  if (is.null(geo_length)) {
-    pattern_sub <- pattern
-  } else {
-    pattern_sub <- stringr::str_sub(pattern, 1L, geo_length)
-  } 
+  pattern_sub <-
+    if (is.null(geo_length)) {
+      pattern
+    } else {
+      stringr::str_sub(pattern, 1L, geo_length)
+    }
   
   matches <-
-    lapply(
-      paste0("^", pattern_sub),
-      stringr::str_which,
-      string = data$GEOID
-    )
+    lapply(paste0("^", pattern_sub), stringr::str_which, string = data$GEOID)
   
   nomatch <- lapply(matches, length) == 0L
   

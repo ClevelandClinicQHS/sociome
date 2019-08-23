@@ -4,10 +4,18 @@
 \alias{calculate_adi}
 \title{Calculate ADI from census data.}
 \usage{
-calculate_adi(data, keep_indicators = FALSE)
+calculate_adi(data_raw, keep_indicators = FALSE)
 }
 \arguments{
-\item{data}{A data frame obtained via
+\item{keep_indicators}{Logical indicating whether or not to keep the
+  component indicators of the ADI as well as the original census variables
+  used to calculate them. Defaults to \code{FALSE}.
+
+  See \code{\link{acs_vars}} and \code{\link{decennial_vars}} for basic
+  descriptions of the raw census variables.}
+
+\item{data}{A data frame, \code{\link[tibble]{tibble}}, or
+  \code{\link[sf]{sf}} ultimately obtained via
   \code{tidycensus::\link[tidycensus]{get_acs}()} or
   \code{tidycensus::\link[tidycensus]{get_decennial}()}, having the data
   necessary to compute the indicators of the ADI.
@@ -18,31 +26,33 @@ calculate_adi(data, keep_indicators = FALSE)
 
   The easiest way to obtain data like this is to run
   \code{sociome::\link{get_adi}(raw_data_only = TRUE)}.}
-
-\item{keep_indicators}{Logical indicating whether or not to keep the
-  component indicators of the ADI as well as the original census variables
-  used to calculate them. Defaults to \code{FALSE}.
-
-  See \code{\link{acs_vars}} and \code{\link{decennial_vars}} for basic
-  descriptions of the raw census variables.}
 }
 \value{
 A \code{\link[tibble]{tibble}} with the same number of rows as
   \code{data}. Columns include \code{GEOID}, \code{NAME}, and \code{ADI}.
   Further columns containing the indicators and raw values will also be
   present if \code{keep_indicators = TRUE}.
-
-  If imputation is necessary and unsuccessful, the \code{ADI} column will be
-  absent and columns containing the indicators will be present regardless of
-  the value of \code{keep_indicators}.
 }
 \description{
-Calculate the area deprivation index using decennial Census or American
+Calculate the area deprivation index using decennial US census or American
 Community Survey (ACS) variables.
 }
 \details{
-This function discerns between ACS, year 2000 decennial census, and year 1990
-decennial census data by checking for the existence of
+The function \code{\link{get_adi}()} calls this function by default as its
+final step, but some users may want to calculate ADI values for different
+combinations of areas in a given data set. \code{\link{get_adi}(raw_data_only
+= TRUE)} returns the raw census data used to calculate ADI. Users may select
+subsets of such a data set and pipe them into \code{calculate_adi()}.
+
+This function discerns what kind of census data that \code{data} contains
+(ACS, or one of the decennial censuses) by checking for the existence of key
+variables unique to each kind of data set.
+
+Areas listed as having zero households are excluded from ADI calculation.
+Their resulting ADIs will be \code{NA}.
+
+For more information, see \code{\link{get_adi}()}, especially \strong{ADI
+factor loadings} and \strong{Missingness and imputation}.
 }
 \examples{
 \donttest{

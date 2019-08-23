@@ -34,7 +34,7 @@
 #' \donttest{
 #' # Wrapped in \donttest{} because it requires a Census API key.
 #'
-#' # Get all tract GEOIDs for all Connecticut counties
+#' # Get all tract GEOIDs for Manhattan
 #' tracts <- get_geoids(geography = "tract", state = "New York", county = "New York")
 #' tracts
 #'

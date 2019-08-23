@@ -1,4 +1,4 @@
-context("Test get_adi() calls for 2010 decennial")
+context("Test get_adi() calls for 1990 decennial")
 
 test_get_adi_arg_tibble <- function(geography,
                                     dataset,
@@ -39,11 +39,11 @@ test_geoids <-
   c("01", "11", "39035", "39089", "09001010101", "09001010500", "090159025001")
 
 
-vars2010 <-
+vars1990 <-
   sociome::decennial_vars %>% 
-  dplyr::filter(.data$year == 2010) %>%
-  dplyr::pull("variable") %>% 
-  list(sociome::acs_vars %>% dplyr::filter(.data$decennial2010) %>% dplyr::pull("variable"))
+  dplyr::filter(.data$year == 1990) %>%
+  split(.$sumfile) %>% 
+  lapply(dplyr::pull, var = "variable")
 
 
 test_that("call tibble for geoids is correct", {
@@ -52,20 +52,19 @@ test_that("call tibble for geoids is correct", {
     test_get_adi_arg_tibble(
       geography = "state",
       dataset = "decennial",
-      year = 2010,
+      year = 1990,
       geoid = test_geoids,
       state = NULL,
       county = NULL,
       zcta = NULL
     ),
     tibble::tibble(
-      .fn = list(tidycensus::get_decennial, tidycensus::get_acs),
-      variables = vars2010,
-      sumfile = list("sf1", NULL),
-      year = 2010,
+      .fn = list(tidycensus::get_decennial),
+      variables = vars1990,
+      sumfile = c("sf1", "sf3"),
+      year = 1990,
       output = "tidy",
       keep_geo_vars = FALSE,
-      endyear = list(NULL),
       geography = list("state"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),
@@ -79,20 +78,19 @@ test_that("call tibble for geoids is correct", {
     test_get_adi_arg_tibble(
       geography = "county",
       dataset = "decennial",
-      year = 2010,
+      year = 1990,
       geoid = test_geoids,
       state = NULL,
       county = NULL,
       zcta = NULL
     ),
     tibble::tibble(
-      .fn = list(tidycensus::get_decennial, tidycensus::get_acs),
-      variables = vars2010,
-      sumfile = list("sf1", NULL),
-      year = 2010,
+      .fn = list(tidycensus::get_decennial),
+      variables = vars1990,
+      sumfile = c("sf1", "sf3"),
+      year = 1990,
       output = "tidy",
       keep_geo_vars = FALSE,
-      endyear = list(NULL),
       geography = list("county"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),
@@ -106,20 +104,19 @@ test_that("call tibble for geoids is correct", {
     test_get_adi_arg_tibble(
       geography = "tract",
       dataset = "decennial",
-      year = 2010,
+      year = 1990,
       geoid = test_geoids,
       state = NULL,
       county = NULL,
       zcta = NULL
     ),
     tibble::tibble(
-      .fn = c(rep(list(tidycensus::get_decennial), 4L), rep(list(tidycensus::get_acs), 4L)),
-      variables = purrr::lmap(vars2010, rep, 4L),
-      sumfile = c(rep("sf1", 4L), rep(list(NULL), 4L)),
-      year = 2010,
+      .fn = list(tidycensus::get_decennial),
+      variables = purrr::lmap(vars1990, rep, 4),
+      sumfile = c(rep("sf1", 4), rep("sf3", 4)),
+      year = 1990,
       output = "tidy",
       keep_geo_vars = FALSE,
-      endyear = list(NULL),
       geography = list("tract"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),
@@ -130,30 +127,26 @@ test_that("call tibble for geoids is correct", {
   )
   
   
-  
   skip_if(Sys.getenv("CENSUS_API_KEY") == "")
-  
   
   
   expect_identical(
     test_get_adi_arg_tibble(
       geography = "block group",
       dataset = "decennial",
-      year = 2010,
+      year = 1990,
       geoid = test_geoids,
       state = NULL,
       county = NULL,
       zcta = NULL
-    ) %>%
-      dplyr::arrange(.data$state, .data$county),
+    ),
     tibble::tibble(
-      .fn = c(rep(list(tidycensus::get_decennial), 72L), rep(list(tidycensus::get_acs), 72L)),
-      variables = purrr::lmap(vars2010, rep, 72),
-      sumfile = c(rep("sf1", 72L), rep(list(NULL), 72L)),
-      year = 2010,
+      .fn = list(tidycensus::get_decennial),
+      variables = purrr::lmap(vars1990, rep, 72),
+      sumfile = c(rep("sf1", 72L), rep("sf3", 72L)),
+      year = 1990,
       output = "tidy",
       keep_geo_vars = FALSE,
-      endyear = list(NULL),
       geography = list("block group"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),
@@ -172,8 +165,7 @@ test_that("call tibble for geoids is correct", {
             "001"),
           2L
         )
-    ) %>%
-      dplyr::arrange(.data$state, .data$county)
+    )
   )
 })
 
@@ -191,20 +183,19 @@ test_that("call tibble for state only is correct", {
     test_get_adi_arg_tibble(
       geography = "state",
       dataset = "decennial",
-      year = 2010,
+      year = 1990,
       geoid = NULL,
       state = c("de", "dc", "ct"),
       county = NULL,
       zcta = NULL
     ),
     tibble::tibble(
-      .fn = list(tidycensus::get_decennial, tidycensus::get_acs),
-      variables = vars2010,
-      sumfile = list("sf1", NULL),
-      year = 2010,
+      .fn = list(tidycensus::get_decennial),
+      variables = vars1990,
+      sumfile = c("sf1", "sf3"),
+      year = 1990,
       output = "tidy",
       keep_geo_vars = FALSE,
-      endyear = list(NULL),
       geography = list("state"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),
@@ -219,20 +210,19 @@ test_that("call tibble for state only is correct", {
     test_get_adi_arg_tibble(
       geography = "county",
       dataset = "decennial",
-      year = 2010,
+      year = 1990,
       geoid = NULL,
       state = c("de", "dc", "ct"),
       county = NULL,
       zcta = NULL
     ),
     tibble::tibble(
-      .fn = list(tidycensus::get_decennial, tidycensus::get_acs),
-      variables = vars2010,
-      sumfile = list("sf1", NULL),
-      year = 2010,
+      .fn = list(tidycensus::get_decennial),
+      variables = vars1990,
+      sumfile = c("sf1", "sf3"),
+      year = 1990,
       output = "tidy",
       keep_geo_vars = FALSE,
-      endyear = list(NULL),
       geography = list("county"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),
@@ -247,20 +237,19 @@ test_that("call tibble for state only is correct", {
     test_get_adi_arg_tibble(
       geography = "tract",
       dataset = "decennial",
-      year = 2010,
+      year = 1990,
       geoid = NULL,
       state = c("de", "dc", "ct"),
       county = NULL,
       zcta = NULL
     ),
     tibble::tibble(
-      .fn = c(rep(list(tidycensus::get_decennial), 3L), rep(list(tidycensus::get_acs), 3L)),
-      variables = purrr::lmap(vars2010, rep, 3L),
-      sumfile = c(rep("sf1", 3L), rep(list(NULL), 3L)),
-      year = 2010,
+      .fn = list(tidycensus::get_decennial),
+      variables = purrr::lmap(vars1990, rep, 3L),
+      sumfile = c(rep("sf1", 3L), rep("sf3", 3L)),
+      year = 1990,
       output = "tidy",
       keep_geo_vars = FALSE,
-      endyear = list(NULL),
       geography = list("tract"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),
@@ -279,20 +268,19 @@ test_that("call tibble for state only is correct", {
     test_get_adi_arg_tibble(
       geography = "block group",
       dataset = "decennial",
-      year = 2010,
+      year = 1990,
       geoid = NULL,
       state = c("de", "dc", "ct"),
       county = NULL,
       zcta = NULL
-    ) %>% dplyr::arrange(.data$state, .data$county),
+    ),
     tibble::tibble(
-      .fn = c(rep(list(tidycensus::get_decennial), 12L), rep(list(tidycensus::get_acs), 12L)),
-      variables = purrr::lmap(vars2010, rep, 12L),
-      sumfile = c(rep("sf1", 12L), rep(list(NULL), 12L)),
-      year = 2010,
+      .fn = list(tidycensus::get_decennial),
+      variables = purrr::lmap(vars1990, rep, 12L),
+      sumfile = c(rep("sf1", 12L), rep("sf3", 12L)),
+      year = 1990,
       output = "tidy",
       keep_geo_vars = FALSE,
-      endyear = list(NULL),
       geography = list("block group"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),
@@ -308,8 +296,7 @@ test_that("call tibble for state only is correct", {
           c("001", "003", "005", "007", "009", "011", "013", "015", "001", "003", "005", "001"),
           2L
         )
-    ) %>% 
-      dplyr::arrange(.data$state, .data$county)
+    )
   )
 
 })
@@ -323,20 +310,19 @@ test_that("call tibble for one state and multiple counties is correct", {
     test_get_adi_arg_tibble(
       geography = "state",
       dataset = "decennial",
-      year = 2010,
+      year = 1990,
       geoid = NULL,
       state = "oh",
       county = c("cuyahoga", "erie", "lake", "franklin"),
       zcta = NULL
     ),
     tibble::tibble(
-      .fn = list(tidycensus::get_decennial, tidycensus::get_acs),
-      variables = vars2010,
-      sumfile = list("sf1", NULL),
-      year = 2010,
+      .fn = list(tidycensus::get_decennial),
+      variables = vars1990,
+      sumfile = c("sf1", "sf3"),
+      year = 1990,
       output = "tidy",
       keep_geo_vars = FALSE,
-      endyear = list(NULL),
       geography = list("state"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),
@@ -351,20 +337,19 @@ test_that("call tibble for one state and multiple counties is correct", {
     test_get_adi_arg_tibble(
       geography = "county",
       dataset = "decennial",
-      year = 2010,
+      year = 1990,
       geoid = NULL,
       state = "oh",
       county = c("cuyahoga", "erie", "lake", "franklin"),
       zcta = NULL
     ),
     tibble::tibble(
-      .fn = list(tidycensus::get_decennial, tidycensus::get_acs),
-      variables = vars2010,
-      sumfile = list("sf1", NULL),
-      year = 2010,
+      .fn = list(tidycensus::get_decennial),
+      variables = vars1990,
+      sumfile = c("sf1", "sf3"),
+      year = 1990,
       output = "tidy",
       keep_geo_vars = FALSE,
-      endyear = list(NULL),
       geography = list("county"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),
@@ -379,20 +364,19 @@ test_that("call tibble for one state and multiple counties is correct", {
     test_get_adi_arg_tibble(
       geography = "tract",
       dataset = "decennial",
-      year = 2010,
+      year = 1990,
       geoid = NULL,
       state = "oh",
       county = c("cuyahoga", "erie", "lake", "franklin"),
       zcta = NULL
     ),
     tibble::tibble(
-      .fn = c(rep(list(tidycensus::get_decennial), 4L), rep(list(tidycensus::get_acs), 4L)),
-      variables = purrr::lmap(vars2010, rep, 4L),
-      sumfile = c(rep("sf1", 4L), rep(list(NULL), 4L)),
-      year = 2010,
+      .fn = list(tidycensus::get_decennial),
+      variables = purrr::lmap(vars1990, rep, 4L),
+      sumfile = c(rep("sf1", 4L), rep("sf3", 4L)),
+      year = 1990,
       output = "tidy",
       keep_geo_vars = FALSE,
-      endyear = list(NULL),
       geography = list("tract"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),
@@ -412,20 +396,19 @@ test_that("call tibble for one state and multiple counties is correct", {
     test_get_adi_arg_tibble(
       geography = "block group",
       dataset = "decennial",
-      year = 2010,
+      year = 1990,
       geoid = NULL,
       state = "oh",
       county = c("cuyahoga", "erie", "lake", "franklin"),
       zcta = NULL
     ),
     tibble::tibble(
-      .fn = c(rep(list(tidycensus::get_decennial), 4L), rep(list(tidycensus::get_acs), 4L)),
-      variables = purrr::lmap(vars2010, rep, 4L),
-      sumfile = c(rep("sf1", 4L), rep(list(NULL), 4L)),
-      year = 2010,
+      .fn = list(tidycensus::get_decennial),
+      variables = purrr::lmap(vars1990, rep, 4L),
+      sumfile = c(rep("sf1", 4L), rep("sf3", 4L)),
+      year = 1990,
       output = "tidy",
       keep_geo_vars = FALSE,
-      endyear = list(NULL),
       geography = list("block group"),
       geometry = list(FALSE),
       shift_geo = list(FALSE),

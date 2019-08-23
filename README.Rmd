@@ -62,6 +62,8 @@ For example, the ADI of Orange County, California is *x* when calculated alongsi
 
 The `get_adi()` function enables the user to define a reference population by feeding a vector of GEOIDs to its `geoid` parameter (or alternatively for convenience, a vector of state abbreviations to its `state` parameter). The function then gathers data from those specified locations and performs calculations using their data alone.
 
+One important behavior of `get_adi()` is its excluding of areas that have zero households from the reference population. Associating ADI values with such areas is not meaningful and can skew the resulting ADIs of the other areas within the reference poplulation. Such areas are not excluded from the tables that `get_adi()` returns, but their ADI values are listed as `NA`.
+
 ## *Localized* ADIs via `get_adi()`
 
 The `get_adi()` function returns a table (viz., a `tibble` or `sf tibble`) of *localized* Singh's area deprivation indices (ADIs). The user chooses:
@@ -75,53 +77,28 @@ The function then calls the specified ACS data sets and employs the same algorit
 
 ## Examples
 
-The following code returns the ADIs of the fifty US states plus the District of Columbia and Puerto Rico, using the 2017 edition of the 5-year ACS estimates (the defaults):
+The following code returns a `tibble` containing the ADIs of the fifty US states plus the District of Columbia and Puerto Rico, using the 2017 edition of the 5-year ACS estimates (the defaults):
+
+```{r library_not_cached, include=FALSE}
+library(sociome)
+```
 
 ```{r usa2017, message=FALSE, cache=TRUE}
 library(sociome)
 get_adi(geography = "state")
 ```
 
-```{r include=FALSE}
-library(sociome)
+The required argument `geography` designates the type of area for which localized ADIs will be calculated: other options include `county`, `tract`, `block group`, and `zcta`. The arguments `state`, `county`, `geoid`, and `zcta` serve to narrow the reference population. The arguments `dataset` and `year` select the type and year, respectively, of the census data set used to calculate localized ADIs.
+
+For example, the following is a `tibble` of the ADIs of the counties of Connecticut, using the 2014 edition of the 1-year ACS estimates:
+
+```{r ct2013, message=FALSE, cache=TRUE}
+get_adi(geography = "county", state = "CT", year = 2014, dataset = "acs1")
 ```
 
-Setting `geometry = TRUE` returns the same data along with **s**hape**f**ile data: an `sf tibble`. Its default output is verbose, so it is only recommended to set `geometry = TRUE` when a map may be produced. The following is an `sf tibble` of the ADIs of the counties of Connecticut, using the 2013 edition of the 1-year ACS estimates:
+Notice the warning to the user that it is not recommended to calculate ADIs for fewer than 30 locations. This warning occurred in this case because Connecticut only has eight counties, and the ADI values of these counties are erratic indeed.
 
-```{r ct2013_download_cache, include=FALSE, cache=TRUE}
-get_adi(
-  geography = "county",
-  state = "CT",
-  year = 2013, 
-  dataset = "acs1",
-  geometry = TRUE
-)
-```
-
-```{r ct2013, message=FALSE, cache=TRUE, results='hold'}
-get_adi(
-  geography = "county",
-  state = "CT",
-  year = 2013, 
-  dataset = "acs1",
-  geometry = TRUE
-)
-```
-
-Notice the warning to the user that it is not recommended to calculate ADIs for fewer than 30 locations. This warning occurred in this case because Connecticut only has eight counties.
-
-The user can mix different levels of geography in the `geoid` parameter. Employing 2000 decennial census data, the code below stores the ADIs of the census block groups in every county entirely or partially on the Delmarva peninsula:
-
-```{r delmarva_geoids_download_cache, include=FALSE, cache=TRUE}
-get_adi(
-  geography = "block group",
-  geoid = c("10", "51001", "51131", "24015", "24029", "24035", "24011", "24041",
-            "24019", "24045", "24039", "24047"), 
-  dataset = "decennial",
-  year = 2000,
-  geometry = TRUE
-)
-```
+The aforementioned `geoid` parameter allows the user to mix different levels of geography when specifying a reference population. Employing 2000 decennial census data, the code below stores the ADIs of the census block groups in every county entirely or partially on the Delmarva peninsula:
 
 ```{r delmarva_geoids, echo=TRUE, results='hold', message=FALSE, cache=TRUE}
 delmarva_geoids <-
@@ -144,11 +121,11 @@ delmarva <-
 # and is split between DELaware, MARyland, and VirginiA.
 ```
 
-The unique advantage of `sociome`'s `get_adi()` function is that it removes the need for researchers to separately download, merge, and filter different data files for each state or county. A single call to `get_adi()` automatically downloads, filters, and merges each necessary data set.
+The unique advantage of `sociome::get_adi()` is that it removes the need for researchers to separately download, merge, and filter different data files for each state or county. A single call to `get_adi()` automatically downloads, filters, and merges each necessary data set.
 
-When setting `geometry = TRUE`, `sf` (**s**hape**f**ile) data is gathered from the US census API. This allows `get_adi()` output to be piped directly into `geom_sf()` from the `ggplot2` package. Below is a demonstration of this capability, using the Delmarva peninsula county ADIs created above:
+Notice that `geometry = TRUE` in the above code chunk, yielding an `sf tibble`, wherein **s**hape**f**ile data for each area is included. Printing `sf tibble`s is verbose, but they can be piped directly into `geom_sf()` from the `ggplot2` package:
 
-```{r plot_delmarva, fig.height=10, fig.width=5, cache=TRUE}
+```{r plot_delmarva, fig.height=9, fig.width=7, cache=TRUE}
 library(ggplot2)
 
 delmarva %>% ggplot() + geom_sf(aes(fill = ADI))
@@ -158,11 +135,44 @@ Notice that the default behavior of `geom_sf()` is to make high-ADI areas lighte
 
 Furthermore, the gray borders between census block groups are a bit thick and in many cases totally obscure some of the smaller block groups. Borders can be removed by setting `lwd = 0` within the `geom_sf()` function.
 
-```{r plot_delmarva_with_viridis, fig.height=10, fig.width=5, cache=TRUE}
+```{r plot_delmarva_with_viridis, fig.height=9, fig.width=7, cache=TRUE}
 delmarva %>%
   ggplot() +
   geom_sf(aes(fill = ADI), lwd = 0) +
   scale_fill_viridis_c(direction = -1)
+```
+
+Careful scrutiny of this map reveals gray areas, such as the one near the northern tip. These areas have no associated ADI because they were excluded from ADI calculation due to having zero households. While these areas are present in the ADI data set, their ADI values are `NA`. To illustrate, below are the year-2000 ADI values for the 35 census tracts of Chautauqua County, New York, where Chautauqua Lake has its own census tract (incidentally, the top row).
+
+```{r chautauqua, cache=TRUE, message=FALSE}
+chautauqua <- 
+  get_adi(
+    "tract",
+    state = "New York",
+    county = "Chautauqua",
+    year = 2000,
+    dataset = "decennial",
+    geometry = TRUE,
+    keep_indicators = TRUE
+  )
+```
+
+```{r chautaqua_vis, cache=TRUE, fig.height=7, message=F}
+chautauqua %>%
+  tibble::as_tibble() %>%
+  dplyr::select(GEOID, NAME, ADI, P015001) %>% 
+  print(n = Inf)
+```
+
+By having set `keep_indicators = TRUE`, the ADI factors as well as the raw census data are retained in the `chautauqua` object. In output above, these columns were filtered out except for `P015001`, which denotes the number of households in each tract. Different census data sets have different variable codes for the same type of data, and the data sets `sociome::acs_vars` and `sociome::decennial_vars` serve as keys to these variable codes.
+
+Below is a map of the ADI data above. Note that the color of areas with `NA` ADIs can be changed via the `na.value` argument in `scale_fill_viridis_c()`.
+
+```{r chautauqua_map, cache=TRUE, fig.height=7, message=F}
+chautauqua %>% 
+  ggplot() +
+  geom_sf(aes(fill = ADI)) + 
+  scale_fill_viridis_c(direction = -1, na.value = "red")
 ```
 
 ### Demonstration of the relative nature of ADIs, using custom reference populations
@@ -235,31 +245,28 @@ Notice that there is a middling effect on Ohio ADIs when all US counties are use
 
 ## Advanced users: extracting the factor loadings
 
-Advanced users interested in the details of the principal components analysis used to obtain the ADI values can obtain the factor loadings of the measures involved. `get_adi()` utilizes `psych::principal()`, which provides factor loadings that are then stored as an `attribute` of the `tibble` or `sf tibble` that `get_adi()` returns. This `attribute` is a named numeric vector called `loadings`. 
+Advanced users interested in the details of the principal components analysis used to obtain the ADI values can obtain the factor loadings of the measures involved. `get_adi()` utilizes `psych::principal()`, which provides factor loadings that are then stored as an attribute of the `tibble` or `sf tibble` that `get_adi()` returns. This attribute is a `tibble` called `loadings`. 
 
-The following code would access and store the factor loadings of the `ohio` ADI table created above:
+The following code accesses the factor loadings for the `ohio` ADI table created above:
 
 ```{r ohio_loadings, cache=TRUE}
-ohio_loadings <- attr(ohio, "loadings")
-ohio_loadings
-```
-
-These loadings code can then be converted into a readable `tibble`:
-
-```{r ohio_tibble, cache=TRUE}
-tibble::tibble(factor = names(ohio_loadings), loadings = ohio_loadings)
+attr(ohio, "loadings")
 ```
 
 ## Warning about missing data and sample size
 
 Calculating ADI values with a reference area containing under thirty locations is not recommended. The user will receive a warning when attempting to do so, but ADI values will be returned nonetheless.
 
-While allowing flexibility in specifying reference populations, data from the ACS are masked for sparsely populated places and may have too many missing values to return ADIs in some cases (i.e., too much missingness for imputation). When this happens, `get_adi()` will return a `tibble` of the factors that could not undergo imputation, followed by the raw census data.
+While allowing flexibility in specifying reference populations, data from the ACS are masked for sparsely populated places and may have too many missing values to return ADIs in some cases (i.e., too much missingness for imputation). When this happens, the data that could not undergo imputation is accessible via `rlang::last_error()$adi_indicators` and the tibble of raw census data is accessible via `rlang::last_error()$adi_raw_data`. The former may have fewer rows than the latter because areas with zero households are excluded prior to calculation of the ADIs.
 
-Here is a demonstration of both of the above:
+For example, ADIs cannot be obtained for the two block groups in Kalawao County, Hawaii because there are only two of them, one of them having zero households:
 
-```{r Kalawao, cache=TRUE, message=F}
+```{r Kalawao, cache=TRUE, message=F, error=TRUE}
 get_adi("block group", state = "hi", county = "kalawao", year = 2015)
+
+rlang::last_error()$adi_indicators
+
+rlang::last_error()$adi_raw_data
 ```
 
 When working with ACS data, it is crucial to know when to use the ACS1, ACS3, or ACS5. See https://www.census.gov/programs-surveys/acs/guidance/estimates.html.

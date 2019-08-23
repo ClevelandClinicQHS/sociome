@@ -1,3 +1,15 @@
+
+# sociome 1.1.0
+
+## Major updates:
+- Households that have zero households are now excluded from ADI calculation
+
+
+## Minor updates:
+- Updated README and documentation
+- Added more tests
+
+
 # sociome 1.0.2
 
 ## Minor updates:

@@ -4,7 +4,7 @@
 #' A dataset of the ACS variable names used to calculate the Area Deprivation
 #' Index (ADI).
 #'
-#' @format A \code{\link[tibble]{tibble}} with 136 rows and 7 variables:
+#' @format A \code{\link[tibble]{tibble}} with 137 rows and 7 variables:
 #'   \describe{ \item{variable}{ACS variable name} \item{description}{Brief
 #'   description of the data the variable contains}
 #'   \item{B23025_and_B15003}{Logical, indicating the variables to be used when
@@ -31,7 +31,7 @@
 #' A dataset of the decennial census variable names used to calculate the Area
 #' Deprivation Index (ADI).
 #'
-#' @format A \code{\link[tibble]{tibble}} with 134 rows and 4 variables:
+#' @format A \code{\link[tibble]{tibble}} with 137 rows and 4 variables:
 #'   \describe{ \item{variable}{Decennial census variable name}
 #'   \item{sumfile}{The summary tape file of the decennial census variable}
 #'   \item{year}{The year of the decennial census variable}

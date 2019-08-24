@@ -19,7 +19,7 @@
 #' For more information, see \code{\link{get_adi}()}, especially \strong{ADI
 #' factor loadings} and \strong{Missingness and imputation}.
 #'
-#' @param data A data frame, \code{\link[tibble]{tibble}}, or
+#' @param data_raw A data frame, \code{\link[tibble]{tibble}}, or
 #'   \code{\link[sf]{sf}} ultimately obtained via
 #'   \code{tidycensus::\link[tidycensus]{get_acs}()} or
 #'   \code{tidycensus::\link[tidycensus]{get_decennial}()}, having the data

@@ -7,14 +7,7 @@
 calculate_adi(data_raw, keep_indicators = FALSE)
 }
 \arguments{
-\item{keep_indicators}{Logical indicating whether or not to keep the
-  component indicators of the ADI as well as the original census variables
-  used to calculate them. Defaults to \code{FALSE}.
-
-  See \code{\link{acs_vars}} and \code{\link{decennial_vars}} for basic
-  descriptions of the raw census variables.}
-
-\item{data}{A data frame, \code{\link[tibble]{tibble}}, or
+\item{data_raw}{A data frame, \code{\link[tibble]{tibble}}, or
   \code{\link[sf]{sf}} ultimately obtained via
   \code{tidycensus::\link[tidycensus]{get_acs}()} or
   \code{tidycensus::\link[tidycensus]{get_decennial}()}, having the data
@@ -26,6 +19,13 @@ calculate_adi(data_raw, keep_indicators = FALSE)
 
   The easiest way to obtain data like this is to run
   \code{sociome::\link{get_adi}(raw_data_only = TRUE)}.}
+
+\item{keep_indicators}{Logical indicating whether or not to keep the
+  component indicators of the ADI as well as the original census variables
+  used to calculate them. Defaults to \code{FALSE}.
+
+  See \code{\link{acs_vars}} and \code{\link{decennial_vars}} for basic
+  descriptions of the raw census variables.}
 }
 \value{
 A \code{\link[tibble]{tibble}} with the same number of rows as

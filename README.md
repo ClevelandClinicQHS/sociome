@@ -53,7 +53,7 @@ For example, the ADI of Orange County, California is *x* when calculated alongsi
 
 The `get_adi()` function enables the user to define a reference population by feeding a vector of GEOIDs to its `geoid` parameter (or alternatively for convenience, a vector of state abbreviations to its `state` parameter). The function then gathers data from those specified locations and performs calculations using their data alone.
 
-One important behavior of `get_adi()` is its excluding of areas that have zero households from the reference population. Associating ADI values with such areas is not meaningful and can skew the resulting ADIs of the other areas within the reference poplulation. Such areas are not excluded from the tables that `get_adi()` returns, but their ADI values are listed as `NA`.
+One important behavior of `get_adi()` is its excluding of areas that have zero households from the reference population. Associating ADI values with such areas is not meaningful and can skew the resulting ADIs of the other areas within the reference population. Such areas are not excluded from the tables that `get_adi()` returns, but their ADI values are listed as `NA`.
 
 *Localized* ADIs via `get_adi()`
 --------------------------------
@@ -106,16 +106,16 @@ get_adi(geography = "county", state = "CT", year = 2014, dataset = "acs1")
 #> Warning in psych::principal(indicators_hh_only): The matrix is not positive
 #> semi-definite, scores found from Structure loadings
 #> # A tibble: 8 x 3
-#>   GEOID NAME                              ADI
-#>   <chr> <chr>                           <dbl>
-#> 1 09001 Fairfield County, Connecticut    39.3
-#> 2 09003 Hartford County, Connecticut    253. 
-#> 3 09005 Litchfield County, Connecticut  -17.8
-#> 4 09007 Middlesex County, Connecticut   -30.0
-#> 5 09009 New Haven County, Connecticut   278. 
-#> 6 09011 New London County, Connecticut  120. 
-#> 7 09013 Tolland County, Connecticut     -50.5
-#> 8 09015 Windham County, Connecticut     208.
+#>   GEOID NAME                             ADI
+#>   <chr> <chr>                          <dbl>
+#> 1 09001 Fairfield County, Connecticut   39.3
+#> 2 09003 Hartford County, Connecticut   253. 
+#> 3 09005 Litchfield County, Connecticut -17.8
+#> 4 09007 Middlesex County, Connecticut  -30.0
+#> 5 09009 New Haven County, Connecticut  278. 
+#> 6 09011 New London County, Connecticut 120. 
+#> 7 09013 Tolland County, Connecticut    -50.5
+#> 8 09015 Windham County, Connecticut    208.
 ```
 
 Notice the warning to the user that it is not recommended to calculate ADIs for fewer than 30 locations. This warning occurred in this case because Connecticut only has eight counties, and the ADI values of these counties are erratic indeed.

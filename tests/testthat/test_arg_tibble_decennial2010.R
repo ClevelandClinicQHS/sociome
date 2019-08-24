@@ -125,7 +125,7 @@ test_that("call tibble for geoids is correct", {
       shift_geo = list(FALSE),
       cache_table = list(FALSE),
       key = list(NULL),
-      state = c("01", "11", "39", "09", "01", "11", "39", "09")
+      state = c("01", "09" , "11", "39", "01", "09" , "11", "39")
     )
   )
   
@@ -266,7 +266,7 @@ test_that("call tibble for state only is correct", {
       shift_geo = list(FALSE),
       cache_table = list(FALSE),
       key = list(NULL),
-      state = rep(c("de", "dc", "ct"), 2L)
+      state = c("ct", "dc", "de", "ct", "dc", "de")
     )
   )
   
@@ -326,7 +326,7 @@ test_that("call tibble for one state and multiple counties is correct", {
       year = 2010,
       geoid = NULL,
       state = "oh",
-      county = c("cuyahoga", "erie", "lake", "franklin"),
+      county = c("cuyahoga", "erie", "franklin", "lake"),
       zcta = NULL
     ),
     tibble::tibble(
@@ -343,7 +343,7 @@ test_that("call tibble for one state and multiple counties is correct", {
       cache_table = list(FALSE),
       key = list(NULL),
       state = list("oh"),
-      county = list(c("cuyahoga", "erie", "lake", "franklin"))
+      county = list(c("cuyahoga", "erie", "franklin", "lake"))
     )
   )
 
@@ -354,7 +354,7 @@ test_that("call tibble for one state and multiple counties is correct", {
       year = 2010,
       geoid = NULL,
       state = "oh",
-      county = c("cuyahoga", "erie", "lake", "franklin"),
+      county = c("cuyahoga", "erie", "franklin", "lake"),
       zcta = NULL
     ),
     tibble::tibble(
@@ -371,7 +371,7 @@ test_that("call tibble for one state and multiple counties is correct", {
       cache_table = list(FALSE),
       key = list(NULL),
       state = list("oh"),
-      county = list(c("cuyahoga", "erie", "lake", "franklin"))
+      county = list(c("cuyahoga", "erie", "franklin", "lake"))
     )
   )
 
@@ -382,7 +382,7 @@ test_that("call tibble for one state and multiple counties is correct", {
       year = 2010,
       geoid = NULL,
       state = "oh",
-      county = c("cuyahoga", "erie", "lake", "franklin"),
+      county = c("cuyahoga", "erie", "franklin", "lake"),
       zcta = NULL
     ),
     tibble::tibble(
@@ -400,10 +400,8 @@ test_that("call tibble for one state and multiple counties is correct", {
       key = list(NULL),
       state = rep("oh", 8L),
       county =
-        rep(
-          c("cuyahoga", "erie", "lake", "franklin"),
-          2L
-        )
+        c("cuyahoga", "erie", "franklin", "lake",
+          "cuyahoga", "erie", "franklin", "lake")
     )
   )
 
@@ -415,7 +413,7 @@ test_that("call tibble for one state and multiple counties is correct", {
       year = 2010,
       geoid = NULL,
       state = "oh",
-      county = c("cuyahoga", "erie", "lake", "franklin"),
+      county = c("cuyahoga", "erie", "franklin", "lake"),
       zcta = NULL
     ),
     tibble::tibble(
@@ -433,10 +431,8 @@ test_that("call tibble for one state and multiple counties is correct", {
       key = list(NULL),
       state = rep("oh", 8L),
       county =
-        rep(
-          c("cuyahoga", "erie", "lake", "franklin"),
-          2L
-        )
+        c("cuyahoga", "erie", "franklin", "lake",
+          "cuyahoga", "erie", "franklin", "lake")
     )
   )
 

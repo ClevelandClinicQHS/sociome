@@ -207,13 +207,9 @@ county_geoids_from_state <- function(exec_arg_tibble, state) {
   exec_args$geometry    <- FALSE
   exec_args$shift_geo   <- FALSE
   exec_args$summary_var <- NULL
+  exec_args$state       <- state
   
-  counties <-
-    exec_insistently(
-      .fn = exec_args$.fn,
-      !!!exec_args[-1L],
-      state = state
-    )
+  counties <- do.call(exec_tidycensus, exec_args)
   
   counties$GEOID
 }

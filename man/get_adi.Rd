@@ -107,13 +107,12 @@ Not necessary if you have already loaded your key with
 these functions' formal arguments can be meaningfully customized (doing so
 will either throw an error or have no effect). However, when setting
 \code{geometry = TRUE}, the \code{tidycensus} functions do pass meaningful
-arguments onto the appropriate
-\code{\link[tigris:tigris-package]{tigris}} function (namely, one of
-\code{\link[tigris]{states}()}, \code{\link[tigris]{counties}()},
-\code{\link[tigris]{tracts}()}, \code{\link[tigris]{block_groups}()}, or
-\code{\link[tigris]{zctas}()}, according to the the value of
-\code{geography}). This enables the user to somewhat customize the
-shapefile data obtained.}
+arguments onto the appropriate \code{\link[tigris:tigris-package]{tigris}}
+function (namely, one of \code{\link[tigris]{states}()},
+\code{\link[tigris]{counties}()}, \code{\link[tigris]{tracts}()},
+\code{\link[tigris]{block_groups}()}, or \code{\link[tigris]{zctas}()},
+according to the the value of \code{geography}). This enables the user to
+somewhat customize the shapefile data obtained.}
 }
 \value{
 If \code{geometry = FALSE}, (the default) a
@@ -188,9 +187,13 @@ zero households are excluded from ADI calculation: their ADI values will be
   may call its underlying functions
   (\code{tidycensus::\link[tidycensus]{get_acs}()} or
   \code{tidycensus::\link[tidycensus]{get_decennial}()}) many times in order
-  to accommodate their behavior. These calls are wrapped in
+  to accommodate their behavior. When these calls are broken up by state or
+  by state and county, a message is printed indicating the state or state and
+  county whose data is being pulled. These calls are wrapped in
   \code{purrr::\link[purrr]{insistently}(rate =
-  purrr::\link[purrr]{rate_delay}())}.
+  purrr::\link[purrr]{rate_delay}(), quiet = FALSE)}, meaning that they are
+  attempted over and over until success, and \code{tidycensus} error messages
+  are printed as they occur.
 }
 
 \section{Warnings and disclaimers}{
@@ -228,9 +231,9 @@ queens <-
     geometry = TRUE
   )
 queens \%>\%
-  dplyr::as_tibble() \%>\% 
+  dplyr::as_tibble() \%>\%
   dplyr::select(GEOID, NAME, ADI, households = B11005_001) \%>\%
-  dplyr::filter(is.na(ADI) | households == 0) \%>\% 
+  dplyr::filter(is.na(ADI) | households == 0) \%>\%
   print(n = Inf)
 
 # geoid argument allows for highly customized reference populations.
@@ -259,7 +262,7 @@ queens \%>\%
   ggplot() +
   geom_sf(aes(fill = ADI), lwd = 0) +
   scale_fill_viridis_c(na.value = "red", direction = -1)
-  
+
 # Obtain factor loadings:
 attr(queens, "loadings")
 }

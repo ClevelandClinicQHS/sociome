@@ -91,13 +91,12 @@
 #'   these functions' formal arguments can be meaningfully customized (doing so
 #'   will either throw an error or have no effect). However, when setting
 #'   \code{geometry = TRUE}, the \code{tidycensus} functions do pass meaningful
-#'   arguments onto the appropriate
-#'   \code{\link[tigris:tigris-package]{tigris}} function (namely, one of
-#'   \code{\link[tigris]{states}()}, \code{\link[tigris]{counties}()},
-#'   \code{\link[tigris]{tracts}()}, \code{\link[tigris]{block_groups}()}, or
-#'   \code{\link[tigris]{zctas}()}, according to the the value of
-#'   \code{geography}). This enables the user to somewhat customize the
-#'   shapefile data obtained.
+#'   arguments onto the appropriate \code{\link[tigris:tigris-package]{tigris}}
+#'   function (namely, one of \code{\link[tigris]{states}()},
+#'   \code{\link[tigris]{counties}()}, \code{\link[tigris]{tracts}()},
+#'   \code{\link[tigris]{block_groups}()}, or \code{\link[tigris]{zctas}()},
+#'   according to the the value of \code{geography}). This enables the user to
+#'   somewhat customize the shapefile data obtained.
 #'
 #' @section Reference area: \strong{The concept of "reference area" is important
 #'   to understand when using this function.} The algorithm that produced the
@@ -148,9 +147,13 @@
 #'   may call its underlying functions
 #'   (\code{tidycensus::\link[tidycensus]{get_acs}()} or
 #'   \code{tidycensus::\link[tidycensus]{get_decennial}()}) many times in order
-#'   to accommodate their behavior. These calls are wrapped in
+#'   to accommodate their behavior. When these calls are broken up by state or
+#'   by state and county, a message is printed indicating the state or state and
+#'   county whose data is being pulled. These calls are wrapped in
 #'   \code{purrr::\link[purrr]{insistently}(rate =
-#'   purrr::\link[purrr]{rate_delay}())}.
+#'   purrr::\link[purrr]{rate_delay}(), quiet = FALSE)}, meaning that they are
+#'   attempted over and over until success, and \code{tidycensus} error messages
+#'   are printed as they occur.
 #'
 #' @section Warnings and disclaimers: Please note that this function calls data
 #'   from US Census servers, so execution may take a long time depending on the
@@ -174,7 +177,7 @@
 #' # Returns a warning because there are only 8 counties.
 #' # A minimum of 30 locations is recommended.
 #' get_adi(geography = "county", state = "CT", year = 2014, dataset = "acs1")
-#' 
+#'
 #' # Areas with zero households will have an ADI of NA:
 #' queens <-
 #'   get_adi(
@@ -185,11 +188,11 @@
 #'     geometry = TRUE
 #'   )
 #' queens %>%
-#'   dplyr::as_tibble() %>% 
+#'   dplyr::as_tibble() %>%
 #'   dplyr::select(GEOID, NAME, ADI, households = B11005_001) %>%
-#'   dplyr::filter(is.na(ADI) | households == 0) %>% 
+#'   dplyr::filter(is.na(ADI) | households == 0) %>%
 #'   print(n = Inf)
-#' 
+#'
 #' # geoid argument allows for highly customized reference populations.
 #' # ADI of all census tracts in the GEOIDs stored in "delmarva" below:
 #' # Notice the mixing of state- ("10") and county-level GEOIDs (the others).
@@ -209,14 +212,14 @@
 #'
 #' # The na.value argument changes the fill of NA ADI areas.
 #' delmarva %>% ggplot() + geom_sf(aes(fill = ADI), lwd = 0)
-#' 
+#'
 #' # Setting direction = -1 makes the less deprived areas the lighter ones
 #' # The argument na.value changes the color of zero-household areas
 #' queens %>%
 #'   ggplot() +
 #'   geom_sf(aes(fill = ADI), lwd = 0) +
 #'   scale_fill_viridis_c(na.value = "red", direction = -1)
-#'   
+#'
 #' # Obtain factor loadings:
 #' attr(queens, "loadings")
 #' }
@@ -382,19 +385,24 @@ get_tidycensus <- function(exec_arg_tibble) {
   
   result <-
     exec_arg_tibble %>% 
-    purrr::pmap(exec_insistently) %>% 
-    lapply(dplyr::select, "GEOID", "NAME", "key" = 3L, "value" = 4L) %>% 
-    Reduce(f = rbind)
+    purrr::pmap(exec_tidycensus) %>% 
+    lapply(dplyr::select, 1L, 2L, names_from = 3L, values_from = 4L) %>% 
+    purrr::reduce(rbind)
   
   geoid_match <- result$GEOID %>% match(., .)
   
   result$NAME <- result$NAME[geoid_match]
   
-  if (any(colnames(result) == "geometry")) {
+  if (any(colnames(result) == 5L)) {
     result$geometry <- result$geometry[geoid_match]
   }
   
-  tidyr::spread(result, key = "key", value = "value")
+  # tidyr::pivot_wider(
+  #   result,
+  #   names_from = "names_from",
+  #   values_from = "values_from"
+  # )
+  tidyr::spread(result, key = "names_from", value = "values_from")
 }
 
 
@@ -427,7 +435,20 @@ choose_acs_variables <- function(year, dataset) {
 
 
 
-exec_insistently <- purrr::insistently(rlang::exec, rate = purrr::rate_delay())
+exec_tidycensus <- function(state = NULL, county = NULL, ...) {
+  if (!is.null(state)) {
+    message("\nState: ", paste(state, collapse = ", "))
+    if (!is.null(county)) {
+      message("County: ", paste(county, collapse = ", "))
+    }
+  }
+  exec_insistently(..., state = state, county = county)
+}
+
+
+
+exec_insistently <- 
+  purrr::insistently(rlang::exec, rate = purrr::rate_delay(), quiet = FALSE)
 
 
 

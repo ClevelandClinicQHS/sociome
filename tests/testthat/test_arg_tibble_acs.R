@@ -12,7 +12,7 @@ test_get_adi_arg_tibble <- function(geography,
     exec_arg_tibble(
       dataset,
       year, 
-      geography,
+      geography = geography,
       geometry = FALSE,
       shift_geo = FALSE,
       cache_table = FALSE,
@@ -32,7 +32,7 @@ test_get_adi_arg_tibble <- function(geography,
       exec_arg_tibble
     )
   
-  tidyr::crossing(exec_arg_tibble, ref_area$state_county)
+  cross_args(exec_arg_tibble, ref_area$state_county, geography, year, dataset)
 }
 
 

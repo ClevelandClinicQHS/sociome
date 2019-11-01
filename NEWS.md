@@ -1,4 +1,13 @@
 
+# sociome 1.3.0
+
+## Major updates:
+- Makes 2015 and 2016 block group calls use median household income (B19013_001) instead of median family income (B19113_001), which is unavailable at that level of geography during those years.
+
+## Minor updates:
+- Fixed tract-level 2010 decennial calls so that they go county-by-county for the ACS-data-gathering portions
+- Made it so `get_adi(dataset = "decennial", state = NULL)` would work.
+
 # sociome 1.2.0
 
 ## Major updates:

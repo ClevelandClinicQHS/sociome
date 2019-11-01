@@ -4,9 +4,17 @@
 \alias{get_geoids}
 \title{Obtain GEOIDs of places}
 \usage{
-get_geoids(geography, state = NULL, county = NULL, geoid = NULL,
-  year = 2010, geometry = FALSE, cache_tables = TRUE, key = NULL,
-  ...)
+get_geoids(
+  geography,
+  state = NULL,
+  county = NULL,
+  geoid = NULL,
+  year = 2010,
+  geometry = FALSE,
+  cache_tables = TRUE,
+  key = NULL,
+  ...
+)
 }
 \arguments{
 \item{geography}{A character string denoting the level of census geography
@@ -52,7 +60,7 @@ complicated reference areas.
 tracts <- get_geoids(geography = "tract", state = "New York", county = "New York")
 tracts
 
-# Get all block GEOIDs for the first tract on that list
-get_geoids(geography = "block", geoid = tracts$GEOID[1])
+# Get all block GEOIDs for the fifth tract on that list
+get_geoids(geography = "block", geoid = tracts$GEOID[5])
 }
 }

@@ -143,6 +143,12 @@
 #'   \code{rlang::\link[rlang]{last_error}()$adi_raw_data}. The former excludes
 #'   areas with zero households, but the latter includes them.
 #'
+#'   One of the ADI indicators is median family income, but methodological
+#'   issues with the 2015 and 2016 ACS have rendered this variable unavailable
+#'   at the block group level for those years. When requested, this function
+#'   will use median household income in its place, with a \code{warning()}. See
+#'   \url{https://www.census.gov/programs-surveys/acs/technical-documentation/user-notes/2016-01.html}.
+#'
 #' @section API-related error handling: Depending on user input, this function
 #'   may call its underlying functions
 #'   (\code{tidycensus::\link[tidycensus]{get_acs}()} or
@@ -250,7 +256,7 @@ get_adi <- function(geography,
     exec_arg_tibble(
       dataset,
       year, 
-      geography = geography,
+      geography,
       geometry = geometry,
       shift_geo = shift_geo,
       cache_table = cache_tables,
@@ -265,11 +271,19 @@ get_adi <- function(geography,
       county, 
       zcta, 
       geography, 
+      year,
       dataset,
       exec_arg_tibble
     )
   
-  exec_arg_tibble <- tidyr::crossing(exec_arg_tibble, ref_area$state_county)
+  exec_arg_tibble <-
+    cross_args(
+      exec_arg_tibble = exec_arg_tibble,
+      state_county = ref_area$state_county,
+      geography = geography,
+      year = year,
+      dataset = dataset
+    )
   
   if (geometry) {
     # Saves old tigris_use_cache value and puts it back when function exits
@@ -309,7 +323,7 @@ get_adi <- function(geography,
 
 
 #' @importFrom rlang .data
-exec_arg_tibble <- function(dataset, year, ...) {
+exec_arg_tibble <- function(dataset, year, geography, ...) {
   
   dots <- lapply(list(...), list)
   
@@ -324,12 +338,13 @@ exec_arg_tibble <- function(dataset, year, ...) {
             dplyr::pull("variable"),
           
           sociome::acs_vars %>% 
-            dplyr::filter(.data$decennial2010) %>% 
+            dplyr::filter(.data$dec2010) %>% 
             dplyr::pull("variable")
         )
       
       rlang::dots_list(
         .fn = list(tidycensus::get_decennial, tidycensus::get_acs),
+        geography = geography,
         variables = variables,
         sumfile = list("sf1", NULL),
         year = year,
@@ -339,7 +354,7 @@ exec_arg_tibble <- function(dataset, year, ...) {
         !!!dots,
         .homonyms = "first"
       ) %>% 
-        tibble::as_tibble(.rows = 2L)
+        dplyr::as_tibble(.rows = 2L)
       
     } else {
       variables <- 
@@ -350,6 +365,7 @@ exec_arg_tibble <- function(dataset, year, ...) {
       
       rlang::dots_list(
         .fn = list(tidycensus::get_decennial),
+        geography = geography,
         variables = variables,
         sumfile = c("sf1", "sf3"),
         year = year,
@@ -358,13 +374,14 @@ exec_arg_tibble <- function(dataset, year, ...) {
         !!!dots,
         .homonyms = "first"
       ) %>% 
-        tibble::as_tibble(.rows = 2L)
+        dplyr::as_tibble(.rows = 2L)
     }
     
   } else {
     rlang::dots_list(
       .fn = list(tidycensus::get_acs),
-      variables = list(choose_acs_variables(year = year, dataset = dataset)),
+      geography = geography,
+      variables = list(choose_acs_variables(year, dataset, geography)),
       year = year,
       survey = dataset,
       output = "tidy",
@@ -373,20 +390,30 @@ exec_arg_tibble <- function(dataset, year, ...) {
       !!!dots,
       .homonyms = "first"
     ) %>% 
-      tibble::as_tibble(.rows = 1L)
+      dplyr::as_tibble(.rows = 1L)
   }
 }
 
 
 #' @importFrom rlang .data
 get_tidycensus <- function(exec_arg_tibble) {
-  
-  message(nrow(exec_arg_tibble), " call(s) to tidycensus beginning.")
+
+  message("\n", nrow(exec_arg_tibble), " call(s) to tidycensus beginning.")
   
   result <-
     exec_arg_tibble %>% 
     purrr::pmap(exec_tidycensus) %>% 
-    lapply(dplyr::select, 1L, 2L, names_from = 3L, values_from = 4L) %>% 
+    lapply(
+      function(x) {
+        dplyr::select(
+          dplyr::select_if(x, is.atomic), # Makes geometry column last
+          1L,
+          2L,
+          names_from = 3L,
+          values_from = 4L
+        )
+      }
+    ) %>% 
     purrr::reduce(rbind)
   
   geoid_match <- result$GEOID %>% match(., .)
@@ -397,38 +424,44 @@ get_tidycensus <- function(exec_arg_tibble) {
     result$geometry <- result$geometry[geoid_match]
   }
   
+  # Not yet supportive of sf-tibbles
   # tidyr::pivot_wider(
   #   result,
   #   names_from = "names_from",
   #   values_from = "values_from"
   # )
+  
   tidyr::spread(result, key = "names_from", value = "values_from")
 }
 
 
 
 #' @importFrom rlang .data
-choose_acs_variables <- function(year, dataset) {
+choose_acs_variables <- function(year, dataset, geography) {
   
   if (year > 2010) {
-    if (year == 2011 && dataset == "acs5") {
+    if (any(2015:2016 == year) && geography == "block group") {
       sociome::acs_vars %>% 
-        dplyr::filter(.data$B23025_and_B15002) %>% 
+        dplyr::filter(.data$set2) %>% 
+        dplyr::pull("variable")
+    } else if (year == 2011 && dataset == "acs5") {
+      sociome::acs_vars %>% 
+        dplyr::filter(.data$set3) %>% 
         dplyr::pull("variable")
     } else {
       sociome::acs_vars %>% 
-        dplyr::filter(.data$B23025_and_B15003) %>% 
+        dplyr::filter(.data$set1) %>% 
         dplyr::pull("variable")
     }
   } else if (
     dataset == "acs1" && year > 2007 || dataset == "acs3" && year == 2010
   ) {
     sociome::acs_vars %>% 
-      dplyr::filter(.data$B23001_and_B15003) %>% 
+      dplyr::filter(.data$set4) %>% 
       dplyr::pull("variable")
   } else {
     sociome::acs_vars %>% 
-      dplyr::filter(.data$B23001_and_B15002) %>% 
+      dplyr::filter(.data$set5) %>% 
       dplyr::pull("variable")
   }
 }

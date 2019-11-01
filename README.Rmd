@@ -262,11 +262,7 @@ While allowing flexibility in specifying reference populations, data from the AC
 For example, ADIs cannot be obtained for the two block groups in Kalawao County, Hawaii because there are only two of them, one of them having zero households:
 
 ```{r Kalawao, cache=TRUE, message=F, error=TRUE}
-get_adi("block group", state = "hi", county = "kalawao", year = 2015)
-
-rlang::last_error()$adi_indicators
-
-rlang::last_error()$adi_raw_data
+get_adi("block group", state = "hi", county = "kalawao", year = 2017)
 ```
 
 When working with ACS data, it is crucial to know when to use the ACS1, ACS3, or ACS5. See https://www.census.gov/programs-surveys/acs/guidance/estimates.html.

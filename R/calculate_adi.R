@@ -16,8 +16,14 @@
 #' Areas listed as having zero households are excluded from ADI calculation.
 #' Their resulting ADIs will be \code{NA}.
 #'
-#' For more information, see \code{\link{get_adi}()}, especially \strong{ADI
-#' factor loadings} and \strong{Missingness and imputation}.
+#' If calling this function directly (i.e., not via \code{get_adi()}) on a data
+#' set that contains median household income (B19013_001) and does not contain
+#' median family income (B19113_001), median household income will be used in
+#' place of median family income, with a \code{warning()}. See the "Missingness
+#' and imputation" section of \code{\link{get_adi}()}.
+#'
+#' @seealso For more information, see \code{\link{get_adi}()}, especially
+#'   \strong{ADI factor loadings} and \strong{Missingness and imputation}.
 #'
 #' @param data_raw A data frame, \code{\link[tibble]{tibble}}, or
 #'   \code{\link[sf]{sf}} ultimately obtained via
@@ -106,7 +112,7 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE) {
             .subclass = "imputation_unsuccessful",
             adi_indicators = 
               data_raw %>% 
-              tibble::as_tibble() %>% 
+              dplyr::as_tibble() %>% 
               dplyr::select("GEOID", dplyr::starts_with("NAME")) %>% 
               dplyr::filter(nonzero_hh_lgl) %>% 
               dplyr::bind_cols(indicators_hh_only),
@@ -187,7 +193,7 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE) {
     }
   
   attr(adi, "loadings") <-
-    tibble::tibble(
+    dplyr::tibble(
       factor  = row.names(fit$loadings),
       loading = as.vector(fit$loadings, mode = "double")
     )
@@ -223,8 +229,8 @@ calculate_indicators <- function(data) {
   colnames <- colnames(data)
   
   indicators <-
-    if (any(colnames == "B19113_001")) {
-      factors_from_acs(data)
+    if (any(colnames == "B17010_001")) {
+      factors_from_acs(data, colnames)
     } else if (any(colnames == "P077001")) {
       factors_from_2000_decennial(data)
     } else if (any(colnames == "P107A001")) {
@@ -244,17 +250,38 @@ calculate_indicators <- function(data) {
 # wrangles them into a data frame that contains the specific measures that are
 # used to calculate ADI
 #' @importFrom rlang .data
-factors_from_acs <- function(data_raw) {
+factors_from_acs <- function(data_raw, colnames) {
   
   data_indicators <- as.data.frame(data_raw)
   # In case data is an sf tibble, this causes the geometry column to become
   # "unsticky", allowing it to be removed by the subsequent dplyr::select()
   # command so that it doesn't interfere with the imputation that may follow.
   
-  colnames <- colnames(data_raw)
+  if (any(colnames == "B19013_001") && !any(colnames == "B19113_001")) {
+    
+    if (!any(grepl("B19113_001", names(warnings())))) {
+      warning(
+        "\nMedian household income (B19013_001) is being used in place of ",
+        "\nmedian family income (B19113_001).",
+        "\n\nThis is desirable only for 2015 or 2016 block group-level data.",
+        '\n\nSee the "Missingness and imputation" section of ?get_adi, ',
+        "as well as:",
+        "\nhttps://www.census.gov/programs-surveys/acs/",
+        "technical-documentation/user-notes/2016-01.html",
+        call. = FALSE,
+        immediate. = TRUE
+      )
+    }
+    
+    data_indicators <- data_indicators %>% 
+      dplyr::rename("B19113_001" = "B19013_001")
+    
+    median_income_name <- "medianHouseholdIncome"
+  } else {
+    median_income_name <- "medianFamilyIncome"
+  }
   
   if (!any(colnames == "B25003_001")) {
-    
     data_indicators <- data_indicators %>% 
       dplyr::rename(
         "B25003_001"      = "H003002",
@@ -262,7 +289,6 @@ factors_from_acs <- function(data_raw) {
         "B11005_002"      = "P020002",
         "B11005_005"      = "P020008"
       )
-    
   }
   
   if (!any(colnames == "B23025_005")) {
@@ -344,7 +370,7 @@ factors_from_acs <- function(data_raw) {
     ) %>%
     
     dplyr::select(
-      "medianFamilyIncome"                            = "B19113_001",
+      !!median_income_name                           := "B19113_001",
       "medianMortgage"                                = "B25088_002",
       "medianRent"                                    = "B25064_001",
       "medianHouseValue"                              = "B25077_001" ,
@@ -361,7 +387,7 @@ factors_from_acs <- function(data_raw) {
       "pctHouseholdsWithOverOnePersonPerRoom"         = "Pcrowded"
     )
 }
- 
+
 
 #' @importFrom rlang .data
 factors_from_2000_decennial <- function(data_raw) {

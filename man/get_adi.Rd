@@ -4,11 +4,22 @@
 \alias{get_adi}
 \title{Get area deprivation index (ADI)}
 \usage{
-get_adi(geography, state = NULL, county = NULL, geoid = NULL,
-  zcta = NULL, year = 2017, dataset = c("acs5", "acs3", "acs1",
-  "decennial"), geometry = FALSE, shift_geo = FALSE,
-  keep_indicators = FALSE, raw_data_only = FALSE,
-  cache_tables = TRUE, key = NULL, ...)
+get_adi(
+  geography,
+  state = NULL,
+  county = NULL,
+  geoid = NULL,
+  zcta = NULL,
+  year = 2017,
+  dataset = c("acs5", "acs3", "acs1", "decennial"),
+  geometry = FALSE,
+  shift_geo = FALSE,
+  keep_indicators = FALSE,
+  raw_data_only = FALSE,
+  cache_tables = TRUE,
+  key = NULL,
+  ...
+)
 }
 \arguments{
 \item{geography}{A character string denoting the level of census geography
@@ -180,6 +191,12 @@ zero households are excluded from ADI calculation: their ADI values will be
   data are available via
   \code{rlang::\link[rlang]{last_error}()$adi_raw_data}. The former excludes
   areas with zero households, but the latter includes them.
+
+  One of the ADI indicators is median family income, but methodological
+  issues with the 2015 and 2016 ACS have rendered this variable unavailable
+  at the block group level for those years. When requested, this function
+  will use median household income in its place, with a \code{warning()}. See
+  \url{https://www.census.gov/programs-surveys/acs/technical-documentation/user-notes/2016-01.html}.
 }
 
 \section{API-related error handling}{

@@ -5,7 +5,6 @@ validate_geography <- function(geography = c("state",
                                              "block group",
                                              "zcta",
                                              "zip code tabulation area")) {
-  
   geography <- match.arg(geography)
   
   if (geography == "zcta") {
@@ -19,8 +18,7 @@ validate_geography <- function(geography = c("state",
 
 validate_year <- function(year) {
   
-  if (!rlang::is_scalar_integerish(year) ||
-      !any(c(1990, 2000, 2005:2019) == year)) {
+  if (!rlang::is_scalar_integerish(year)) {
     stop("year must be a single number")
   }
   
@@ -54,6 +52,18 @@ validate_dataset <- function(dataset = c("acs5", "acs3", "acs1", "decennial"),
       )
     }
     
+  } else if (geography == "block group" && any(2015:2016 == year)) {
+    warning(
+      "\nMedian family income (B19113_001) is unavailable at the block group",
+      "\nlevel in the years 2015 and 2016.",
+      "\n\nMedian household income (B19013_001) will be used instead.",
+      '\n\nSee the "Missingness and imputation" section of ?get_adi, ',
+      "as well as:",
+      "\nhttps://www.census.gov/programs-surveys/acs/",
+      "technical-documentation/user-notes/2016-01.html",
+      call. = FALSE,
+      immediate. = TRUE
+    )
   }
   
   dataset
@@ -67,47 +77,33 @@ validate_location <- function(geoid,
                               county, 
                               zcta, 
                               geography,
+                              year,
                               dataset,
                               exec_arg_tibble) {
-  
   if (geography == "zip code tabulation area") {
-    
     if (!is.null(state) || !is.null(county) || !is.null(geoid)) {
       stop(
         'If geography = "zcta",',
         ' then state, county, and geoid args must be NULL.'
       )
     }
-    
-    ref_area <- ref_area_from_zcta(zcta)
-    
+    ref_area_from_zcta(zcta)
   } else {
-    
     if (!is.null(zcta)) {
       stop(
         "If supplying something to zcta argument then",
         '\ngeography = "zip code tabulation area" is required.'
       )
     }
-    
     if (is.null(geoid)) {
-      
-      ref_area <-
-        ref_area_from_sc(state, county, geography, dataset, exec_arg_tibble)
-      
+      ref_area_from_sc(state, county, geography, year, dataset, exec_arg_tibble)
     } else {
-      
       if (!is.null(state) || !is.null(county)) {
         stop("Can't supply both geoid and state/county")
       }
-      
-      ref_area <-
-        ref_area_from_geoid(geoid, geography, dataset, exec_arg_tibble)
+      ref_area_from_geoid(geoid, geography, year, dataset, exec_arg_tibble)
     }
-    
   }
-  
-  ref_area
 }
 
 
@@ -134,7 +130,7 @@ ref_area_from_zcta <- function(zcta) {
   list(
     geoid        = NULL,
     geo_length   = NULL,
-    state_county = tibble::tibble(state = list(NULL), county = list(NULL)),
+    state_county = dplyr::tibble(state = list(NULL), county = list(NULL)),
     zcta         = zcta
   )
 }
@@ -143,7 +139,8 @@ ref_area_from_zcta <- function(zcta) {
 
 ref_area_from_sc <- function(state, 
                              county, 
-                             geography, 
+                             geography,
+                             year,
                              dataset, 
                              exec_arg_tibble) {
   
@@ -158,25 +155,19 @@ ref_area_from_sc <- function(state,
   
   state_county <-
     if (any(c("state", "county") == geography)) {
-      
-      tibble::tibble(state = list(state), county = list(county))
-      
+      dplyr::tibble(state = list(state), county = list(county))
     } else if (is.null(county)) {
       
-      if (geography == "tract" && dataset == "decennial") {
-        
-        tibble::tibble(state = state) #, county = list(NULL))
-        
+      if (geography == "tract" && dataset == "decennial" && year != 2010) {
+        dplyr::tibble(
+          state = if (is.null(state)) c(censusapi::fips, "72") else state
+        )
       } else {
-        
         sc_from_preliminary_call(exec_arg_tibble, state)
-        
       }
       
     } else {
-      
-      tibble::tibble(state = state, county = county)
-      
+      dplyr::tibble(state = state, county = county)
     }
   
   list(
@@ -192,7 +183,7 @@ ref_area_from_sc <- function(state,
 sc_from_preliminary_call <- function(exec_arg_tibble, state) {
   
   county_geoids <- county_geoids_from_state(exec_arg_tibble, state)
-    
+  
   sc_from_county_geoids(county_geoids)
 }
 
@@ -218,7 +209,7 @@ county_geoids_from_state <- function(exec_arg_tibble, state) {
 
 
 sc_from_county_geoids <- function(county_geoids) {
-  tibble::tibble(
+  dplyr::tibble(
     state  = substr(county_geoids, 1L, 2L),
     county = substr(county_geoids, 3L, 5L)
   )
@@ -227,13 +218,17 @@ sc_from_county_geoids <- function(county_geoids) {
 
 
 
-ref_area_from_geoid <- function(geoid, geography, dataset, exec_arg_tibble) {
-  
+ref_area_from_geoid <- function(geoid,
+                                geography, 
+                                year, 
+                                dataset, 
+                                exec_arg_tibble) {
   geoid <- validate_geoid(geoid)
   
   geo_length <- validate_geo_length(geography, geoid)
   
-  state_county <- sc_from_geoid(geoid, geography, dataset, exec_arg_tibble)
+  state_county <-
+    sc_from_geoid(geoid, geography, year, dataset, exec_arg_tibble)
   
   list(
     geoid = geoid,
@@ -265,10 +260,10 @@ validate_geoid <- function(geoid) {
   
   geoid
 }
-  
 
 
-  
+
+
 validate_geo_length <- function(geography, geoid) {
   
   geo_length <-
@@ -287,7 +282,7 @@ validate_geo_length <- function(geography, geoid) {
   
   if (max(nchar(geoid)) > geo_length) {
     warning(
-      '"One or more geoids are more granular than geography = "', geography,
+      'One or more geoids are more granular than geography = "', geography,
       '"\nThe ', geography, " in which these elements dwell will be used."
     )
   }
@@ -299,24 +294,17 @@ validate_geo_length <- function(geography, geoid) {
 
 
 # @importFrom rlang .data
-sc_from_geoid <- function(geoid, geography, dataset, exec_arg_tibble) {
+sc_from_geoid <- function(geoid, geography, year, dataset, exec_arg_tibble) {
   
   first_two <- substr(geoid, 1L, 2L)
   
   if (any(c("state", "county") == geography)) {
     
-    tibble::tibble(state = list(unique(first_two)))
+    dplyr::tibble(state = list(unique(first_two)))
     
-    # list(list(state = unique(first_two), county = NULL))
+  } else if (geography == "tract" && dataset == "decennial" && year != 2010) {
     
-  } else if (geography == "tract" && dataset == "decennial") {
-    
-    tibble::tibble(state = unique(first_two))
-    
-    # lapply(
-    #   unique(first_two),
-    #   function(state) list(state = state, county = NULL)
-    # )
+    dplyr::tibble(state = unique(first_two))
     
   } else {
     
@@ -340,3 +328,26 @@ sc_from_geoid <- function(geoid, geography, dataset, exec_arg_tibble) {
   }
 }
 
+
+
+cross_args <- function(exec_arg_tibble, 
+                       state_county, 
+                       geography, 
+                       year, 
+                       dataset) {
+  if (geography == "tract" && year == 2010 && dataset == "decennial") {
+    dplyr::bind_rows(
+      dplyr::tibble(
+        !!!exec_arg_tibble[1L, ], # This is the decennial row
+        state = unique(state_county$state)
+      ),
+      dplyr::tibble(
+        !!!exec_arg_tibble[2L, ], # This is the acs row
+        state = state_county$state,
+        county = as.vector(state_county$county, mode = "list")
+      )
+    )
+  } else {
+    tidyr::crossing(exec_arg_tibble, state_county)
+  }
+}

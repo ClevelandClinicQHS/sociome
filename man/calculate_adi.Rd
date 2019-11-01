@@ -51,8 +51,11 @@ variables unique to each kind of data set.
 Areas listed as having zero households are excluded from ADI calculation.
 Their resulting ADIs will be \code{NA}.
 
-For more information, see \code{\link{get_adi}()}, especially \strong{ADI
-factor loadings} and \strong{Missingness and imputation}.
+If calling this function directly (i.e., not via \code{get_adi()}) on a data
+set that contains median household income (B19013_001) and does not contain
+median family income (B19113_001), median household income will be used in
+place of median family income, with a \code{warning()}. See the "Missingness
+and imputation" section of \code{\link{get_adi}()}.
 }
 \examples{
 \donttest{
@@ -64,4 +67,8 @@ calculate_adi(raw_census)
 
 calculate_adi(raw_census, keep_indicators = TRUE)
 }
+}
+\seealso{
+For more information, see \code{\link{get_adi}()}, especially
+  \strong{ADI factor loadings} and \strong{Missingness and imputation}.
 }

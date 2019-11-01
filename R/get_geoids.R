@@ -38,8 +38,8 @@
 #' tracts <- get_geoids(geography = "tract", state = "New York", county = "New York")
 #' tracts
 #'
-#' # Get all block GEOIDs for the first tract on that list
-#' get_geoids(geography = "block", geoid = tracts$GEOID[1])
+#' # Get all block GEOIDs for the fifth tract on that list
+#' get_geoids(geography = "block", geoid = tracts$GEOID[5])
 #' }
 #' @export
 get_geoids <- function(geography,
@@ -85,7 +85,7 @@ get_geoids <- function(geography,
       !!!lapply(list(...), list),
       .homonyms = "first"
     ) %>% 
-    tibble::as_tibble(.rows = 1L)
+    dplyr::as_tibble(.rows = 1L)
   
   ref_area <-
     validate_location(

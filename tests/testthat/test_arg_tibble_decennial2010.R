@@ -107,6 +107,12 @@ test_that("call tibble for geoids is correct", {
     )
   )
   
+  
+  
+  skip_if(Sys.getenv("CENSUS_API_KEY") == "")
+  
+  
+  
   expect_identical(
     test_get_adi_arg_tibble(
       geography = "tract",
@@ -140,10 +146,6 @@ test_that("call tibble for geoids is correct", {
           "001")
     )
   )
-  
-  
-  
-  skip_if(Sys.getenv("CENSUS_API_KEY") == "")
   
   
   
@@ -255,6 +257,12 @@ test_that("call tibble for state only is correct", {
     )
   )
 
+  
+  
+  skip_if(Sys.getenv("CENSUS_API_KEY") == "")
+  
+  
+  
   expect_identical(
     test_get_adi_arg_tibble(
       geography = "tract",
@@ -290,9 +298,6 @@ test_that("call tibble for state only is correct", {
   
   
   
-  skip_if(Sys.getenv("CENSUS_API_KEY") == "")
-
-
   expect_identical(
     test_get_adi_arg_tibble(
       geography = "block group",

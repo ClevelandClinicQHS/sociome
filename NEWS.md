@@ -1,9 +1,12 @@
 
 # sociome 1.3.1
 
+## Major updates
+- Currently, the latest CRAN version of `tidycensus`, 0.9.5, is incompatible with `sociome` due to a `tidycensus` bug. This bug is fixed in version 0.9.6, which is available on Github, but in order to accommodate new users of `sociome`, the older CRAN version, 0.9.2, will be required instead. This will be changed once the latest version of `tidycensus` becomes available on CRAN.
+
 ## Minor updates
 
-- Removed reference to now-nonexistent `tigris-package` help page to avoid warning.
+- Removed reference to now-nonexistent `tigris-package` help page to avoid CRAN warning.
 
 # sociome 1.3.0
 

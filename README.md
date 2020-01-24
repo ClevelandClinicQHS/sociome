@@ -198,7 +198,8 @@ counties are erratic indeed.
 The aforementioned `geoid` parameter allows the user to mix different
 levels of geography when specifying a reference population. Employing
 2000 decennial census data, the code below stores the ADIs of the census
-tracts in every county entirely or partially on the Delmarva peninsula:
+block groups in every county entirely or partially on the Delmarva
+peninsula:
 
 ``` r
 delmarva_geoids <-
@@ -211,7 +212,7 @@ delmarva_geoids <-
 
 delmarva <-
   get_adi(
-    geography = "tract",
+    geography = "block group",
     geoid = delmarva_geoids, 
     dataset = "decennial",
     year = 2000,
@@ -244,9 +245,10 @@ areas lighter in color than low-ADI areas, which is counterintuitive.
 While not necessarily *incorrect*, this can be “fixed” using other
 `ggplot` features, such as `scale_fill_viridis_c(direction = -1)`.
 
-Furthermore, the gray borders between census tracts are a bit thick and
-in many cases totally obscure some of the smaller tracts. Borders can be
-removed by setting `lwd = 0` within the `geom_sf()` function.
+Furthermore, the gray borders between census block groups are a bit
+thick and in many cases totally obscure some of the smaller block
+groups. Borders can be removed by setting `lwd = 0` within the
+`geom_sf()` function.
 
 ``` r
 delmarva %>%

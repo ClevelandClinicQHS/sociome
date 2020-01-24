@@ -98,7 +98,7 @@ get_adi(geography = "county", state = "CT", year = 2014, dataset = "acs1")
 
 Notice the warning to the user that it is not recommended to calculate ADIs for fewer than 30 locations. This warning occurred in this case because Connecticut only has eight counties, and the ADI values of these counties are erratic indeed.
 
-The aforementioned `geoid` parameter allows the user to mix different levels of geography when specifying a reference population. Employing 2000 decennial census data, the code below stores the ADIs of the census tracts in every county entirely or partially on the Delmarva peninsula:
+The aforementioned `geoid` parameter allows the user to mix different levels of geography when specifying a reference population. Employing 2000 decennial census data, the code below stores the ADIs of the census block groups in every county entirely or partially on the Delmarva peninsula:
 
 ```{r delmarva_geoids, echo=TRUE, results='hold', message=FALSE, cache=TRUE}
 delmarva_geoids <-
@@ -111,7 +111,7 @@ delmarva_geoids <-
 
 delmarva <-
   get_adi(
-    geography = "tract",
+    geography = "block group",
     geoid = delmarva_geoids, 
     dataset = "decennial",
     year = 2000,
@@ -133,7 +133,7 @@ delmarva %>% ggplot() + geom_sf(aes(fill = ADI))
 
 Notice that the default behavior of `geom_sf()` is to make high-ADI areas lighter in color than low-ADI areas, which is counterintuitive. While not necessarily *incorrect*, this can be "fixed" using other `ggplot` features, such as `scale_fill_viridis_c(direction = -1)`.
 
-Furthermore, the gray borders between census tracts are a bit thick and in many cases totally obscure some of the smaller tracts. Borders can be removed by setting `lwd = 0` within the `geom_sf()` function.
+Furthermore, the gray borders between census block groups are a bit thick and in many cases totally obscure some of the smaller block groups. Borders can be removed by setting `lwd = 0` within the `geom_sf()` function.
 
 ```{r plot_delmarva_with_viridis, fig.height=9, fig.width=7, cache=TRUE}
 delmarva %>%

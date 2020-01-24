@@ -118,12 +118,12 @@ Not necessary if you have already loaded your key with
 these functions' formal arguments can be meaningfully customized (doing so
 will either throw an error or have no effect). However, when setting
 \code{geometry = TRUE}, the \code{tidycensus} functions do pass meaningful
-arguments onto the appropriate \code{\link[tigris:tigris-package]{tigris}}
-function (namely, one of \code{\link[tigris]{states}()},
-\code{\link[tigris]{counties}()}, \code{\link[tigris]{tracts}()},
-\code{\link[tigris]{block_groups}()}, or \code{\link[tigris]{zctas}()},
-according to the the value of \code{geography}). This enables the user to
-somewhat customize the shapefile data obtained.}
+arguments onto the appropriate \code{tigris} function (namely, one of
+\code{\link[tigris]{states}()}, \code{\link[tigris]{counties}()},
+\code{\link[tigris]{tracts}()}, \code{\link[tigris]{block_groups}()}, or
+\code{\link[tigris]{zctas}()}, according to the the value of
+\code{geography}). This enables the user to somewhat customize the
+shapefile data obtained.}
 }
 \value{
 If \code{geometry = FALSE}, (the default) a

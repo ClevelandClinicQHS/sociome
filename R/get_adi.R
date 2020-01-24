@@ -91,12 +91,12 @@
 #'   these functions' formal arguments can be meaningfully customized (doing so
 #'   will either throw an error or have no effect). However, when setting
 #'   \code{geometry = TRUE}, the \code{tidycensus} functions do pass meaningful
-#'   arguments onto the appropriate \code{\link[tigris:tigris-package]{tigris}}
-#'   function (namely, one of \code{\link[tigris]{states}()},
-#'   \code{\link[tigris]{counties}()}, \code{\link[tigris]{tracts}()},
-#'   \code{\link[tigris]{block_groups}()}, or \code{\link[tigris]{zctas}()},
-#'   according to the the value of \code{geography}). This enables the user to
-#'   somewhat customize the shapefile data obtained.
+#'   arguments onto the appropriate \code{tigris} function (namely, one of
+#'   \code{\link[tigris]{states}()}, \code{\link[tigris]{counties}()},
+#'   \code{\link[tigris]{tracts}()}, \code{\link[tigris]{block_groups}()}, or
+#'   \code{\link[tigris]{zctas}()}, according to the the value of
+#'   \code{geography}). This enables the user to somewhat customize the
+#'   shapefile data obtained.
 #'
 #' @section Reference area: \strong{The concept of "reference area" is important
 #'   to understand when using this function.} The algorithm that produced the
@@ -148,6 +148,8 @@
 #'   at the block group level for those years. When requested, this function
 #'   will use median household income in its place, with a \code{warning()}. See
 #'   \url{https://www.census.gov/programs-surveys/acs/technical-documentation/user-notes/2016-01.html}.
+#'
+#'
 #'
 #' @section API-related error handling: Depending on user input, this function
 #'   may call its underlying functions

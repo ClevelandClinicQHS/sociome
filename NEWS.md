@@ -1,4 +1,10 @@
 
+# sociome 1.3.1
+
+## Minor updates
+
+- Removed reference to now-nonexistent `tigris-package` help page to avoid warning.
+
 # sociome 1.3.0
 
 ## Major updates:

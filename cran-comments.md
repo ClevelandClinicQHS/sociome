@@ -1,9 +1,6 @@
-## sociome 1.3.0
+## sociome 1.3.1
 
-* Changed behavior for some function calls
-* Added dependancy: censusapi; moved "tibble" from imports to suggests.
-* Updated README, tests, manual files.
-* Code improvements
+* Removed reference to the now-nonexistent `tigris-package` help page.
 
 
 ## R CMD check results

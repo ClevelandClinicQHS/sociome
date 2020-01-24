@@ -119,7 +119,7 @@ user chooses:
   - the level of geography whose ADIs are desired (viz., state, county,
     census tract, or census block group)
   - the year
-  - the ACS estimates (viz. the one-, three-, or five-year estimates)
+  - the ACS estimates (viz. the one-, three-, or five-year estimates)
   - the **reference population** (see above).
 
 The function then calls the specified ACS data sets and employs the same
@@ -166,8 +166,7 @@ arguments `dataset` and `year` select the type and year, respectively,
 of the census data set used to calculate localized ADIs.
 
 For example, the following is a `tibble` of the ADIs of the counties of
-Connecticut, using the 2014 edition of the 1-year ACS
-estimates:
+Connecticut, using the 2014 edition of the 1-year ACS estimates:
 
 ``` r
 get_adi(geography = "county", state = "CT", year = 2014, dataset = "acs1")
@@ -175,8 +174,7 @@ get_adi(geography = "county", state = "CT", year = 2014, dataset = "acs1")
 #> Calculating ADI values from fewer than 30 locations.
 #> It is recommended to add more in order to obtain trustworthy results.
 #> Warning: Number of logged events: 102
-#> Warning in cor.smooth(r): Matrix was not positive definite, smoothing was
-#> done
+#> Warning in cor.smooth(r): Matrix was not positive definite, smoothing was done
 #> Warning in psych::principal(indicators_hh_only): The matrix is not positive
 #> semi-definite, scores found from Structure loadings
 #> # A tibble: 8 x 3
@@ -200,8 +198,7 @@ counties are erratic indeed.
 The aforementioned `geoid` parameter allows the user to mix different
 levels of geography when specifying a reference population. Employing
 2000 decennial census data, the code below stores the ADIs of the census
-block groups in every county entirely or partially on the Delmarva
-peninsula:
+tracts in every county entirely or partially on the Delmarva peninsula:
 
 ``` r
 delmarva_geoids <-
@@ -214,7 +211,7 @@ delmarva_geoids <-
 
 delmarva <-
   get_adi(
-    geography = "block group",
+    geography = "tract",
     geoid = delmarva_geoids, 
     dataset = "decennial",
     year = 2000,
@@ -247,10 +244,9 @@ areas lighter in color than low-ADI areas, which is counterintuitive.
 While not necessarily *incorrect*, this can be “fixed” using other
 `ggplot` features, such as `scale_fill_viridis_c(direction = -1)`.
 
-Furthermore, the gray borders between census block groups are a bit
-thick and in many cases totally obscure some of the smaller block
-groups. Borders can be removed by setting `lwd = 0` within the
-`geom_sf()` function.
+Furthermore, the gray borders between census tracts are a bit thick and
+in many cases totally obscure some of the smaller tracts. Borders can be
+removed by setting `lwd = 0` within the `geom_sf()` function.
 
 ``` r
 delmarva %>%

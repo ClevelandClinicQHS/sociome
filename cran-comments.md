@@ -1,4 +1,4 @@
-## sociome 1.3.1
+## sociome 1.3.2
 
 * Removed reference to the now-nonexistent `tigris-package` help page.
 

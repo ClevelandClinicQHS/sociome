@@ -1,4 +1,9 @@
 
+# sociome 1.3.2
+
+## Major updates
+- Made `tidycensus` 0.9.2 the minimum version, now that 0.9.6 is on CRAN. Both those versions are compatible, but 0.9.5 is not.
+
 # sociome 1.3.1
 
 ## Major updates

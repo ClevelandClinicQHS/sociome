@@ -416,7 +416,10 @@ get_tidycensus <- function(exec_arg_tibble) {
         )
       }
     ) %>% 
-    purrr::reduce(rbind)
+    purrr::reduce(rbind) %>% 
+    dplyr::add_count(.data$GEOID, name = "n_GEOID") %>% 
+    dplyr::filter(.data$n_GEOID == max(.data$n_GEOID)) %>% 
+    dplyr::select(-"n_GEOID")
   
   geoid_match <- result$GEOID %>% match(., .)
   

@@ -1,6 +1,6 @@
-## sociome 1.3.2
+## sociome 1.3.3
 
-* Removed reference to the now-nonexistent `tigris-package` help page.
+No ERRORs, WARNINGs, or NOTEs.
 
 
 ## R CMD check results

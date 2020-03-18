@@ -4,7 +4,8 @@
 \name{acs_vars}
 \alias{acs_vars}
 \title{ACS variable names for ADI calculation}
-\format{A \code{\link[tibble]{tibble}} with 138 rows and 8 variables:
+\format{
+A \code{\link[tibble]{tibble}} with 138 rows and 8 variables:
   \describe{ \item{variable}{ACS variable name} \item{description}{Brief
   description of the data the variable contains} \item{set1}{Logical,
   indicating the variables to be used when calculating ADI using the 1- or
@@ -20,7 +21,8 @@
   the pre-2011 5-year estimates} \item{dec2010}{Logical, indicating the
   variables to use in conjunction with the few actual 2010 decennial census
   variables when running \code{\link{get_adi}(year = 2010, dataset =
-  "decennial")}}}}
+  "decennial")}}}
+}
 \usage{
 acs_vars
 }

@@ -44,6 +44,8 @@
 #'   See \code{\link{acs_vars}} and \code{\link{decennial_vars}} for basic
 #'   descriptions of the raw census variables.
 #'
+#' @param seed Passed to \code{\link{set.seed}()} when imputation is needed.
+#'
 #' @return A \code{\link[tibble]{tibble}} with the same number of rows as
 #'   \code{data}. Columns include \code{GEOID}, \code{NAME}, and \code{ADI}.
 #'   Further columns containing the indicators and raw values will also be
@@ -61,7 +63,7 @@
 #' }
 #' @importFrom rlang .data
 #' @export
-calculate_adi <- function(data_raw, keep_indicators = FALSE) {
+calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NULL) {
   
   if (!is.data.frame(data_raw)) {
     stop("data must be a tibble, sf tibble, or data-frame-like object")
@@ -84,7 +86,7 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE) {
   
   # Performs single imputation if there is any missingness in the data.
   if (anyNA(indicators_hh_only)) {
-    
+    set.seed(seed)
     indicators_hh_only <-
       tryCatch(
         indicators_hh_only %>%

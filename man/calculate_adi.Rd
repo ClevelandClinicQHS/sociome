@@ -4,7 +4,7 @@
 \alias{calculate_adi}
 \title{Calculate ADI from census data.}
 \usage{
-calculate_adi(data_raw, keep_indicators = FALSE)
+calculate_adi(data_raw, keep_indicators = FALSE, seed = NULL)
 }
 \arguments{
 \item{data_raw}{A data frame, \code{\link[tibble]{tibble}}, or
@@ -26,6 +26,8 @@ calculate_adi(data_raw, keep_indicators = FALSE)
 
   See \code{\link{acs_vars}} and \code{\link{decennial_vars}} for basic
   descriptions of the raw census variables.}
+
+\item{seed}{Passed to \code{\link{set.seed}()} when imputation is needed.}
 }
 \value{
 A \code{\link[tibble]{tibble}} with the same number of rows as

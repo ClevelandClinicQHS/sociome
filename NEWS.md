@@ -1,4 +1,14 @@
 
+# sociome 1.3.3
+
+## Major updates
+- Fixed bug wherein `get_adi(dataset = "decennial", geography = "tract", year = 2010)` returned [incorrect] results for all tracts in all specified states, irrespective of what was passed to the `geoid` or `county` arguments.
+
+## Minor updates
+- Added `seed` argument to `get_adi()` and `calculate_adi()`.
+- Code improvements
+- Simplified testing
+
 # sociome 1.3.2
 
 ## Major updates

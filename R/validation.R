@@ -79,7 +79,7 @@ validate_location <- function(geoid,
                               geography,
                               year,
                               dataset,
-                              exec_arg_tibble) {
+                              tidycensus_calls) {
   if (geography == "zip code tabulation area") {
     if (!is.null(state) || !is.null(county) || !is.null(geoid)) {
       stop(
@@ -96,12 +96,12 @@ validate_location <- function(geoid,
       )
     }
     if (is.null(geoid)) {
-      ref_area_from_sc(state, county, geography, year, dataset, exec_arg_tibble)
+      ref_area_from_sc(state, county, geography, year, dataset, tidycensus_calls)
     } else {
       if (!is.null(state) || !is.null(county)) {
         stop("Can't supply both geoid and state/county")
       }
-      ref_area_from_geoid(geoid, geography, year, dataset, exec_arg_tibble)
+      ref_area_from_geoid(geoid, geography, year, dataset, tidycensus_calls)
     }
   }
 }
@@ -142,7 +142,7 @@ ref_area_from_sc <- function(state,
                              geography,
                              year,
                              dataset, 
-                             exec_arg_tibble) {
+                             tidycensus_calls) {
   
   if (!is.null(county) && length(state) != 1L) {
     stop(
@@ -163,7 +163,7 @@ ref_area_from_sc <- function(state,
           state = if (is.null(state)) c(censusapi::fips, "72") else state
         )
       } else {
-        sc_from_preliminary_call(exec_arg_tibble, state)
+        sc_from_preliminary_call(tidycensus_calls, state)
       }
       
     } else {
@@ -180,29 +180,44 @@ ref_area_from_sc <- function(state,
 
 
 
-sc_from_preliminary_call <- function(exec_arg_tibble, state) {
+sc_from_preliminary_call <- function(tidycensus_calls, state) {
   
-  county_geoids <- county_geoids_from_state(exec_arg_tibble, state)
+  county_geoids <- county_geoids_from_state(tidycensus_calls, state)
   
   sc_from_county_geoids(county_geoids)
 }
 
 
 
-county_geoids_from_state <- function(exec_arg_tibble, state) {
+county_geoids_from_state <- function(tidycensus_calls, state) {
   
-  exec_args <- purrr::map(exec_arg_tibble, 1L)
+  message("\nPreliminary tidycensus call beginning...")
   
-  exec_args$geography   <- "county"
-  exec_args$variables   <- exec_args$variables[1L]
-  exec_args$geometry    <- FALSE
-  exec_args$shift_geo   <- FALSE
-  exec_args$summary_var <- NULL
-  exec_args$state       <- state
+  counties <-
+    tidycensus_calls[[1L]] %>% 
+    rlang::call_modify(
+      geography = "county",
+      variables = .$variables[1L],
+      geometry = FALSE,
+      shift_geo = FALSE,
+      state = state
+    ) %>% 
+    eval() 
   
-  counties <- do.call(exec_tidycensus, exec_args)
+  counties[["GEOID"]]
   
-  counties$GEOID
+  # exec_args <- purrr::map(tidycensus_calls, 1L)
+  # 
+  # exec_args$geography   <- "county"
+  # exec_args$variables   <- exec_args$variables[1L]
+  # exec_args$geometry    <- FALSE
+  # exec_args$shift_geo   <- FALSE
+  # exec_args$summary_var <- NULL
+  # exec_args$state       <- state
+  # 
+  # counties <- do.call(exec_tidycensus, exec_args)
+  # 
+  # counties$GEOID
 }
 
 
@@ -222,13 +237,13 @@ ref_area_from_geoid <- function(geoid,
                                 geography, 
                                 year, 
                                 dataset, 
-                                exec_arg_tibble) {
+                                tidycensus_calls) {
   geoid <- validate_geoid(geoid)
   
   geo_length <- validate_geo_length(geography, geoid)
   
   state_county <-
-    sc_from_geoid(geoid, geography, year, dataset, exec_arg_tibble)
+    sc_from_geoid(geoid, geography, year, dataset, tidycensus_calls)
   
   list(
     geoid = geoid,
@@ -294,7 +309,7 @@ validate_geo_length <- function(geography, geoid) {
 
 
 # @importFrom rlang .data
-sc_from_geoid <- function(geoid, geography, year, dataset, exec_arg_tibble) {
+sc_from_geoid <- function(geoid, geography, year, dataset, tidycensus_calls) {
   
   first_two <- substr(geoid, 1L, 2L)
   
@@ -315,7 +330,7 @@ sc_from_geoid <- function(geoid, geography, year, dataset, exec_arg_tibble) {
         c(
           geoid[!state_geoids_lgl],
           county_geoids_from_state(
-            exec_arg_tibble = exec_arg_tibble,
+            tidycensus_calls = tidycensus_calls,
             state = unique(geoid[state_geoids_lgl])
           )
         )
@@ -325,29 +340,5 @@ sc_from_geoid <- function(geoid, geography, year, dataset, exec_arg_tibble) {
     
     sc_from_county_geoids(county_geoids)
     
-  }
-}
-
-
-
-cross_args <- function(exec_arg_tibble, 
-                       state_county, 
-                       geography, 
-                       year, 
-                       dataset) {
-  if (geography == "tract" && year == 2010 && dataset == "decennial") {
-    dplyr::bind_rows(
-      dplyr::tibble(
-        !!!exec_arg_tibble[1L, ], # This is the decennial row
-        state = unique(state_county$state)
-      ),
-      dplyr::tibble(
-        !!!exec_arg_tibble[2L, ], # This is the acs row
-        state = state_county$state,
-        county = as.vector(state_county$county, mode = "list")
-      )
-    )
-  } else {
-    tidyr::crossing(exec_arg_tibble, state_county)
   }
 }

@@ -66,26 +66,35 @@ get_geoids <- function(geography,
   
   variables <-
     stats::setNames(
-      if (year == 1990) "P0010001" else "P001001",
-      paste0("census_", year, "_pop")
-    ) %>% 
-    list()
+      object = if (year == 1990) "P0010001" else "P001001",
+      nm = paste0("census_", year, "_pop")
+    )
   
-  exec_arg_tibble <- 
-    rlang::dots_list(
-      .fn = list(tidycensus::get_decennial),
+  args <-
+    list(
       geography = geography,
       variables = variables,
       cache_table = cache_tables,
       year = year,
       sumfile = "sf1",
       geometry = geometry,
-      output = "tidy",
-      key = list(key),
-      !!!lapply(list(...), list),
+      output = "wide",
+      key = key,
+      endyear = rlang::zap(),
+      survey = rlang::zap(),
+      ...
+    )
+  if (!rlang::is_named(args)) {
+    stop("\nAdditional arguments passed to ... must all be named")
+  }
+  
+  tidycensus_call <-
+    rlang::call_modify(
+      .call = quote(tidycensus::get_decennial()),
+      !!!args,
       .homonyms = "first"
     ) %>% 
-    dplyr::as_tibble(.rows = 1L)
+    list()
   
   ref_area <-
     validate_location(
@@ -94,18 +103,22 @@ get_geoids <- function(geography,
       county = county, 
       zcta = NULL, 
       geography = geography, 
+      year = year,
       dataset = "decennial",
-      exec_arg_tibble = exec_arg_tibble
+      tidycensus_calls = tidycensus_call
     )
   
-  exec_arg_tibble <- tidyr::crossing(exec_arg_tibble, ref_area$state_county)
-  
-  census_data <- get_tidycensus(exec_arg_tibble)
+  census_data <- 
+    ref_area$state_county %>% 
+    dplyr::mutate(.call = tidycensus_call) %>% 
+    purrr::pmap(rlang::call_modify) %>% 
+    lapply(eval) %>% 
+    do.call(what = rbind) %>% 
+    dplyr::select("GEOID", "NAME", dplyr::starts_with("census_"))
   
   if (!is.null(ref_area$geoid)) {
-    census_data <-
+    census_data <- census_data %>% 
       filter_ref_area(
-        data       = census_data,
         what       = "GEOID",
         pattern    = ref_area$geoid,
         geo_length = ref_area$geo_length

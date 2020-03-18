@@ -18,6 +18,7 @@ get_adi(
   raw_data_only = FALSE,
   cache_tables = TRUE,
   key = NULL,
+  seed = NULL,
   ...
 )
 }
@@ -111,6 +112,9 @@ return ADIs, so many tables are cached if \code{TRUE}). Defaults to
 \url{http://api.census.gov/data/key_signup.html}. Defaults to \code{NULL}.
 Not necessary if you have already loaded your key with
 \code{\link{census_api_key}()}.}
+
+\item{seed}{Passed to \code{\link{set.seed}()} in
+\code{\link{calculate_adi}()} when imputation is needed.}
 
 \item{...}{Additional arguments to be passed onto
 \code{tidycensus::\link[tidycensus]{get_acs}()} or

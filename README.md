@@ -180,14 +180,14 @@ get_adi(geography = "county", state = "CT", year = 2014, dataset = "acs1")
 #> # A tibble: 8 x 3
 #>   GEOID NAME                             ADI
 #>   <chr> <chr>                          <dbl>
-#> 1 09001 Fairfield County, Connecticut   41.8
-#> 2 09003 Hartford County, Connecticut   263. 
-#> 3 09005 Litchfield County, Connecticut -35.3
-#> 4 09007 Middlesex County, Connecticut  -33.3
-#> 5 09009 New Haven County, Connecticut  288. 
-#> 6 09011 New London County, Connecticut 129. 
-#> 7 09013 Tolland County, Connecticut    -54.2
-#> 8 09015 Windham County, Connecticut    200.
+#> 1 09001 Fairfield County, Connecticut   39.3
+#> 2 09003 Hartford County, Connecticut   253. 
+#> 3 09005 Litchfield County, Connecticut -17.8
+#> 4 09007 Middlesex County, Connecticut  -30.0
+#> 5 09009 New Haven County, Connecticut  278. 
+#> 6 09011 New London County, Connecticut 120. 
+#> 7 09013 Tolland County, Connecticut    -50.5
+#> 8 09015 Windham County, Connecticut    208.
 ```
 
 Notice the warning to the user that it is not recommended to calculate

@@ -170,7 +170,7 @@ Connecticut, using the 2014 edition of the 1-year ACS estimates:
 
 ``` r
 get_adi(geography = "county", state = "CT", year = 2014, dataset = "acs1")
-#> Warning in calculate_adi(census_data, keep_indicators = keep_indicators): 
+#> Warning in calculate_adi(census_data, keep_indicators = keep_indicators, : 
 #> Calculating ADI values from fewer than 30 locations.
 #> It is recommended to add more in order to obtain trustworthy results.
 #> Warning: Number of logged events: 102
@@ -496,7 +496,7 @@ zero households:
 
 ``` r
 get_adi("block group", state = "hi", county = "kalawao", year = 2017)
-#> Warning in calculate_adi(census_data, keep_indicators = keep_indicators): 
+#> Warning in calculate_adi(census_data, keep_indicators = keep_indicators, : 
 #> Calculating ADI values from fewer than 30 locations.
 #> It is recommended to add more in order to obtain trustworthy results.
 #> Error: Imputation unsuccessful. ADIs not calculated.

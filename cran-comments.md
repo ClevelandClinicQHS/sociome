@@ -1,6 +1,6 @@
 ## sociome 1.3.3
 
-No ERRORs, WARNINGs, or NOTEs.
+No ERRORs or WARNINGs. There is a persistent note that a URL used in the documentation (https://www.census.gov/programs-surveys/acs/guidance/estimates.html) is invalid, but it is not.
 
 
 ## R CMD check results

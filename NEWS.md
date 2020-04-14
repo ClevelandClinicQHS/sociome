@@ -1,4 +1,9 @@
 
+# sociome 1.4.1
+
+## Major updates
+- Fixed bug wherein `get_adi(dataset = "decennial", year = 2010)` calls did not work unless `geography = "tract"`
+
 # sociome 1.4.0
 
 ## Major updates

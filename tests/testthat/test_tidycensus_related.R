@@ -50,6 +50,56 @@ test_that("get_adi() works", {
           198.143948913714)
     ) %>% as.data.frame()
   )
+  
+  expect_equivalent(
+    get_adi(
+      geography = "state",
+      year = 2010,
+      geometry = TRUE,
+      dataset = "decennial"
+    ) %>% 
+      as.data.frame() %>% 
+      dplyr::select(c("GEOID", "NAME", "ADI")),
+    dplyr::tibble(
+      GEOID =
+        c("01", "02", "04", "05", "06", "08", "09", "10", "11", "12", "13",
+          "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25",
+          "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36",
+          "37", "38", "39", "40", "41", "42", "44", "45", "46", "47", "48",
+          "49", "50", "51", "53", "54", "55", "56", "72"),
+      NAME = 
+        c("Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+          "Connecticut", "Delaware", "District of Columbia", "Florida",
+          "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas",
+          "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts",
+          "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana",
+          "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico",
+          "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma",
+          "Oregon", "Pennsylvania", "Rhode Island", "South Carolina",
+          "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia",
+          "Washington", "West Virginia", "Wisconsin", "Wyoming", "Puerto Rico"),
+      ADI =
+        c(119.489436432114, 80.0410585454343, 102.322541961018,
+          122.185237378861, 88.0027663207948, 87.1722239555725,
+          76.3080218973778, 89.3221141155259, 88.0467288517754, 
+          102.348324899058, 107.767089540593, 68.8026211113271, 
+          102.100747662927, 95.5932317829465, 106.174620136842,
+          97.2955951165276, 97.2415113245769, 121.171976061924,
+          119.423907544317, 98.9900810107325, 72.4574088160087, 
+          76.4871611247993, 106.2675860193, 85.7349152250932, 
+          131.118089573466, 106.113055035437, 100.194839178265,
+          95.3180009862003, 95.54596929085, 74.7702491009537,
+          73.1101669773923, 116.956479964611, 92.7424804345555,
+          110.56028472009, 97.7842558033965, 104.668536185593,
+          111.485639427132, 96.4949393483412, 97.9235061160272,
+          93.4434999222941, 116.126438905738, 101.247924974427, 
+          116.061456961722, 111.758764424446, 86.1318699154495,
+          88.4991212316467, 83.265242162246, 85.6352434583865,
+          122.444141330237, 93.7865885202094, 89.6065020672775,
+          196.459807148163)
+    ) %>%
+      as.data.frame()
+  )
 })
 
 test_that("calculate_adi() works correctly", {

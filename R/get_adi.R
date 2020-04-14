@@ -505,11 +505,14 @@ get_tidycensus <- function(tidycensus_calls,
     data <-
       state_county %>% 
       tidyr::expand_grid(.call = tidycensus_calls) %>% 
-      purrr::pmap(rlang::call_modify) %>% 
-      lapply(eval) %>% 
-      do.call(what = rbind) %>% 
-      dplyr::select_if(is.atomic) %>% 
-      dplyr::select("GEOID", "NAME", names = 3L, values = 4L)
+      purrr::pmap(
+        function(...)
+          rlang::call_modify(...) %>% 
+          eval() %>% 
+          dplyr::select_if(is.atomic) %>% 
+          dplyr::select("GEOID", "NAME", names = 3L, values = 4L)
+      ) %>% 
+      do.call(rbind, .)
     
     # dplyr::bind_rows(
     #   dplyr::tibble(

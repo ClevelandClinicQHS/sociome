@@ -31,8 +31,8 @@
 #'   at your own risk.
 #'
 #' @examples
-#' \donttest{
-#' # Wrapped in \donttest{} because it requires a Census API key.
+#' \dontrun{
+#' # Wrapped in \dontrun{} because it requires a Census API key.
 #'
 #' # Get all tract GEOIDs for Manhattan
 #' tracts <- get_geoids(geography = "tract", state = "New York", county = "New York")

@@ -52,9 +52,9 @@
 #'   present if \code{keep_indicators = TRUE}.
 #'
 #' @examples
-#' \donttest{
-#' # Wrapped in \donttest{} because these examples require a Census API key.
-#'
+#' \dontrun{
+#' # Wrapped in \dontrun{} because these examples require a Census API key.
+#' 
 #' raw_census <- get_adi("state", raw_data_only = TRUE)
 #'
 #' calculate_adi(raw_census)
@@ -258,6 +258,22 @@ factors_from_acs <- function(data_raw, colnames) {
   # In case data is an sf tibble, this causes the geometry column to become
   # "unsticky", allowing it to be removed by the subsequent dplyr::select()
   # command so that it doesn't interfere with the imputation that may follow.
+  
+  if (any(colnames == "C24010_040")) {
+    if (any(colnames == "C24010_039")) {
+      warning(
+        "\nThe variables C24010_039 and C24010_040 are both present.",
+        '\nC24010_039 will be used for "civilian females age 16+ in',
+        '\nwhite-collar occupations", which is incorrect for pre-2010 data.',
+        "\nIf seeking pre-2010 estimates, remove C24010_039 from dataset.",
+        call. = FALSE,
+        immediate. = TRUE
+      )
+    } else {
+      data_indicators <- data_indicators %>% 
+        dplyr::rename("C24010_039" = "C24010_040")
+    }
+  }
   
   if (any(colnames == "B19013_001") && !any(colnames == "B19113_001")) {
     

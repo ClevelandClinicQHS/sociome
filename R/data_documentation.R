@@ -13,14 +13,19 @@
 #'   used when calculating ADI at the block group level using the 2015 or 2016
 #'   estimates} \item{set3}{Logical, indicating the variables to be used when
 #'   calculating ADI using the 2011 5-year estimates} \item{set4}{Logical,
-#'   indicating the variables to be used when calculating ADI using the
-#'   2008-2010 1-year estimates or the 2010 3-year estimates}
-#'   \item{set5}{Logical, indicating the variables to be used when calculating
-#'   ADI using the pre-2008 1-year estimates, the pre-2010 3-year estimates, or
-#'   the pre-2011 5-year estimates} \item{dec2010}{Logical, indicating the
-#'   variables to use in conjunction with the few actual 2010 decennial census
-#'   variables when running \code{\link{get_adi}(year = 2010, dataset =
-#'   "decennial")}}}
+#'   indicating the variables to be used when calculating ADI using the 2010 1-
+#'   or 3-year estimates} \item{set5}{Logical, indicating the variables to be
+#'   used when calculating ADI using the 2010 5-year estimates}
+#'   \item{set6}{Logical, indicating the variables to be used when calculating
+#'   ADI using the 2008 or 2009 1-year estimates} \item{set7}{Logical,
+#'   indicating the variables to be used when calculating ACS estimates not
+#'   previously mentioned, including the 2009 5-year estimates}
+#'   \item{dec2010}{Logical, indicating the variables to use in conjunction with
+#'   the few actual 2010 decennial census variables when running
+#'   \code{\link{get_adi}(year = 2010, dataset = "decennial")}}}
+#'
+#'   Note that not all year/estimate combinations are currently supported by the
+#'   census API and/or \code{tidycensus}, and some may never be supported.
 #'
 #' @seealso \code{\link{decennial_vars}}
 "acs_vars"

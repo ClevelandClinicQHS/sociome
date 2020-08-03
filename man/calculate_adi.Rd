@@ -60,8 +60,8 @@ place of median family income, with a \code{warning()}. See the "Missingness
 and imputation" section of \code{\link{get_adi}()}.
 }
 \examples{
-\donttest{
-# Wrapped in \donttest{} because these examples require a Census API key.
+\dontrun{
+# Wrapped in \dontrun{} because these examples require a Census API key.
 
 raw_census <- get_adi("state", raw_data_only = TRUE)
 

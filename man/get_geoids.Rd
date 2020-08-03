@@ -53,8 +53,8 @@ This facilitates calls to \code{\link{get_adi}()} that involve somewhat
 complicated reference areas.
 }
 \examples{
-\donttest{
-# Wrapped in \donttest{} because it requires a Census API key.
+\dontrun{
+# Wrapped in \dontrun{} because it requires a Census API key.
 
 # Get all tract GEOIDs for Manhattan
 tracts <- get_geoids(geography = "tract", state = "New York", county = "New York")

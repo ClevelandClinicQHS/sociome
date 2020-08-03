@@ -1,4 +1,13 @@
 
+# sociome 1.4.2
+
+## Major updates
+- `get_adi()` now pulls the correct variable for "civilian females age 16+ in white-collar occupations" for pre-2010 ACS estimates (C24010_040 instead of C24010_039).
+
+## Minor updates
+- Accommodations for new CRAN rules on referencing help pages in other packages.
+- Since examples wrapped in `\donttest{}` are now run during CRAN checks, all instances were changed to `\dontrun{}`.
+
 # sociome 1.4.1
 
 ## Major updates

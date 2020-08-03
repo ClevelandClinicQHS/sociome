@@ -154,6 +154,7 @@
 #'
 #'
 #'
+#'
 #' @section API-related error handling: Depending on user input, this function
 #'   may call its underlying functions
 #'   (\code{tidycensus::\link[tidycensus]{get_acs}()} or
@@ -162,9 +163,9 @@
 #'   by state and county, a message is printed indicating the state or state and
 #'   county whose data is being pulled. These calls are wrapped in
 #'   \code{purrr::\link[purrr]{insistently}(rate =
-#'   purrr::\link[purrr]{rate_delay}(), quiet = FALSE)}, meaning that they are
-#'   attempted over and over until success, and \code{tidycensus} error messages
-#'   are printed as they occur.
+#'   purrr::\link[purrr:rate-helpers]{rate_delay}(), quiet = FALSE)}, meaning
+#'   that they are attempted over and over until success, and \code{tidycensus}
+#'   error messages are printed as they occur.
 #'
 #' @section Warnings and disclaimers: Please note that this function calls data
 #'   from US Census servers, so execution may take a long time depending on the
@@ -177,8 +178,8 @@
 #'   for details.
 #'
 #' @examples
-#' \donttest{
-#' # Wrapped in \donttest{} because all these examples take >5 seconds
+#' \dontrun{
+#' # Wrapped in \dontrun{} because all these examples take >5 seconds
 #' # and require a Census API key.
 #'
 #' # ADI of all census tracts in Cuyahoga County, Ohio
@@ -577,31 +578,28 @@ get_tidycensus <- function(tidycensus_calls,
 #' @importFrom rlang .data
 choose_acs_variables <- function(year, dataset, geography) {
   
-  if (year > 2010) {
-    if (any(2015:2016 == year) && geography == "block group") {
-      sociome::acs_vars %>% 
-        dplyr::filter(.data$set2) %>% 
-        dplyr::pull("variable")
-    } else if (year == 2011 && dataset == "acs5") {
-      sociome::acs_vars %>% 
-        dplyr::filter(.data$set3) %>% 
-        dplyr::pull("variable")
+  set <-
+    if (year >= 2011) {
+      if (any(2015:2016 == year) && geography == "block group") {
+        "set2"
+      } else if (year == 2011 && dataset == "acs5") {
+        "set3"
+      } else {
+        "set1"
+      }
+    } else if (year == 2010) {
+      if (dataset == "acs5") {
+        "set5"
+      } else {
+        "set4"
+      }
+    } else if (dataset == "acs1" && year >= 2008) {
+      "set6"
     } else {
-      sociome::acs_vars %>% 
-        dplyr::filter(.data$set1) %>% 
-        dplyr::pull("variable")
+      "set7"
     }
-  } else if (
-    dataset == "acs1" && year > 2007 || dataset == "acs3" && year == 2010
-  ) {
-    sociome::acs_vars %>% 
-      dplyr::filter(.data$set4) %>% 
-      dplyr::pull("variable")
-  } else {
-    sociome::acs_vars %>% 
-      dplyr::filter(.data$set5) %>% 
-      dplyr::pull("variable")
-  }
+  
+  sociome::acs_vars$variable[sociome::acs_vars[[set]]]
 }
 
 

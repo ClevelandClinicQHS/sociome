@@ -212,9 +212,9 @@ zero households are excluded from ADI calculation: their ADI values will be
   by state and county, a message is printed indicating the state or state and
   county whose data is being pulled. These calls are wrapped in
   \code{purrr::\link[purrr]{insistently}(rate =
-  purrr::\link[purrr]{rate_delay}(), quiet = FALSE)}, meaning that they are
-  attempted over and over until success, and \code{tidycensus} error messages
-  are printed as they occur.
+  purrr::\link[purrr:rate-helpers]{rate_delay}(), quiet = FALSE)}, meaning
+  that they are attempted over and over until success, and \code{tidycensus}
+  error messages are printed as they occur.
 }
 
 \section{Warnings and disclaimers}{
@@ -230,8 +230,8 @@ zero households are excluded from ADI calculation: their ADI values will be
 }
 
 \examples{
-\donttest{
-# Wrapped in \donttest{} because all these examples take >5 seconds
+\dontrun{
+# Wrapped in \dontrun{} because all these examples take >5 seconds
 # and require a Census API key.
 
 # ADI of all census tracts in Cuyahoga County, Ohio

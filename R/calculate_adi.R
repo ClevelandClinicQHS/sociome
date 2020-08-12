@@ -135,74 +135,94 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NULL) {
     message("\nSingle imputation performed")
   }
   
-  # if (keep_indicators) {
-  #   keep_columns <- append(names(data$raw), c("ADI", names(data$indicators)), after = 2L)
-  #   data         <- dplyr::bind_cols(data, data_f)
-  # } else {
-  #   keep_columns <- alist("GEOID", dplyr::starts_with("NAME"), "ADI")
-  # }
-  
-  # Where the magic happens: a principal-components analysis (PCA) of the
-  # statistics that produces the raw ADI scores
-  fit <- psych::principal(indicators_hh_only)
-  
-  # Sometimes the PCA produces results that are completely reversed (i.e., it
-  # gives deprived areas low ADIs and less deprived areas high ADIs). Therefore,
-  # this function performs a check to see if this has occured.
-  #   1. The signage of the factor loadings are multiplied by their expected
-  #      signage according to Singh's original research (present in the unnamed
-  #      vector of 1s and -1s below). This produces a vector of 1s and -1s, with
-  #      a 1 indicating a factor loading in the expected direction and a -1
-  #      indicating a factor loading in the wrong direction.
-  #   2. The sum() of this vector is computed.
-  #   3. The sign() of this sum is computed and saved into a variable called
-  #      "signage_flipper". It will equal 1 or -1. It will equal 1 if most of
-  #      the factor loadings have the same sign as the original Singh factor
-  #      loadings. It will be -1 if not. It will never equal 0 because there is
-  #      an odd number of factor loadings.
-  signage_flipper <-
-    sign(
-      sum(
-        sign(fit$loadings) *
-          c(-1, -1, -1, -1, 1, -1, 1, 1, 1, 1, -1, 1, -1, 1, 1)
-      )
-    )
-  #   4. The variable signage_flipper is multiplied by the PCA scores before
-  #      standardization. In effect, this flips the ADIs in the right direction
-  #      (multiplies their scores by -1) if they were reversed, and it keeps
-  #      them the same (multiplies their scores by 1) if they were not reversed.
-  # The raw ADI scores are standardized to have a mean of 100 and sd of 20
-  
-  adi_vec <- rep.int(NA_real_, length(nonzero_hh_lgl))
-  adi_vec[nonzero_hh_lgl] <- as.numeric(fit$scores * signage_flipper * 20 + 100)
-  
   adi <-
-    if (keep_indicators) {
-      dplyr::bind_cols(data_raw, indicators) %>% 
-        dplyr::mutate(ADI = adi_vec) %>% 
-        dplyr::select(
-          1L,
-          2L,
-          "ADI",
-          colnames(indicators),
-          !!total_hh_colname,
-          dplyr::everything()
-        )
-    } else {
-      data_raw %>% 
-        dplyr::mutate(ADI = adi_vec) %>% 
-        dplyr::select(1L, 2L, "ADI")
-    }
-  
-  attr(adi, "loadings") <-
-    dplyr::tibble(
-      factor  = row.names(fit$loadings),
-      loading = as.vector(fit$loadings, mode = "double")
+    purrr::map2_dfc(
+      list(
+        ADI = TRUE,
+        Financial_Strength =
+          c("medianFamilyIncome", "medianMortgage", "medianRent",
+            "medianHouseValue", "pctPeopleWithWhiteCollarJobs"),
+        Economic_Hardship_and_Inequality =
+          c("pctFamiliesInPoverty", "pctOwnerOccupiedHousing",
+            "ratioThoseMakingUnder10kToThoseMakingOver50k",
+            "pctPeopleLivingBelow150PctFederalPovertyLevel",
+            "pctHouseholdsWithChildrenThatAreSingleParent",
+            "pctHouseholdsWithNoVehicle", "pctPeopleUnemployed"),
+        Educational_Attainment = 
+          c("pctPeopleWithAtLeastHSEducation",
+            "pctPeopleWithLessThan9thGradeEducation",
+            "pctHouseholdsWithOverOnePersonPerRoom")
+      ),
+      list(
+        c(-1, -1, -1, -1, 1, -1, 1, 1, 1, 1, -1, 1, -1, 1, 1),
+        c(-1, -1, -1, -1, -1),
+        c(1, -1, 1, 1, 1, 1, 1),
+        c(-1, 1, 1)
+      ),
+      function(set, expected_signs, result_vec) {
+        
+        # Where the magic happens: a principal-components analysis (PCA) of the
+        # statistics that produces the raw ADI scores
+        fit <- psych::principal(indicators_hh_only[set])
+        
+        # Sometimes the PCA produces results that are completely reversed (i.e.,
+        # it gives deprived areas low ADIs and less deprived areas high ADIs).
+        # Therefore, this function performs a check to see if this has occurred.
+        
+        # 1. The signage of the factor loadings are multiplied by their expected
+        # signage according to Singh's original research (present in the unnamed
+        # vector of 1s and -1s below). This produces a vector of 1s and -1s,
+        # with a 1 indicating a factor loading in the expected direction and a
+        # -1 indicating a factor loading in the wrong direction.
+        
+        # 2. The sum() of this vector is computed.
+        
+        # 3. The sign() of this sum is computed and saved into a variable called
+        # "signage_flipper". It will equal 1 or -1. It will equal 1 if most of
+        # the factor loadings have the same sign as the original Singh factor
+        # loadings. It will be -1 if not. It will never equal 0 because there is
+        # an odd number of factor loadings.
+        signage_flipper <- sign(sum(sign(fit$loadings) * expected_signs))
+        #   4. The variable signage_flipper is multiplied by the PCA scores
+        #   before standardization. In effect, this flips the ADIs in the right
+        #   direction (multiplies their scores by -1) if they were reversed, and
+        #   it keeps them the same (multiplies their scores by 1) if they were
+        #   not reversed.
+        
+        # The raw ADI scores are standardized to have a mean of 100 and sd of 20
+        result_vec[nonzero_hh_lgl] <-
+          as.numeric(fit$scores * signage_flipper * 20 + 100)
+        
+        # We also want the loadings tables for each of the three factors
+        attr(result_vec, "loadings") <-
+          dplyr::tibble(
+            factor = row.names(fit$loadings),
+            loading = as.double(fit$loadings)
+          )
+        
+        result_vec
+      },
+      result_vec = rep_len(NA_real_, length.out = length(nonzero_hh_lgl))
     )
   
-  class(adi) <- c("adi", class(adi))
+  out <-
+    if (keep_indicators) {
+      dplyr::select(
+        dplyr::bind_cols(data_raw, adi, indicators),
+        1L,
+        2L,
+        !!colnames(adi),
+        !!colnames(indicators),
+        !!total_hh_colname,
+        dplyr::everything()
+      )
+    } else dplyr::bind_cols(data_raw[1L:2L], adi)
   
-  adi
+  attr(out, "loadings") <- attr(out$ADI, "loadings")
+  
+  class(out) <- c("adi", class(out))
+  
+  out
 }
 
 

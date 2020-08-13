@@ -85,8 +85,7 @@
 #'   \code{\link{census_api_key}()}.
 #' @param raw_data_only Logical, indicating whether or not to skip calculation
 #'   of the ADI and only return the census variables. Defaults to \code{FALSE}.
-#' @param seed Passed to \code{\link{set.seed}()} in
-#'   \code{\link{calculate_adi}()} when imputation is needed.
+#' @param seed Passed to \code{\link{calculate_adi}()}.
 #' @param ... Additional arguments to be passed onto
 #'   \code{tidycensus::\link[tidycensus]{get_acs}()} or
 #'   \code{tidycensus::\link[tidycensus]{get_decennial}()}. Currently, none of
@@ -137,7 +136,7 @@
 #'   resulting in many missing values.
 #'
 #'   Imputation is attempted via \code{mice::\link[mice]{mice}(m = 1, maxit =
-#'   50, method = "pmm", seed = 500)}. If imputation is unsuccessful, an error
+#'   50, method = "pmm", seed = seed)}. If imputation is unsuccessful, an error
 #'   is thrown, but the dataset of indicators on which imputation was
 #'   unsuccessful is available via
 #'   \code{rlang::\link[rlang]{last_error}()$adi_indicators} and the raw census

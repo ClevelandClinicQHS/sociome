@@ -113,8 +113,7 @@ return ADIs, so many tables are cached if \code{TRUE}). Defaults to
 Not necessary if you have already loaded your key with
 \code{\link{census_api_key}()}.}
 
-\item{seed}{Passed to \code{\link{set.seed}()} in
-\code{\link{calculate_adi}()} when imputation is needed.}
+\item{seed}{Passed to \code{\link{calculate_adi}()}.}
 
 \item{...}{Additional arguments to be passed onto
 \code{tidycensus::\link[tidycensus]{get_acs}()} or
@@ -188,7 +187,7 @@ zero households are excluded from ADI calculation: their ADI values will be
   resulting in many missing values.
 
   Imputation is attempted via \code{mice::\link[mice]{mice}(m = 1, maxit =
-  50, method = "pmm", seed = 500)}. If imputation is unsuccessful, an error
+  50, method = "pmm", seed = seed)}. If imputation is unsuccessful, an error
   is thrown, but the dataset of indicators on which imputation was
   unsuccessful is available via
   \code{rlang::\link[rlang]{last_error}()$adi_indicators} and the raw census

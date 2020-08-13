@@ -44,7 +44,8 @@
 #'   See \code{\link{acs_vars}} and \code{\link{decennial_vars}} for basic
 #'   descriptions of the raw census variables.
 #'
-#' @param seed Passed to \code{\link{set.seed}()} when imputation is needed.
+#' @param seed Passed to the \code{seed} argument of
+#'   \code{mice::\link[mice]{mice}()} when imputation is needed.
 #'
 #' @return A \code{\link[tibble]{tibble}} with the same number of rows as
 #'   \code{data}. Columns include \code{GEOID}, \code{NAME}, and \code{ADI}.
@@ -54,7 +55,7 @@
 #' @examples
 #' \dontrun{
 #' # Wrapped in \dontrun{} because these examples require a Census API key.
-#' 
+#'
 #' raw_census <- get_adi("state", raw_data_only = TRUE)
 #'
 #' calculate_adi(raw_census)
@@ -86,7 +87,6 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NULL) {
   
   # Performs single imputation if there is any missingness in the data.
   if (anyNA(indicators_hh_only)) {
-    set.seed(seed)
     indicators_hh_only <-
       tryCatch(
         indicators_hh_only %>%
@@ -94,7 +94,7 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NULL) {
             m = 1L, 
             maxit = 50L, 
             method = "pmm", 
-            seed = 500L,
+            seed = seed,
             printFlag = FALSE
           ) %>%
           mice::complete(),

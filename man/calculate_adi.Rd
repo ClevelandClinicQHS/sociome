@@ -27,7 +27,8 @@ calculate_adi(data_raw, keep_indicators = FALSE, seed = NULL)
   See \code{\link{acs_vars}} and \code{\link{decennial_vars}} for basic
   descriptions of the raw census variables.}
 
-\item{seed}{Passed to \code{\link{set.seed}()} when imputation is needed.}
+\item{seed}{Passed to the \code{seed} argument of
+\code{mice::\link[mice]{mice}()} when imputation is needed.}
 }
 \value{
 A \code{\link[tibble]{tibble}} with the same number of rows as

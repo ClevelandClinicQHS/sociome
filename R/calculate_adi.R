@@ -64,7 +64,7 @@
 #' }
 #' @importFrom rlang .data
 #' @export
-calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NULL) {
+calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NA) {
   
   if (!is.data.frame(data_raw)) {
     stop("data must be a tibble, sf tibble, or data-frame-like object")
@@ -109,7 +109,7 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NULL) {
               "\n\nRun rlang::last_error()$adi_raw_data to access the raw ",
               "census data,\n",
               "which includes areas with zero households (identified by the ",
-              'third column named "', total_hh_colname, '").'
+              'column named "', total_hh_colname, '").'
             ),
             .subclass = "imputation_unsuccessful",
             adi_indicators = 

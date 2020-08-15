@@ -251,7 +251,7 @@ get_adi <- function(geography,
                     raw_data_only   = FALSE,
                     cache_tables    = TRUE,
                     key             = NULL,
-                    seed            = NULL,
+                    seed            = NA,
                     ...) {
   
   geography <- validate_geography(geography)

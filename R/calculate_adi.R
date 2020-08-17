@@ -136,34 +136,60 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NA) {
   }
   
   adi <-
-    purrr::map2_dfc(
+    purrr::map_dfc(
       list(
-        ADI = TRUE,
+        ADI =
+          dplyr::tribble(
+            ~indicator,                                      ~expected_sign, 
+            "medianFamilyIncome",                            -1,
+            "medianMortgage",                                -1,
+            "medianRent",                                    -1,
+            "medianHouseValue",                              -1,
+            "pctFamiliesInPoverty",                          +1,
+            "pctOwnerOccupiedHousing",                       -1,
+            "ratioThoseMakingUnder10kToThoseMakingOver50k",  +1,
+            "pctPeopleLivingBelow150PctFederalPovertyLevel", +1,
+            "pctHouseholdsWithChildrenThatAreSingleParent",  +1,
+            "pctHouseholdsWithNoVehicle",                    +1,
+            "pctPeopleWithWhiteCollarJobs",                  -1,
+            "pctPeopleUnemployed",                           +1,
+            "pctPeopleWithAtLeastHSEducation",               -1,
+            "pctPeopleWithLessThan9thGradeEducation",        +1,
+            "pctHouseholdsWithOverOnePersonPerRoom",         +1
+          ),
         Financial_Strength =
-          c("medianFamilyIncome", "medianMortgage", "medianRent",
-            "medianHouseValue", "pctPeopleWithWhiteCollarJobs"),
+          dplyr::tribble(
+            ~indicator,                     ~expected_sign,
+            "medianFamilyIncome",           +1,
+            "medianMortgage",               +1,
+            "medianRent",                   +1,
+            "medianHouseValue",             +1,
+            "pctPeopleWithWhiteCollarJobs", +1
+          ),
         Economic_Hardship_and_Inequality =
-          c("pctFamiliesInPoverty", "pctOwnerOccupiedHousing",
-            "ratioThoseMakingUnder10kToThoseMakingOver50k",
-            "pctPeopleLivingBelow150PctFederalPovertyLevel",
-            "pctHouseholdsWithChildrenThatAreSingleParent",
-            "pctHouseholdsWithNoVehicle", "pctPeopleUnemployed"),
+          dplyr::tribble(
+            ~indicator,                                      ~expected_sign,
+            "pctFamiliesInPoverty",                          +1,
+            "pctOwnerOccupiedHousing",                       -1,
+            "ratioThoseMakingUnder10kToThoseMakingOver50k",  +1,
+            "pctPeopleLivingBelow150PctFederalPovertyLevel", +1,
+            "pctHouseholdsWithChildrenThatAreSingleParent",  +1,
+            "pctHouseholdsWithNoVehicle",                    +1,
+            "pctPeopleUnemployed",                           +1
+          ),
         Educational_Attainment = 
-          c("pctPeopleWithAtLeastHSEducation",
-            "pctPeopleWithLessThan9thGradeEducation",
-            "pctHouseholdsWithOverOnePersonPerRoom")
+          dplyr::tribble(
+            ~indicator,                               ~expected_sign,
+            "pctPeopleWithAtLeastHSEducation",        +1,
+            "pctPeopleWithLessThan9thGradeEducation", -1,
+            "pctHouseholdsWithOverOnePersonPerRoom",  -1
+          )
       ),
-      list(
-        c(-1, -1, -1, -1, 1, -1, 1, 1, 1, 1, -1, 1, -1, 1, 1),
-        c(-1, -1, -1, -1, -1),
-        c(1, -1, 1, 1, 1, 1, 1),
-        c(-1, 1, 1)
-      ),
-      function(set, expected_signs, result_vec) {
+      function(indicators_tbl, result_vec) {
         
         # Where the magic happens: a principal-components analysis (PCA) of the
         # statistics that produces the raw ADI scores
-        fit <- psych::principal(indicators_hh_only[set])
+        fit <- psych::principal(indicators_hh_only[indicators_tbl$indicator])
         
         # Sometimes the PCA produces results that are completely reversed (i.e.,
         # it gives deprived areas low ADIs and less deprived areas high ADIs).
@@ -182,7 +208,8 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NA) {
         # the factor loadings have the same sign as the original Singh factor
         # loadings. It will be -1 if not. It will never equal 0 because there is
         # an odd number of factor loadings.
-        signage_flipper <- sign(sum(sign(fit$loadings) * expected_signs))
+        signage_flipper <-
+          sign(sum(sign(fit$loadings) * indicators_tbl$expected_sign))
         #   4. The variable signage_flipper is multiplied by the PCA scores
         #   before standardization. In effect, this flips the ADIs in the right
         #   direction (multiplies their scores by -1) if they were reversed, and

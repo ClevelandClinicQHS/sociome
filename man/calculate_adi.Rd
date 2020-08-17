@@ -4,7 +4,7 @@
 \alias{calculate_adi}
 \title{Calculate ADI from census data.}
 \usage{
-calculate_adi(data_raw, keep_indicators = FALSE, seed = NULL)
+calculate_adi(data_raw, keep_indicators = FALSE, seed = NA)
 }
 \arguments{
 \item{data_raw}{A data frame, \code{\link[tibble]{tibble}}, or

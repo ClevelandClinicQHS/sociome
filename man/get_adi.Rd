@@ -18,7 +18,7 @@ get_adi(
   raw_data_only = FALSE,
   cache_tables = TRUE,
   key = NULL,
-  seed = NULL,
+  seed = NA,
   ...
 )
 }

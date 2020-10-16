@@ -1,7 +1,13 @@
 # Development Version
 
+**Note that `get_adi()` will not work with 1990 nor 2000 Decennial Census data until the US Census restores the availability of those data.**
+
 ## Major updates
 - The 3-factor split of ADI (i.e., the "Berg indices") have been incorporated and are now automatically included in `get_adi()` and `calculate_adi()` output.
+
+## Minor updates
+- Lots of comments added
+- Minor code fixes for clarity
 
 ## Bug fixes
 - The `seed` argument had been essentially ignored up until now, since `seed = 500` was hard-coded into the call to `mice::mice()` within `sociome::calculate_adi()`. User-specified `seed` values in `calculate_adi()` and `sociome::get_adi()` are now properly passed to `mice()`. Users desiring to recover old results should specify `seed = 500`.

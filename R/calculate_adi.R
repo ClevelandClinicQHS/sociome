@@ -67,16 +67,25 @@
 calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NA) {
   
   if (!is.data.frame(data_raw)) {
-    stop("data must be a tibble, sf tibble, or data-frame-like object")
+    stop(
+      "data must be a tibble, sf tibble, or data-frame-like object",
+      .call = FALSE
+    )
   }
   
+  # Returns the name of the column in data_raw that contains data on total
+  # number of households per area.
   total_hh_colname <- get_total_hh_colname(data_raw)
   
+  # Logical vector indicating whether or not each area has a nonzero number of
+  # households.
   nonzero_hh_lgl <- data_raw[[total_hh_colname]] != 0
   
+  # Calculate the 15 ADI indicators from the raw census data.
   indicators <- calculate_indicators(data_raw)
   
-  indicators_hh_only <- indicators %>% dplyr::filter(nonzero_hh_lgl)
+  # Filter the data to only include areas with more than zero households.
+  indicators_hh_only <- indicators %>% dplyr::filter(!!nonzero_hh_lgl)
   
   if (nrow(indicators_hh_only) < 30L) {
     warning(
@@ -111,14 +120,21 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NA) {
               "which includes areas with zero households (identified by the ",
               'column named "', total_hh_colname, '").'
             ),
+            
             .subclass = "imputation_unsuccessful",
-            adi_indicators = 
+            
+            adi_indicators =
+              # 15 ADI indicators data, accessible via
+              # rlang::last_error()$adi_indicators
               data_raw %>% 
               dplyr::as_tibble() %>% 
               dplyr::select("GEOID", dplyr::starts_with("NAME")) %>% 
-              dplyr::filter(nonzero_hh_lgl) %>% 
+              dplyr::filter(!!nonzero_hh_lgl) %>% 
               dplyr::bind_cols(indicators_hh_only),
+            
             adi_raw_data =
+              # Raw census data, which includes the areas with zero households,
+              # accessible via rlang::last_error()$adi_raw_data
               data_raw %>%
               dplyr::select(
                 "GEOID",
@@ -135,6 +151,9 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NA) {
     message("\nSingle imputation performed")
   }
   
+  # Iterate over four different sets of variables to create four different
+  # indices. The first is the traditional ADI, the rest are the traditional ADI
+  # indicators split into three meaningful categories.
   adi <-
     purrr::map_dfc(
       list(
@@ -175,7 +194,7 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NA) {
       ),
       function(expected_signs, result_vec) {
         
-        # A principal-components analysis (PCA) of the statistics that produces
+        # Principal-components analysis (PCA) of the statistics that produces
         # the raw ADI scores
         fit <- psych::principal(indicators_hh_only[names(expected_signs)])
         
@@ -203,7 +222,7 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NA) {
         #   it keeps them the same (multiplies their scores by 1) if they were
         #   not reversed.
         
-        # The raw ADI scores are standardized to have a mean of 100 and sd of 20
+        # The raw ADI scores are standardized to have a mean of 100 and SD of 20
         result_vec[nonzero_hh_lgl] <-
           as.numeric(fit$scores * signage_flipper * 20 + 100)
         
@@ -243,9 +262,14 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NA) {
 
 get_total_hh_colname <- function(data_raw) {
   
+  # Returns the name of the column that contains data on the total number of
+  # households per area.
+  
   total_hh_colname <-
-    colnames(data_raw) %>%
-    `[`(. %in% c("P018001", "P015001", "P0030001", "B11005_001"))
+    intersect(
+      x = colnames(data_raw),
+      y = c("P018001", "P015001", "P0030001", "B11005_001")
+    )
   
   if (length(total_hh_colname) != 1L) {
     stop(
@@ -262,6 +286,10 @@ get_total_hh_colname <- function(data_raw) {
 
 calculate_indicators <- function(data) {
   
+  # Calculates the 15 ADI indicators, first checking to see what kind of data
+  # are in the data set to see if it's ACS data, 2000 decennial census data,
+  # etc.
+  
   colnames <- colnames(data)
   
   indicators <-
@@ -275,6 +303,7 @@ calculate_indicators <- function(data) {
       stop("Data missing at least one variable necessary to calculate ADI.")
     }
   
+  # Changes non-finite values (including NaN) to NA.
   indicators[!is.finite(as.matrix.data.frame(indicators))] <- NA
   
   indicators
@@ -293,6 +322,13 @@ factors_from_acs <- function(data_raw, colnames) {
   # "unsticky", allowing it to be removed by the subsequent dplyr::select()
   # command so that it doesn't interfere with the imputation that may follow.
   
+  # Before 2010, C24010_040 contained the "civilian female age 16+ in
+  # white-collar occupations" data, but starting in 2010 C24010_039 contained
+  # these data. If C24010_040 is in data_raw and C24010_039 is not, the former
+  # is renamed to C24010_039. If they are both in the data a warning() is
+  # thrown, C24010_040 is ignored, and only C24010_039 will be used. Since
+  # get_adi() never passes both of these variables to calculate_adi(), this will
+  # only be a problem if the user uses calculate_adi() manually.
   if (any(colnames == "C24010_040")) {
     if (any(colnames == "C24010_039")) {
       warning(
@@ -309,6 +345,13 @@ factors_from_acs <- function(data_raw, colnames) {
     }
   }
   
+  # B19113_001 (median family income) is unavailable for at the block group
+  # level for 2015 or 2016 data, so B19013_001 (median household income) is used
+  # instead. If B19013_001 is in the data and B19113_001 is not, B19013_001 will
+  # be renamed to B19113_001, and a warning will be thrown if get_adi()'s
+  # version of the warning was not detected in "warnings()". The special
+  # variable median_income_name is created so that the eventual output properly
+  # identifies which kind of median income was used.
   if (any(colnames == "B19013_001") && !any(colnames == "B19113_001")) {
     
     if (!any(grepl("B19113_001", names(warnings())))) {
@@ -333,15 +376,26 @@ factors_from_acs <- function(data_raw, colnames) {
     median_income_name <- "medianFamilyIncome"
   }
   
+  
+  # The absence of B25003_001 (occupied housing units) is assumed to indicate
+  # that ADI using 2010 decennial census data was requested. This request
+  # results in mostly 2010 5-year ACS estimates being used, except for the
+  # handful of 2010 decennial census variables that are applicable to ADI
+  # indicator calculation. This is handled by simply renaming the decenial
+  # census variables to their ACS counterparts.
   if (!any(colnames == "B25003_001")) {
     data_indicators <- data_indicators %>% 
       dplyr::rename(
-        "B25003_001"      = "H003002",
-        "B25003_002"      = "H014002",
-        "B11005_002"      = "P020002",
-        "B11005_005"      = "P020008"
+        "B25003_001" = "H003002",
+        "B25003_002" = "H014002",
+        "B11005_002" = "P020002",
+        "B11005_005" = "P020008"
       )
   }
+  
+  # Below, the presence or absence of various census variables are used to
+  # discern which year of data is being used, and the calculation of the
+  # indicators is adjusted accordingly.
   
   if (!any(colnames == "B23025_005")) {
     data_indicators <- data_indicators %>% 
@@ -443,9 +497,9 @@ factors_from_acs <- function(data_raw, colnames) {
 
 #' @importFrom rlang .data
 factors_from_2000_decennial <- function(data_raw) {
-  # Selects the relevant variables from the tidycensus::get_acs() output, then
-  # wrangles them into a data frame that contains the specific measures that are
-  # used to calculate ADI
+  # Selects the relevant variables from the tidycensus::get_decennial() output,
+  # then wrangles them into a data frame that contains the specific measures
+  # that are used to calculate ADI
   
   data_raw %>% 
     
@@ -512,6 +566,9 @@ factors_from_1990_decennial <- function(data_raw) {
   data_raw %>% 
     
     as.data.frame() %>% 
+    # In case data is an sf tibble, this causes the geometry column to become
+    # "unsticky", allowing it to be removed by the subsequent dplyr::select()
+    # command so that it doesn't interfere with the imputation that may follow.
     
     dplyr::mutate(
       familybelowpoverty = .data$P1230013 + .data$P1230014 + .data$P1230015 +

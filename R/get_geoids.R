@@ -58,18 +58,23 @@ get_geoids <- function(geography,
       c("state", "county", "tract", "block group", "block")
     )
   
+  # Converts year to the most recent year divisible by 10.
   year <- floor(year / 10) * 10
   
   if (!any(c(1990, 2000, 2010) == year)) {
-    stop("year must be between 1990 and 2019")
+    stop("year must be between 1990 and 2019", call. = FALSE)
   }
   
+  # Since some variable has to be passed to tidycensus::get_decennial(), it may
+  # as well be an understandable one like total population.
   variables <-
     stats::setNames(
       object = if (year == 1990) "P0010001" else "P001001",
       nm = paste0("census_", year, "_pop")
     )
   
+  # Set up and validate the arguments to be passed to the call to
+  # tidycensus::get_decennial()
   args <-
     list(
       geography = geography,
@@ -88,6 +93,10 @@ get_geoids <- function(geography,
     stop("\nAdditional arguments passed to ... must all be named")
   }
   
+  # Create the call skeleton to get_decennial() using the validated argument
+  # list. It is wrapped in list() because of how these "call skeletons" are
+  # handled with respect to how they are completed with the ref_area object. See
+  # the code comments in get_adi() for more details.
   tidycensus_call <-
     rlang::call_modify(
       .call = quote(tidycensus::get_decennial()),
@@ -108,14 +117,18 @@ get_geoids <- function(geography,
       tidycensus_calls = tidycensus_call
     )
   
+  # Create call(s) iteratively over the rows of ref_area$state_county, evaluate
+  # them, bind them into one table, and extract the desired columns.
   census_data <- 
     ref_area$state_county %>% 
     dplyr::mutate(.call = tidycensus_call) %>% 
     purrr::pmap(rlang::call_modify) %>% 
     lapply(eval) %>% 
-    do.call(what = rbind) %>% 
+    do.call(rbind, .) %>% 
     dplyr::select("GEOID", "NAME", dplyr::starts_with("census_"))
   
+  # Filter tidycensus output to only include the areas specified by the
+  # user-specified reference area.
   if (!is.null(ref_area$geoid)) {
     census_data <- census_data %>% 
       filter_ref_area(

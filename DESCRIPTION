@@ -2,7 +2,7 @@ Type: Package
 Package: sociome
 Title: Operationalizing Social Determinants of Health Data for
     Researchers
-Version: 1.4.2.9006
+Version: 2.0.0
 Authors@R: 
     c(person(given = "Nik",
              family = "Krieger",
@@ -32,7 +32,7 @@ BugReports: https://github.com/NikKrieger/sociome/issues
 Depends:
     R (>= 3.3.0)
 Imports:
-    censusapi (>= 0.6.0),
+    censusapi,
     dplyr (>= 1.0.1),
     magrittr (>= 1.5),
     mice (>= 3.10.0.1),
@@ -40,11 +40,11 @@ Imports:
     purrr (>= 0.3.4),
     rlang (>= 0.4.7),
     stringr (>= 1.4.0),
-    tidycensus (>= 0.9.9.5),
+    tidycensus (>= 0.11.4),
     tidyr (>= 1.1.0)
 Suggests:
     ggplot2 (>= 3.3.2),
-    sf (>= 0.9-5),
+    sf (>= 0.9-7),
     testthat (>= 2.3.2),
     tibble (>= 3.0.3),
     tigris (>= 1.0)

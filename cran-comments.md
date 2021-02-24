@@ -1,6 +1,21 @@
-## sociome 1.4.2
 
-Since examples wrapped in `\donttest{}` are now run during CRAN checks, all instances were changed to `\dontrun{}`. This is neccesary because the examples require a US Census API key, and they take a long time to run even if a valid key exists in the testing environment.
+## Resubmission
+
+* The flagship function now outputs more measures.
+
+* We removed a default from one of the main arguments (`year`).
+
+* We changed some of the package versions in the Imports and Suggests.
+
+* We added a lot of comments and updated the documentation and README.
+
+
+## Test environments:
+
+* CentOS Linux 8, R 4.0.3
+* Ubuntu Linux 20.04.1 LTS, R-release 4.0.4
+* win-builder devel
+
 
 ## R CMD check results
 There were no ERRORs or WARNINGs.

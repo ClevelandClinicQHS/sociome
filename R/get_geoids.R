@@ -17,9 +17,9 @@
 #'   Note that block-level data cannot be obtained from 1990 and 2000 decennial
 #'   census data due to limitations in
 #'   \code{tidycensus::\link[tidycensus]{get_decennial}()}. Whereas block-level
-#'   2010 decennial census data are available, block-level ADIs cannot be
-#'   calculated due to the removal of the long-form questionnaire from the 2010
-#'   decennial census.
+#'   2010 decennial census data are available, block-level ADI and ADI-3 cannot
+#'   be calculated due to the removal of the long-form questionnaire from the
+#'   2010 decennial census.
 #' @param year Single integer specifying the year of US Census data to use.
 #'   Defaults to 2010. Based on this year, data from the most recent decennial
 #'   census will be returned (specifically, \code{year <- floor(year / 10) * 10}

@@ -16,7 +16,7 @@ decennial_vars
 }
 \description{
 A dataset of the decennial census variable names used to calculate the Area
-Deprivation Index (ADI).
+Deprivation Index (ADI) and the Berg Indices (ADI-3).
 }
 \seealso{
 \code{\link{acs_vars}}

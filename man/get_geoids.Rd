@@ -24,9 +24,9 @@ get_geoids(
   Note that block-level data cannot be obtained from 1990 and 2000 decennial
   census data due to limitations in
   \code{tidycensus::\link[tidycensus]{get_decennial}()}. Whereas block-level
-  2010 decennial census data are available, block-level ADIs cannot be
-  calculated due to the removal of the long-form questionnaire from the 2010
-  decennial census.}
+  2010 decennial census data are available, block-level ADI and ADI-3 cannot
+  be calculated due to the removal of the long-form questionnaire from the
+  2010 decennial census.}
 
 \item{state, county, geoid, geometry, cache_tables, key}{See the descriptions of
 the arguments in \code{\link{get_adi}()}.}

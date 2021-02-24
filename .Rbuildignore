@@ -5,7 +5,7 @@
 ^cran-comments\.md$
 ^README\.md$
 ^README\.Rmd$
-^README-.*\.png$
+^README-.*\.\w{2,}$
 ^README_cache$
 ^development_code$
 ^CRAN-RELEASE$

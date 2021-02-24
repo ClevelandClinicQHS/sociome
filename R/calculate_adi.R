@@ -1,20 +1,21 @@
-#' Calculate ADI from census data.
+#' Calculate ADI and ADI-3 from census data.
 #'
-#' Calculate the area deprivation index using decennial US census or American
-#' Community Survey (ACS) variables.
+#' Calculate the Area Deprivation Index and Berg Indices (ADI-3) using decennial
+#' US census or American Community Survey (ACS) variables.
 #'
 #' The function \code{\link{get_adi}()} calls this function by default as its
-#' final step, but some users may want to calculate ADI values for different
-#' combinations of areas in a given data set. \code{\link{get_adi}(raw_data_only
-#' = TRUE)} returns the raw census data used to calculate ADI. Users may select
-#' subsets of such a data set and pipe them into \code{calculate_adi()}.
+#' final step, but some users may want to calculate ADI and ADI-3 values for
+#' different combinations of areas in a given data set.
+#' \code{\link{get_adi}(raw_data_only = TRUE)} returns the raw census data used
+#' to calculate ADI and ADI-3. Users may select subsets of such a data set and
+#' pipe them into \code{calculate_adi()}.
 #'
 #' This function discerns what kind of census data that \code{data} contains
 #' (ACS, or one of the decennial censuses) by checking for the existence of key
 #' variables unique to each kind of data set.
 #'
-#' Areas listed as having zero households are excluded from ADI calculation.
-#' Their resulting ADIs will be \code{NA}.
+#' Areas listed as having zero households are excluded from ADI and ADI-3
+#' calculation. Their resulting ADIs and ADI-3s will be \code{NA}.
 #'
 #' If calling this function directly (i.e., not via \code{get_adi()}) on a data
 #' set that contains median household income (B19013_001) and does not contain
@@ -23,13 +24,14 @@
 #' and imputation" section of \code{\link{get_adi}()}.
 #'
 #' @seealso For more information, see \code{\link{get_adi}()}, especially
-#'   \strong{ADI factor loadings} and \strong{Missingness and imputation}.
+#'   \strong{ADI and ADI-3 factor loadings} and \strong{Missingness and
+#'   imputation}.
 #'
 #' @param data_raw A data frame, \code{\link[tibble]{tibble}}, or
 #'   \code{\link[sf]{sf}} ultimately obtained via
 #'   \code{tidycensus::\link[tidycensus]{get_acs}()} or
 #'   \code{tidycensus::\link[tidycensus]{get_decennial}()}, having the data
-#'   necessary to compute the indicators of the ADI.
+#'   necessary to compute the indicators of the ADI and ADI-3.
 #'
 #'   The columns of his data frame must be named according to the elements of
 #'   the \code{variable} column in \code{sociome::\link{acs_vars}} and/or
@@ -38,8 +40,8 @@
 #'   The easiest way to obtain data like this is to run
 #'   \code{sociome::\link{get_adi}(raw_data_only = TRUE)}.
 #' @param keep_indicators Logical indicating whether or not to keep the
-#'   component indicators of the ADI as well as the original census variables
-#'   used to calculate them. Defaults to \code{FALSE}.
+#'   component indicators of the ADI and ADI-3 as well as the original census
+#'   variables used to calculate them. Defaults to \code{FALSE}.
 #'
 #'   See \code{\link{acs_vars}} and \code{\link{decennial_vars}} for basic
 #'   descriptions of the raw census variables.
@@ -48,15 +50,16 @@
 #'   \code{mice::\link[mice]{mice}()} when imputation is needed.
 #'
 #' @return A \code{\link[tibble]{tibble}} with the same number of rows as
-#'   \code{data}. Columns include \code{GEOID}, \code{NAME}, and \code{ADI}.
-#'   Further columns containing the indicators and raw values will also be
-#'   present if \code{keep_indicators = TRUE}.
+#'   \code{data}. Columns include \code{GEOID}, \code{NAME}, \code{ADI},
+#'   \code{Financial Strength}, \code{Economic_Hardship_and_Inequality}, and
+#'   \code{Educational_Attainment}. Further columns containing the indicators
+#'   and raw values will also be present if \code{keep_indicators = TRUE}.
 #'
 #' @examples
 #' \dontrun{
 #' # Wrapped in \dontrun{} because these examples require a Census API key.
 #'
-#' raw_census <- get_adi("state", raw_data_only = TRUE)
+#' raw_census <- get_adi("state", year = 2017, raw_data_only = TRUE)
 #'
 #' calculate_adi(raw_census)
 #'
@@ -89,8 +92,8 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NA) {
   
   if (nrow(indicators_hh_only) < 30L) {
     warning(
-      "\nCalculating ADI values from fewer than 30 locations.\nIt is ",
-      "recommended to add more in order to obtain trustworthy results."
+      "\nCalculating ADI and ADI-3 values from fewer than 30 locations.",
+      "\nIt is recommended to add more in order to obtain trustworthy results."
     )
   }
   
@@ -110,7 +113,8 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NA) {
         error = function(e) {
           rlang::abort(
             paste0(
-              "Imputation unsuccessful. ADIs not calculated.",
+              "Imputation unsuccessful. ",
+              "Neither ADIs nor ADI-3s were calculated.",
               "\n\nRun rlang::last_error()$adi_indicators to access the ",
               "indicator data",
               "\nwhose missingness could not be imputed. These data exclude ",
@@ -153,7 +157,8 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NA) {
   
   # Iterate over four different sets of variables to create four different
   # indices. The first is the traditional ADI, the rest are the traditional ADI
-  # indicators split into three meaningful categories.
+  # indicators split into three meaningful categories: the Berg Indices, or
+  # ADI-3.
   adi <-
     purrr::map_dfc(
       list(
@@ -195,7 +200,7 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NA) {
       function(expected_signs, result_vec) {
         
         # Principal-components analysis (PCA) of the statistics that produces
-        # the raw ADI scores
+        # the raw ADI and ADI-3 scores
         fit <- psych::principal(indicators_hh_only[names(expected_signs)])
         
         # Sometimes the PCA produces results that are completely reversed (i.e.,
@@ -313,7 +318,7 @@ calculate_indicators <- function(data) {
 
 # Selects the relevant variables from the tidycensus::get_acs() output, then
 # wrangles them into a data frame that contains the specific measures that are
-# used to calculate ADI
+# used to calculate ADI and ADI-3
 #' @importFrom rlang .data
 factors_from_acs <- function(data_raw, colnames) {
   
@@ -378,11 +383,11 @@ factors_from_acs <- function(data_raw, colnames) {
   
   
   # The absence of B25003_001 (occupied housing units) is assumed to indicate
-  # that ADI using 2010 decennial census data was requested. This request
-  # results in mostly 2010 5-year ACS estimates being used, except for the
-  # handful of 2010 decennial census variables that are applicable to ADI
-  # indicator calculation. This is handled by simply renaming the decenial
-  # census variables to their ACS counterparts.
+  # that ADI and ADI-3 calculated using 2010 decennial census data was
+  # requested. This request results in mostly 2010 5-year ACS estimates being
+  # used, except for the handful of 2010 decennial census variables that are
+  # applicable to ADI and ADI-3 indicator calculation. This is handled by simply
+  # renaming the decennial census variables to their ACS counterparts.
   if (!any(colnames == "B25003_001")) {
     data_indicators <- data_indicators %>% 
       dplyr::rename(
@@ -499,7 +504,7 @@ factors_from_acs <- function(data_raw, colnames) {
 factors_from_2000_decennial <- function(data_raw) {
   # Selects the relevant variables from the tidycensus::get_decennial() output,
   # then wrangles them into a data frame that contains the specific measures
-  # that are used to calculate ADI
+  # that are used to calculate ADI and ADI-3
   
   data_raw %>% 
     

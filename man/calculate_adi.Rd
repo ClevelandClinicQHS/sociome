@@ -2,7 +2,7 @@
 % Please edit documentation in R/calculate_adi.R
 \name{calculate_adi}
 \alias{calculate_adi}
-\title{Calculate ADI from census data.}
+\title{Calculate ADI and ADI-3 from census data.}
 \usage{
 calculate_adi(data_raw, keep_indicators = FALSE, seed = NA)
 }
@@ -11,7 +11,7 @@ calculate_adi(data_raw, keep_indicators = FALSE, seed = NA)
   \code{\link[sf]{sf}} ultimately obtained via
   \code{tidycensus::\link[tidycensus]{get_acs}()} or
   \code{tidycensus::\link[tidycensus]{get_decennial}()}, having the data
-  necessary to compute the indicators of the ADI.
+  necessary to compute the indicators of the ADI and ADI-3.
 
   The columns of his data frame must be named according to the elements of
   the \code{variable} column in \code{sociome::\link{acs_vars}} and/or
@@ -21,8 +21,8 @@ calculate_adi(data_raw, keep_indicators = FALSE, seed = NA)
   \code{sociome::\link{get_adi}(raw_data_only = TRUE)}.}
 
 \item{keep_indicators}{Logical indicating whether or not to keep the
-  component indicators of the ADI as well as the original census variables
-  used to calculate them. Defaults to \code{FALSE}.
+  component indicators of the ADI and ADI-3 as well as the original census
+  variables used to calculate them. Defaults to \code{FALSE}.
 
   See \code{\link{acs_vars}} and \code{\link{decennial_vars}} for basic
   descriptions of the raw census variables.}
@@ -32,27 +32,29 @@ calculate_adi(data_raw, keep_indicators = FALSE, seed = NA)
 }
 \value{
 A \code{\link[tibble]{tibble}} with the same number of rows as
-  \code{data}. Columns include \code{GEOID}, \code{NAME}, and \code{ADI}.
-  Further columns containing the indicators and raw values will also be
-  present if \code{keep_indicators = TRUE}.
+  \code{data}. Columns include \code{GEOID}, \code{NAME}, \code{ADI},
+  \code{Financial Strength}, \code{Economic_Hardship_and_Inequality}, and
+  \code{Educational_Attainment}. Further columns containing the indicators
+  and raw values will also be present if \code{keep_indicators = TRUE}.
 }
 \description{
-Calculate the area deprivation index using decennial US census or American
-Community Survey (ACS) variables.
+Calculate the Area Deprivation Index and Berg Indices (ADI-3) using decennial
+US census or American Community Survey (ACS) variables.
 }
 \details{
 The function \code{\link{get_adi}()} calls this function by default as its
-final step, but some users may want to calculate ADI values for different
-combinations of areas in a given data set. \code{\link{get_adi}(raw_data_only
-= TRUE)} returns the raw census data used to calculate ADI. Users may select
-subsets of such a data set and pipe them into \code{calculate_adi()}.
+final step, but some users may want to calculate ADI and ADI-3 values for
+different combinations of areas in a given data set.
+\code{\link{get_adi}(raw_data_only = TRUE)} returns the raw census data used
+to calculate ADI and ADI-3. Users may select subsets of such a data set and
+pipe them into \code{calculate_adi()}.
 
 This function discerns what kind of census data that \code{data} contains
 (ACS, or one of the decennial censuses) by checking for the existence of key
 variables unique to each kind of data set.
 
-Areas listed as having zero households are excluded from ADI calculation.
-Their resulting ADIs will be \code{NA}.
+Areas listed as having zero households are excluded from ADI and ADI-3
+calculation. Their resulting ADIs and ADI-3s will be \code{NA}.
 
 If calling this function directly (i.e., not via \code{get_adi()}) on a data
 set that contains median household income (B19013_001) and does not contain
@@ -64,7 +66,7 @@ and imputation" section of \code{\link{get_adi}()}.
 \dontrun{
 # Wrapped in \dontrun{} because these examples require a Census API key.
 
-raw_census <- get_adi("state", raw_data_only = TRUE)
+raw_census <- get_adi("state", year = 2017, raw_data_only = TRUE)
 
 calculate_adi(raw_census)
 
@@ -73,5 +75,6 @@ calculate_adi(raw_census, keep_indicators = TRUE)
 }
 \seealso{
 For more information, see \code{\link{get_adi}()}, especially
-  \strong{ADI factor loadings} and \strong{Missingness and imputation}.
+  \strong{ADI and ADI-3 factor loadings} and \strong{Missingness and
+  imputation}.
 }

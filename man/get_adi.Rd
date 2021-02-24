@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_adi.R
 \name{get_adi}
 \alias{get_adi}
-\title{Get area deprivation index (ADI)}
+\title{Get Area Deprivation Index (ADI) and Berg Indices (ADI-3)}
 \usage{
 get_adi(
   geography,
@@ -10,7 +10,7 @@ get_adi(
   county = NULL,
   geoid = NULL,
   zcta = NULL,
-  year = 2017,
+  year,
   dataset = c("acs5", "acs3", "acs1", "decennial"),
   geometry = FALSE,
   shift_geo = FALSE,
@@ -24,20 +24,21 @@ get_adi(
 }
 \arguments{
 \item{geography}{A character string denoting the level of census geography
-whose ADIs you'd like to obtain. Must be one of \code{c("state", "county",
-"tract", "block group", or "zcta")}. Required.}
+whose ADIs and ADI-3s you'd like to obtain. Must be one of \code{c("state",
+"county", "tract", "block group", or "zcta")}. Required.}
 
-\item{state}{A character string specifying states whose ADI data is desired.
-Defaults to \code{NULL}. Can contain full state names, two-letter state
-abbreviations, or a two-digit FIPS code/GEOID (must be a vector of strings,
-so use quotation marks and leading zeros if necessary). Must be left as
-\code{NULL} blank if using the \code{geoid} or \code{zcta} parameter.}
+\item{state}{A character string specifying states whose ADI and ADI-3 data is
+desired. Defaults to \code{NULL}. Can contain full state names, two-letter
+state abbreviations, or a two-digit FIPS code/GEOID (must be a vector of
+strings, so use quotation marks and leading zeros if necessary). Must be
+left as \code{NULL} blank if using the \code{geoid} or \code{zcta}
+parameter.}
 
 \item{county}{A vector of character strings specifying the counties whose ADI
-data you're requesting. Defaults to \code{NULL}. If not \code{NULL}, the
-\code{state} parameter must have a length of 1. County names and
-three-digit FIPS codes are accepted (must contain strings, so use quotation
-marks and leading zeros if necessary). Must be blank if using the
+and ADI-3 data you're requesting. Defaults to \code{NULL}. If not
+\code{NULL}, the \code{state} parameter must have a length of 1. County
+names and three-digit FIPS codes are accepted (must contain strings, so use
+quotation marks and leading zeros if necessary). Must be blank if using the
 \code{geoid} parameter.}
 
 \item{geoid}{A character vector of GEOIDs (use quotation marks and leading
@@ -55,10 +56,9 @@ geography (see details).}
   Requires that \code{geography = "zcta"}. If \code{geography = "zcta"} and
   \code{zcta = NULL}, all ZCTAs in the US will be used.}
 
-\item{year}{Single integer specifying the year of US Census data to use.
-Defaults to 2017.}
+\item{year}{Single integer specifying the year of US Census data to use.}
 
-\item{dataset}{The data set used to calculate ADIs. Must be one of
+\item{dataset}{The data set used to calculate ADIs and ADI-3s. Must be one of
   \code{c("acs5", "acs3", "acs1", "decennial")}, denoting the 5-, 3-, and
   1-year ACS along with the decennial census. Defaults to \code{"acs5"}.
 
@@ -92,21 +92,22 @@ Defaults to 2017.}
 
 \item{keep_indicators}{Logical value indicating whether or not the resulting
   \code{\link[tibble]{tibble}} or \code{\link[sf]{sf}} \code{tibble} will
-  contain the socioeconomic measures used to calculate the ADI values.
-  Defaults to \code{FALSE}.
+  contain the socioeconomic measures used to calculate the ADI and ADI-3
+  values. Defaults to \code{FALSE}.
 
   See \code{\link{acs_vars}} and \code{\link{decennial_vars}} for basic
   descriptions of the raw census variables.}
 
 \item{raw_data_only}{Logical, indicating whether or not to skip calculation
-of the ADI and only return the census variables. Defaults to \code{FALSE}.}
+of the ADI and ADI-3 and only return the census variables. Defaults to
+\code{FALSE}.}
 
 \item{cache_tables}{The plural version of the \code{cache_table} argument in
 \code{tidycensus::\link[tidycensus]{get_acs}()} or
 \code{tidycensus::\link[tidycensus]{get_decennial}()}. (\code{get_adi()}
 calls the necessary \code{tidycensus} function many times in order to
-return ADIs, so many tables are cached if \code{TRUE}). Defaults to
-\code{TRUE}.}
+return ADIs and ADI-3s, so many tables are cached if \code{TRUE}). Defaults
+to \code{TRUE}.}
 
 \item{key}{Your Census API key as a character string. Obtain one at
 \url{http://api.census.gov/data/key_signup.html}. Defaults to \code{NULL}.
@@ -134,14 +135,14 @@ If \code{geometry = FALSE}, (the default) a
   \code{\link[sf]{sf}} \code{tibble}.
 }
 \description{
-Returns the ADIs of user-specified areas.
+Returns the ADI and ADI-3 of user-specified areas.
 }
 \details{
 Returns a \code{\link[tibble]{tibble}} or \code{\link[sf]{sf}} \code{tibble}
-of the area deprivation indices (ADIs) of user-specified locations in the
-United States, utilizing US Census data. Locations that are listed as having
-zero households are excluded from ADI calculation: their ADI values will be
-\code{NA}.
+of the Area Deprivation Indices (ADIs) and Berg Indices (ADI-3s) of
+user-specified locations in the United States, utilizing US Census data.
+Locations that are listed as having zero households are excluded from ADI and
+ADI-3 calculation: their ADI and ADI-3 values will be \code{NA}.
 }
 \section{Reference area}{
  \strong{The concept of "reference area" is important
@@ -160,8 +161,13 @@ zero households are excluded from ADI calculation: their ADI values will be
   function then gathers data from those specified locations and performs
   calculations using their data alone.
 
+  The Berg Indices (ADI-3) were developed with this principle of relativity
+  in mind, and as such there is no set of seminal ADI-3 values. Thus, the
+  terms "Berg Indices" and "ADI-3" refer more nearly to any values generated
+  using the algorithm employed in this package.
+
   Areas listed as having zero households are excluded from the reference
-  area, and their ADI values will be \code{NA}.
+  area, and their ADI and ADI-3 values will be \code{NA}.
 }
 
 \section{The \code{geoid} parameter}{
@@ -172,12 +178,12 @@ zero households are excluded from ADI calculation: their ADI values will be
   well as leading zeros where applicable.
 }
 
-\section{ADI factor loadings}{
- The returned \code{\link[tibble]{tibble}} or
-  \code{\link[sf]{sf}} \code{tibble} is of class \code{adi}, and it contains
-  an attribute called \code{loadings}, which contains a tibble of the PCA
-  loadings of each factor. This is accessible through
-  \code{\link{attr}(name_of_tibble, "loadings")}.
+\section{ADI and ADI-3 factor loadings}{
+ The returned
+  \code{\link[tibble]{tibble}} or \code{\link[sf]{sf}} \code{tibble} is of
+  class \code{adi}, and it contains an attribute called \code{loadings},
+  which contains a tibble of the PCA loadings of each factor. This is
+  accessible through \code{\link{attr}(name_of_tibble, "loadings")}.
 }
 
 \section{Missingness and imputation}{
@@ -195,10 +201,11 @@ zero households are excluded from ADI calculation: their ADI values will be
   \code{rlang::\link[rlang]{last_error}()$adi_raw_data}. The former excludes
   areas with zero households, but the latter includes them.
 
-  One of the ADI indicators is median family income, but methodological
-  issues with the 2015 and 2016 ACS have rendered this variable unavailable
-  at the block group level for those years. When requested, this function
-  will use median household income in its place, with a \code{warning()}. See
+  One of the indicators of both ADI and the Financial Strength component of
+  ADI-3 is median family income, but methodological issues with the 2015 and
+  2016 ACS have rendered this variable unavailable at the block group level
+  for those years. When requested, this function will use median household
+  income in its place, with a \code{warning()}. See
   \url{https://www.census.gov/programs-surveys/acs/technical-documentation/user-notes/2016-01.html}.
 }
 
@@ -234,17 +241,18 @@ zero households are excluded from ADI calculation: their ADI values will be
 # and require a Census API key.
 
 # ADI of all census tracts in Cuyahoga County, Ohio
-get_adi(geography = "tract", state = "OH", county = "Cuyahoga")
+get_adi(geography = "tract", year = 2017, state = "OH", county = "Cuyahoga")
 
-# ADI of all counties in Connecticut, using the 2014 ACS1 survey.
+# ADI and ADI-3 of all counties in Connecticut, using the 2014 ACS1 survey.
 # Returns a warning because there are only 8 counties.
 # A minimum of 30 locations is recommended.
 get_adi(geography = "county", state = "CT", year = 2014, dataset = "acs1")
 
-# Areas with zero households will have an ADI of NA:
+# Areas with zero households will have an ADI and ADI-3 of NA:
 queens <-
   get_adi(
     "tract",
+    year = 2017,
     state = "NY",
     county = "Queens",
     keep_indicators = TRUE,
@@ -265,8 +273,8 @@ delmarva <-
   get_adi(
     geography = "tract",
     geoid = delmarva_geoids,
-    dataset = "decennial",
-    year = 2000,
+    dataset = "acs5",
+    year = 2009,
     geometry = TRUE
   )
 

@@ -28,6 +28,11 @@ test_that("get_adi(), calculate_adi() works", {
     nmcounties2010
   )
   
+  skip(
+    paste0("2000 decennial data are currently unavailable.",
+           "\nWe will reinstate these tests if they are ever restored.")
+  )
+  
   expect_equivalent(
     get_adi(
       geography = "county",
@@ -38,6 +43,11 @@ test_that("get_adi(), calculate_adi() works", {
       cache_tables = FALSE
     ),
     nmcounties2000
+  )
+  
+  skip(
+    paste0("1990 decennial data are currently unavailable.",
+           "\nWe will reinstate these tests if they are ever restored.")
   )
   
   expect_equivalent(

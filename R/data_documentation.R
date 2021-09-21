@@ -4,7 +4,7 @@
 #' A dataset of the ACS variable names used to calculate the Area Deprivation
 #' Index (ADI) and Berg Indices (ADI-3).
 #'
-#' @format A \code{\link[tibble]{tibble}} with 139 rows and 10 variables:
+#' @format A [`tibble`][tibble::tibble] with 139 rows and 10 variables:
 #'   \describe{ \item{variable}{ACS variable name} \item{description}{Brief
 #'   description of the data the variable contains} \item{set1}{Logical,
 #'   indicating the variables to be used when calculating ADI and ADI-3 using
@@ -28,6 +28,7 @@
 #'   census API and/or \code{tidycensus}, and some may never be supported.
 #'
 #' @seealso \code{\link{decennial_vars}}
+#' @noMd
 "acs_vars"
 
 
@@ -44,4 +45,5 @@
 #'   \item{description}{Brief description of the data the variable contains}}
 #'   
 #' @seealso \code{\link{acs_vars}}
+#' @noMd
 "decennial_vars"

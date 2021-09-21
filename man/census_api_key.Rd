@@ -4,5 +4,5 @@
 \alias{census_api_key}
 \title{Census API Key installer}
 \description{
-See \code{tidycensus::\link[tidycensus]{census_api_key}()}.
+See \code{\link[tidycensus:census_api_key]{tidycensus::census_api_key()}}.
 }

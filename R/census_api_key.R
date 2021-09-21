@@ -1,6 +1,6 @@
 #' Census API Key installer
 #'
-#' See \code{tidycensus::\link[tidycensus]{census_api_key}()}.
+#' See [tidycensus::census_api_key()].
 #'
 #' @name census_api_key
 #' @export

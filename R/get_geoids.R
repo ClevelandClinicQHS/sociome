@@ -1,34 +1,32 @@
-#' Obtain GEOIDs of places
+#' Obtain GEOIDs of areas
 #'
-#' Returns a \code{tibble} of GEOIDs, names, and decennial census population of
-#' user-specified locations.
+#' Returns a [`tibble`][tibble::tibble] or [`sf`][sf::sf] of GEOIDs, names, and
+#' decennial census population of user-specified locations.
 #'
 #' This allows users to quickly obtain all GEOIDs in a specified location at a
 #' specific level of geography without having to manually look them up somewhere
 #' else.
 #'
-#' This facilitates calls to \code{\link{get_adi}()} that involve somewhat
-#' complicated reference areas.
+#' This facilitates calls to [get_adi()] that involve somewhat complicated
+#' reference areas.
 #'
 #' @param geography A character string denoting the level of census geography
-#'   whose GEOIDs you'd like to obtain. Must be one of \code{c("state",
-#'   "county", "tract", "block group", "block")}.
+#'   whose GEOIDs you'd like to obtain. Must be one of `c("state", "county",
+#'   "tract", "block group", "block")`.
 #'
 #'   Note that block-level data cannot be obtained from 1990 and 2000 decennial
-#'   census data due to limitations in
-#'   \code{tidycensus::\link[tidycensus]{get_decennial}()}. Whereas block-level
-#'   2010 decennial census data are available, block-level ADI and ADI-3 cannot
-#'   be calculated due to the removal of the long-form questionnaire from the
-#'   2010 decennial census.
+#'   census data due to limitations in [tidycensus::get_decennial()]. Whereas
+#'   block-level 2010 decennial census data are available, block-level ADI and
+#'   ADI-3 cannot be calculated due to the removal of the long-form
+#'   questionnaire from the 2010 decennial census.
 #' @param year Single integer specifying the year of US Census data to use.
 #'   Defaults to 2010. Based on this year, data from the most recent decennial
-#'   census will be returned (specifically, \code{year <- floor(year / 10) * 10}
-#'   is run).
+#'   census will be returned (specifically, `year <- `[`floor`]`(year / 10) *
+#'   10` is run).
 #' @param state,county,geoid,geometry,cache_tables,key See the descriptions of
-#'   the arguments in \code{\link{get_adi}()}.
+#'   the arguments in [get_adi()].
 #' @param ... Additional arguments to be passed to
-#'   \code{tidycensus::\link[tidycensus]{get_decennial}()}. Not recommended; use
-#'   at your own risk.
+#'   [tidycensus::get_decennial()]. Use at your own risk.
 #'
 #' @examples
 #' \dontrun{
@@ -106,7 +104,7 @@ get_geoids <- function(geography,
     list()
   
   ref_area <-
-    validate_location(
+    get_ref_area(
       geoid = geoid,
       state = state, 
       county = county, 

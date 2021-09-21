@@ -7,5 +7,5 @@
 ^README\.Rmd$
 ^README-.*\.\w{2,}$
 ^README_cache$
-^development_code$
 ^CRAN-RELEASE$
+^data-raw$

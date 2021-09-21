@@ -1,13 +1,9 @@
 
 ## Resubmission
 
-* The flagship function now outputs more measures.
-
-* We removed a default from one of the main arguments (`year`).
-
-* We changed some of the package versions in the Imports and Suggests.
-
-* We added a lot of comments and updated the documentation and README.
+* Added new functions `areas_in_radius()`, `lon_lat_from_area()`, and `append_dissimilarities()`
+* Added new Suggests
+* Updated README and code and documentation
 
 
 ## Test environments:

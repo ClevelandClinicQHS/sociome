@@ -1,8 +1,3 @@
----
-title: "Census Variables Dataset creator"
----
-
-```{r}
 decennial_vars <-
   tibble::tribble(
     ~variable, ~sumfile, ~year, ~description,
@@ -327,60 +322,4 @@ acs_vars <-
     "C24010_040",	"Civilian females age 16+ in white-collar occupations",	    FALSE, FALSE,	FALSE, FALSE,	FALSE, TRUE,  TRUE,  FALSE
   )
 
-usethis::use_data(acs_vars, decennial_vars, overwrite = TRUE)
-```
-
-```{r}
-nmcounties2017 <-
-  get_adi(
-    geography = "county",
-    state = "NM",
-    keep_indicators = TRUE,
-    geometry = FALSE,
-    year = 2017
-  )
-
-nmcounties2010 <-
-  get_adi(
-    geography = "county",
-    state = "NM",
-    keep_indicators = TRUE,
-    geometry = FALSE,
-    year = 2010,
-    dataset = "decennial"
-  )
-
-# Not run because 2000 data is currently not easily accessible via Census API.
-# This will be restored if the Census API ever fixes it, or if I decide to 
-# perform a workaround.
-# nmcounties2000 <-
-#   get_adi(
-#     geography = "county",
-#     state = "NM",
-#     keep_indicators = TRUE,
-#     geometry = FALSE,
-#     year = 2000,
-#     raw_data_only = TRUE,
-#     dataset = "decennial"
-#   )
-
-# Not run because 1990 data is currently not accessible via Census API.
-# This will be restored if the Census API ever fixes it.
-# nmcounties1990 <-
-#   get_adi(
-#     geography = "county",
-#     state = "NM",
-#     keep_indicators = TRUE,
-#     geometry = FALSE,
-#     year = 1990,
-#     raw_data_only = TRUE,
-#     dataset = "decennial"
-#   )
-
-usethis::use_data(
-  nmcounties2017, nmcounties2010, # nmcounties2000, nmcounties1990,
-  internal = TRUE,
-  overwrite = TRUE
-)
-```
-
+usethis::use_data(acs_vars, decennial_vars, overwrite = TRUE, compress = "xz")

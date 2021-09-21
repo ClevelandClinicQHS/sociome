@@ -3,57 +3,54 @@
 #' Calculate the Area Deprivation Index and Berg Indices (ADI-3) using decennial
 #' US census or American Community Survey (ACS) variables.
 #'
-#' The function \code{\link{get_adi}()} calls this function by default as its
-#' final step, but some users may want to calculate ADI and ADI-3 values for
-#' different combinations of areas in a given data set.
-#' \code{\link{get_adi}(raw_data_only = TRUE)} returns the raw census data used
-#' to calculate ADI and ADI-3. Users may select subsets of such a data set and
-#' pipe them into \code{calculate_adi()}.
+#' The function [get_adi()] calls this function by default as its final step,
+#' but some users may want to calculate ADI and ADI-3 values for different
+#' combinations of areas in a given data set. [`get_adi`]`(raw_data_only =
+#' TRUE)` returns the raw census data used to calculate ADI and ADI-3. Users may
+#' select subsets of such a data set and pipe them into `calculate_adi()`.
 #'
-#' This function discerns what kind of census data that \code{data} contains
-#' (ACS, or one of the decennial censuses) by checking for the existence of key
-#' variables unique to each kind of data set.
+#' This function discerns what kind of census data that `data` contains (ACS, or
+#' one of the decennial censuses) by checking for the existence of key variables
+#' unique to each kind of data set.
 #'
 #' Areas listed as having zero households are excluded from ADI and ADI-3
-#' calculation. Their resulting ADIs and ADI-3s will be \code{NA}.
+#' calculation. Their resulting ADIs and ADI-3s will be `NA`.
 #'
-#' If calling this function directly (i.e., not via \code{get_adi()}) on a data
-#' set that contains median household income (B19013_001) and does not contain
+#' If calling this function directly (i.e., not via [get_adi()]) on a data set
+#' that contains median household income (B19013_001) and does not contain
 #' median family income (B19113_001), median household income will be used in
-#' place of median family income, with a \code{warning()}. See the "Missingness
-#' and imputation" section of \code{\link{get_adi}()}.
+#' place of median family income, with a `warning()`. See the "Missingness and
+#' imputation" section of [get_adi()].
 #'
-#' @seealso For more information, see \code{\link{get_adi}()}, especially
-#'   \strong{ADI and ADI-3 factor loadings} and \strong{Missingness and
-#'   imputation}.
+#' @seealso For more information, see [get_adi()], especially the sections
+#'   titled **ADI and ADI-3 factor loadings** and **Missingness and
+#'   imputation**.
 #'
-#' @param data_raw A data frame, \code{\link[tibble]{tibble}}, or
-#'   \code{\link[sf]{sf}} ultimately obtained via
-#'   \code{tidycensus::\link[tidycensus]{get_acs}()} or
-#'   \code{tidycensus::\link[tidycensus]{get_decennial}()}, having the data
-#'   necessary to compute the indicators of the ADI and ADI-3.
+#' @param data_raw A data frame, [`tibble`][tibble::tibble], or [`sf`][sf::sf]
+#'   object ultimately obtained via [tidycensus::get_acs()] or
+#'   [tidycensus::get_decennial()], having the data necessary to compute the
+#'   indicators of the ADI and ADI-3.
 #'
 #'   The columns of his data frame must be named according to the elements of
-#'   the \code{variable} column in \code{sociome::\link{acs_vars}} and/or
-#'   \code{sociome::decennial_vars}.
+#'   the `variable` column in [`acs_vars`] and/or [`decennial_vars`].
 #'
 #'   The easiest way to obtain data like this is to run
-#'   \code{sociome::\link{get_adi}(raw_data_only = TRUE)}.
+#'   [`get_adi`]`(raw_data_only = TRUE)`.
 #' @param keep_indicators Logical indicating whether or not to keep the
 #'   component indicators of the ADI and ADI-3 as well as the original census
-#'   variables used to calculate them. Defaults to \code{FALSE}.
+#'   variables used to calculate them. Defaults to `FALSE`.
 #'
-#'   See \code{\link{acs_vars}} and \code{\link{decennial_vars}} for basic
-#'   descriptions of the raw census variables.
+#'   See [`acs_vars`] and [`decennial_vars`] for basic descriptions of the raw
+#'   census variables.
 #'
-#' @param seed Passed to the \code{seed} argument of
-#'   \code{mice::\link[mice]{mice}()} when imputation is needed.
+#' @param seed Passed to the `seed` argument of [mice::mice()] when imputation
+#'   is needed.
 #'
-#' @return A \code{\link[tibble]{tibble}} with the same number of rows as
-#'   \code{data}. Columns include \code{GEOID}, \code{NAME}, \code{ADI},
-#'   \code{Financial Strength}, \code{Economic_Hardship_and_Inequality}, and
-#'   \code{Educational_Attainment}. Further columns containing the indicators
-#'   and raw values will also be present if \code{keep_indicators = TRUE}.
+#' @return A [`tibble`][tibble::tibble] (or [`sf`][sf::sf]) with the same number
+#'   of rows as `data`. Columns include `GEOID`, `NAME`, `ADI`, `Financial
+#'   Strength`, `Economic_Hardship_and_Inequality`, and
+#'   `Educational_Attainment`. Further columns containing the indicators and raw
+#'   values will also be present if `keep_indicators = TRUE`.
 #'
 #' @examples
 #' \dontrun{

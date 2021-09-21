@@ -147,19 +147,19 @@ estimates:
 ``` r
 library(sociome)
 get_adi(geography = "state", year = 2019, dataset = "acs1")
-#> # A tibble: 52 x 6
-#>    GEOID NAME        ADI Financial_Streng… Economic_Hardship_… Educational_Atta…
-#>    <chr> <chr>     <dbl>             <dbl>               <dbl>             <dbl>
-#>  1 01    Alabama   118.               81.4               111.               95.6
-#>  2 02    Alaska     84.8             110.                 92.9             108. 
-#>  3 04    Arizona   105.               97.3               103.               82.6
-#>  4 05    Arkansas  120.               76.2               111.               89.0
-#>  5 06    Californ…  85.4             135.                 95.0              42.8
-#>  6 08    Colorado   79.2             122.                 83.1             111. 
-#>  7 09    Connecti…  87.8             119.                 95.2             106. 
-#>  8 10    Delaware   96.9             104.                 96.9             106. 
-#>  9 11    District…  68.4             171.                124.              109. 
-#> 10 12    Florida   104.               98.3               103.               91.8
+#> # A tibble: 52 × 6
+#>    GEOID NAME                   ADI Financial_Stren… Economic_Hardsh… Educational_Att…
+#>    <chr> <chr>                <dbl>            <dbl>            <dbl>            <dbl>
+#>  1 01    Alabama              118.              81.4            111.              95.6
+#>  2 02    Alaska                84.8            110.              92.9            108. 
+#>  3 04    Arizona              105.              97.3            103.              82.6
+#>  4 05    Arkansas             120.              76.2            111.              89.0
+#>  5 06    California            85.4            135.              95.0             42.8
+#>  6 08    Colorado              79.2            122.              83.1            111. 
+#>  7 09    Connecticut           87.8            119.              95.2            106. 
+#>  8 10    Delaware              96.9            104.              96.9            106. 
+#>  9 11    District of Columbia  68.4            171.             124.             109. 
+#> 10 12    Florida              104.              98.3            103.              91.8
 #> # … with 42 more rows
 ```
 
@@ -176,12 +176,12 @@ Connecticut, using 2010 decennial census data:
 ``` r
 get_adi(geography = "county", state = "CT", year = 2010, dataset = "decennial")
 #> Warning in calculate_adi(census_data, keep_indicators = keep_indicators, : 
-#> Calculating ADI values from fewer than 30 locations.
+#> Calculating ADI and ADI-3 values from fewer than 30 locations.
 #> It is recommended to add more in order to obtain trustworthy results.
 #> Warning in cor.smooth(r): Matrix was not positive definite, smoothing was done
 #> Warning in psych::principal(indicators_hh_only[names(expected_signs)]): The
 #> matrix is not positive semi-definite, scores found from Structure loadings
-#> # A tibble: 8 x 6
+#> # A tibble: 8 × 6
 #>   GEOID NAME          ADI Financial_Streng… Economic_Hardship… Educational_Atta…
 #>   <chr> <chr>       <dbl>             <dbl>              <dbl>             <dbl>
 #> 1 09001 Fairfield…   78.2             142.               100.               78.8
@@ -236,7 +236,7 @@ library(ggplot2)
 delmarva %>% ggplot() + geom_sf(aes(fill = ADI))
 ```
 
-![](README-plot_delmarva-1.svg)<!-- -->
+![](README-plot_delmarva-1.png)<!-- -->
 
 Notice that the default behavior of `geom_sf()` is to make high-ADI
 areas lighter in color than low-ADI areas, which is counterintuitive.
@@ -255,7 +255,7 @@ delmarva %>%
   scale_fill_viridis_c(direction = -1)
 ```
 
-![](README-plot_delmarva_with_viridis-1.svg)<!-- -->
+![](README-plot_delmarva_with_viridis-1.png)<!-- -->
 
 Careful scrutiny of this map reveals gray areas, such as the one near
 the northern tip. These areas have no associated ADI because they were
@@ -283,44 +283,44 @@ chautauqua %>%
   tibble::as_tibble() %>%
   dplyr::select(GEOID, NAME, ADI, B11005_001) %>% 
   print(n = Inf)
-#> # A tibble: 35 x 4
+#> # A tibble: 35 × 4
 #>    GEOID       NAME                                               ADI B11005_001
 #>    <chr>       <chr>                                            <dbl>      <dbl>
 #>  1 36013000000 Census Tract 0, Chautauqua County, New York       NA            0
-#>  2 36013030100 Census Tract 301, Chautauqua County, New York    131.        1327
-#>  3 36013030200 Census Tract 302, Chautauqua County, New York    102.        1600
-#>  4 36013030300 Census Tract 303, Chautauqua County, New York    147.         844
-#>  5 36013030400 Census Tract 304, Chautauqua County, New York     98.7       1900
-#>  6 36013030500 Census Tract 305, Chautauqua County, New York    151.        1587
+#>  2 36013030100 Census Tract 301, Chautauqua County, New York    132.        1327
+#>  3 36013030200 Census Tract 302, Chautauqua County, New York    103.        1600
+#>  4 36013030300 Census Tract 303, Chautauqua County, New York    146.         844
+#>  5 36013030400 Census Tract 304, Chautauqua County, New York     99.5       1900
+#>  6 36013030500 Census Tract 305, Chautauqua County, New York    150.        1587
 #>  7 36013030600 Census Tract 306, Chautauqua County, New York    138.        1572
 #>  8 36013030700 Census Tract 307, Chautauqua County, New York    109.        1773
-#>  9 36013030800 Census Tract 308, Chautauqua County, New York     89.8       1918
-#> 10 36013035100 Census Tract 351, Chautauqua County, New York     91.3       1790
+#>  9 36013030800 Census Tract 308, Chautauqua County, New York     90.6       1918
+#> 10 36013035100 Census Tract 351, Chautauqua County, New York     91.7       1790
 #> 11 36013035200 Census Tract 352, Chautauqua County, New York     88.7        873
-#> 12 36013035300 Census Tract 353, Chautauqua County, New York     80.6        981
-#> 13 36013035400 Census Tract 354, Chautauqua County, New York    131.        1258
-#> 14 36013035500 Census Tract 355, Chautauqua County, New York    129.        1292
-#> 15 36013035600 Census Tract 356, Chautauqua County, New York     96.4       1454
-#> 16 36013035700 Census Tract 357, Chautauqua County, New York    116.        1337
-#> 17 36013035800 Census Tract 358, Chautauqua County, New York     84.7       2004
-#> 18 36013035901 Census Tract 359.01, Chautauqua County, New York  77.3       2392
-#> 19 36013035902 Census Tract 359.02, Chautauqua County, New York  87.7        102
-#> 20 36013036000 Census Tract 360, Chautauqua County, New York     89.3       1807
-#> 21 36013036100 Census Tract 361, Chautauqua County, New York     94.3       2029
-#> 22 36013036300 Census Tract 363, Chautauqua County, New York     95.1       2011
-#> 23 36013036400 Census Tract 364, Chautauqua County, New York     91.1       2620
+#> 12 36013035300 Census Tract 353, Chautauqua County, New York     81.6        981
+#> 13 36013035400 Census Tract 354, Chautauqua County, New York    130.        1258
+#> 14 36013035500 Census Tract 355, Chautauqua County, New York    128.        1292
+#> 15 36013035600 Census Tract 356, Chautauqua County, New York     97.2       1454
+#> 16 36013035700 Census Tract 357, Chautauqua County, New York    117.        1337
+#> 17 36013035800 Census Tract 358, Chautauqua County, New York     86.4       2004
+#> 18 36013035901 Census Tract 359.01, Chautauqua County, New York  78.8       2392
+#> 19 36013035902 Census Tract 359.02, Chautauqua County, New York  89.0        102
+#> 20 36013036000 Census Tract 360, Chautauqua County, New York     89.6       1807
+#> 21 36013036100 Census Tract 361, Chautauqua County, New York     94.6       2029
+#> 22 36013036300 Census Tract 363, Chautauqua County, New York     95.0       2011
+#> 23 36013036400 Census Tract 364, Chautauqua County, New York     91.5       2620
 #> 24 36013036500 Census Tract 365, Chautauqua County, New York    101.        2250
 #> 25 36013036600 Census Tract 366, Chautauqua County, New York     93.9       1496
-#> 26 36013036700 Census Tract 367, Chautauqua County, New York    106.        1553
-#> 27 36013036800 Census Tract 368, Chautauqua County, New York     83.1       1792
-#> 28 36013036900 Census Tract 369, Chautauqua County, New York     79.9       2397
-#> 29 36013037000 Census Tract 370, Chautauqua County, New York     79.8       1380
-#> 30 36013037100 Census Tract 371, Chautauqua County, New York     85.7       1770
-#> 31 36013037200 Census Tract 372, Chautauqua County, New York     88.8       1485
-#> 32 36013037300 Census Tract 373, Chautauqua County, New York     96.8       2429
-#> 33 36013037400 Census Tract 374, Chautauqua County, New York     96.7       1531
-#> 34 36013037500 Census Tract 375, Chautauqua County, New York     79.4       1889
-#> 35 36013940000 Census Tract 9400, Chautauqua County, New York    91.1         14
+#> 26 36013036700 Census Tract 367, Chautauqua County, New York    105.        1553
+#> 27 36013036800 Census Tract 368, Chautauqua County, New York     83.5       1792
+#> 28 36013036900 Census Tract 369, Chautauqua County, New York     80.6       2397
+#> 29 36013037000 Census Tract 370, Chautauqua County, New York     80.3       1380
+#> 30 36013037100 Census Tract 371, Chautauqua County, New York     86.6       1770
+#> 31 36013037200 Census Tract 372, Chautauqua County, New York     89.6       1485
+#> 32 36013037300 Census Tract 373, Chautauqua County, New York     97.4       2429
+#> 33 36013037400 Census Tract 374, Chautauqua County, New York     96.6       1531
+#> 34 36013037500 Census Tract 375, Chautauqua County, New York     80.0       1889
+#> 35 36013940000 Census Tract 9400, Chautauqua County, New York    77.2         14
 ```
 
 By having set `keep_indicators = TRUE`, the ADI factors as well as the
@@ -342,14 +342,14 @@ chautauqua %>%
   scale_fill_viridis_c(direction = -1, na.value = "red")
 ```
 
-![](README-chautauqua_map-1.svg)<!-- -->
+![](README-chautauqua_map-1.png)<!-- -->
 
 ### Demonstration of the relative nature of ADIs, using custom reference populations
 
 The code below calculates and maps ADIs for Ohio counties.
 
 ``` r
-ohio <- get_adi(geography = "county", state = "OH", geometry = TRUE)
+ohio <- get_adi("county", state = "OH", year = 2017, geometry = TRUE)
 
 ohio %>%
   ggplot() +
@@ -357,7 +357,7 @@ ohio %>%
   scale_fill_viridis_c(direction = -1)
 ```
 
-![](README-ohio-1.svg)<!-- -->
+![](README-ohio-1.png)<!-- -->
 
 The code below also calculates and maps ADIs for Ohio counties, but it
 uses a reference population of all counties in the fifty states plus DC
@@ -365,7 +365,7 @@ and Puerto Rico:
 
 ``` r
 ohio_ref_US <- 
-  get_adi(geography = "county", geometry = TRUE) %>%
+  get_adi("county", year = 2017, geometry = TRUE) %>%
   dplyr::filter(substr(GEOID, 1, 2) == "39")
   # Ohio's GEOID is 39, so the GEOIDs of all Ohio counties begin with 39.
 
@@ -375,7 +375,7 @@ ohio_ref_US %>%
   scale_fill_viridis_c(direction = -1)
 ```
 
-![](README-ohio_ref_US-1.svg)<!-- -->
+![](README-ohio_ref_US-1.png)<!-- -->
 
 Notice how the ADI of each county varies depending on the reference
 population provided. This map allows the viewer to visually compare and
@@ -432,7 +432,7 @@ grid.arrange(
 )
 ```
 
-![](README-corrected_ohio_color_scales-1.svg)<!-- -->
+![](README-corrected_ohio_color_scales-1.png)<!-- -->
 
 Notice that there is a middling effect on Ohio ADIs when all US counties
 are used as the reference population; this implies that Ohio counties
@@ -452,7 +452,7 @@ created above:
 
 ``` r
 attr(ohio, "loadings")
-#> # A tibble: 15 x 2
+#> # A tibble: 15 × 2
 #>    factor                                        loading
 #>    <chr>                                           <dbl>
 #>  1 medianFamilyIncome                             -0.959
@@ -495,9 +495,9 @@ zero households:
 ``` r
 get_adi("block group", state = "hi", county = "kalawao", year = 2017)
 #> Warning in calculate_adi(census_data, keep_indicators = keep_indicators, : 
-#> Calculating ADI values from fewer than 30 locations.
+#> Calculating ADI and ADI-3 values from fewer than 30 locations.
 #> It is recommended to add more in order to obtain trustworthy results.
-#> Error: Imputation unsuccessful. ADIs not calculated.
+#> Error: Imputation unsuccessful. Neither ADIs nor ADI-3s were calculated.
 #> 
 #> Run rlang::last_error()$adi_indicators to access the indicator data
 #> whose missingness could not be imputed. These data exclude areas with zero households.

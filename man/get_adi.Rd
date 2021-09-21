@@ -24,215 +24,192 @@ get_adi(
 }
 \arguments{
 \item{geography}{A character string denoting the level of census geography
-whose ADIs and ADI-3s you'd like to obtain. Must be one of \code{c("state",
-"county", "tract", "block group", or "zcta")}. Required.}
+whose ADIs and ADI-3s you'd like to obtain. Must be one of \code{c("state", "county", "tract", "block group", "zcta")}. Required.}
 
 \item{state}{A character string specifying states whose ADI and ADI-3 data is
-desired. Defaults to \code{NULL}. Can contain full state names, two-letter
-state abbreviations, or a two-digit FIPS code/GEOID (must be a vector of
-strings, so use quotation marks and leading zeros if necessary). Must be
-left as \code{NULL} blank if using the \code{geoid} or \code{zcta}
-parameter.}
+desired. Defaults to \code{NULL}. Can contain full state names, two-letter state
+abbreviations, or a two-digit FIPS code/GEOID (must be a vector of strings,
+so use quotation marks and leading zeros if necessary). Must be left as
+\code{NULL} blank if using the \code{geoid} or \code{zcta} parameter.}
 
 \item{county}{A vector of character strings specifying the counties whose ADI
-and ADI-3 data you're requesting. Defaults to \code{NULL}. If not
-\code{NULL}, the \code{state} parameter must have a length of 1. County
-names and three-digit FIPS codes are accepted (must contain strings, so use
-quotation marks and leading zeros if necessary). Must be blank if using the
-\code{geoid} parameter.}
+and ADI-3 data you're requesting. Defaults to \code{NULL}. If not \code{NULL}, the
+\code{state} parameter must have a length of 1. County names and three-digit
+FIPS codes are accepted (must contain strings, so use quotation marks and
+leading zeros if necessary). Must be blank if using the \code{geoid} parameter.}
 
 \item{geoid}{A character vector of GEOIDs (use quotation marks and leading
-zeros). Defaults to \code{NULL}. Must be blank if \code{state},
-\code{county}, or \code{zcta} is used. Can contain different levels of
-geography (see details).}
+zeros). Defaults to \code{NULL}. Must be blank if \code{state}, \code{county}, or \code{zcta}
+is used. Can contain different levels of geography (see details).}
 
 \item{zcta}{A character vector of ZCTAs or the leading digit(s) of ZCTAs (use
-  quotation marks and leading zeros). Defaults to \code{NULL}. Must be blank
-  if \code{state}, \code{county}, or \code{geoid} is used.
+quotation marks and leading zeros). Defaults to \code{NULL}. Must be blank if
+\code{state}, \code{county}, or \code{geoid} is used.
 
-  Strings under 5 digits long will yield all ZCTAs that begin with those
-  digits.
+Strings under 5 digits long will yield all ZCTAs that begin with those
+digits.
 
-  Requires that \code{geography = "zcta"}. If \code{geography = "zcta"} and
-  \code{zcta = NULL}, all ZCTAs in the US will be used.}
+Requires that \code{geography = "zcta"}. If \code{geography = "zcta"} and \code{zcta = NULL}, all ZCTAs in the US will be used.}
 
 \item{year}{Single integer specifying the year of US Census data to use.}
 
 \item{dataset}{The data set used to calculate ADIs and ADI-3s. Must be one of
-  \code{c("acs5", "acs3", "acs1", "decennial")}, denoting the 5-, 3-, and
-  1-year ACS along with the decennial census. Defaults to \code{"acs5"}.
+\code{c("acs5", "acs3", "acs1", "decennial")}, denoting the 5-, 3-, and 1-year
+ACS along with the decennial census. Defaults to \code{"acs5"}.
 
-  When \code{dataset = "decennial"}, \code{year} must be in \code{c(1990,
-  2000, 2010)}.
+When \code{dataset = "decennial"}, \code{year} must be in \code{c(1990, 2000, 2010)}.
 
-  The 2010 decennial census did not include the long-form questionnaire used
-  in the 1990 and 2000 censuses, so this function uses the 5-year estimates
-  from the 2010 ACS to supply the data not included in the 2010 decennial
-  census. In fact, the only 2010 decennial variables used are H003002,
-  H014002, P020002, and P020008.
+The 2010 decennial census did not include the long-form questionnaire used
+in the 1990 and 2000 censuses, so this function uses the 5-year estimates
+from the 2010 ACS to supply the data not included in the 2010 decennial
+census. In fact, the only 2010 decennial variables used are H003002,
+H014002, P020002, and P020008.
 
-  Important: data are not always available depending on the level of
-  geography and data set chosen. See
-  \url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html}.}
+Important: data are not always available depending on the level of
+geography and data set chosen. See
+\url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html}.}
 
 \item{geometry}{Logical value indicating whether or not shapefile data should
-  be included in the result, making the result an \code{\link[sf]{sf}}
-  \code{tibble} instead of a plain \code{\link[tibble]{tibble}}. Defaults to
-  \code{FALSE}.
+be included in the result, making the result an \code{\link[sf:sf]{sf}} object
+instead of a plain \code{\link[tibble:tibble]{tibble}}. Defaults to \code{FALSE}.
 
-  The shapefile data that is returned is somewhat customizable: see the
-  \code{shift_geo} and \code{...} arguments.}
+The shapefile data that is returned is somewhat customizable: see the
+\code{shift_geo} and \code{...} arguments.}
 
 \item{shift_geo}{Logical value. See the \code{shift_geo} argument of
-  \code{tidycensus::\link[tidycensus]{get_acs}()} or
-  \code{tidycensus::\link[tidycensus]{get_decennial}()} for details.
+\code{\link[tidycensus:get_acs]{tidycensus::get_acs()}} or \code{\link[tidycensus:get_decennial]{tidycensus::get_decennial()}} for details.
 
-  See \code{...} below for other ways to customize the shapefile data
-  returned.}
+See \code{...} below for other ways to customize the shapefile data returned.}
 
 \item{keep_indicators}{Logical value indicating whether or not the resulting
-  \code{\link[tibble]{tibble}} or \code{\link[sf]{sf}} \code{tibble} will
-  contain the socioeconomic measures used to calculate the ADI and ADI-3
-  values. Defaults to \code{FALSE}.
+\code{\link[tibble:tibble]{tibble}} or \code{\link[sf:sf]{sf}} object will contain the
+socioeconomic measures used to calculate the ADI and ADI-3 values. Defaults
+to \code{FALSE}.
 
-  See \code{\link{acs_vars}} and \code{\link{decennial_vars}} for basic
-  descriptions of the raw census variables.}
+See \code{\link{acs_vars}} and \code{\link{decennial_vars}} for basic descriptions of the raw
+census variables.}
 
 \item{raw_data_only}{Logical, indicating whether or not to skip calculation
 of the ADI and ADI-3 and only return the census variables. Defaults to
 \code{FALSE}.}
 
 \item{cache_tables}{The plural version of the \code{cache_table} argument in
-\code{tidycensus::\link[tidycensus]{get_acs}()} or
-\code{tidycensus::\link[tidycensus]{get_decennial}()}. (\code{get_adi()}
-calls the necessary \code{tidycensus} function many times in order to
-return ADIs and ADI-3s, so many tables are cached if \code{TRUE}). Defaults
-to \code{TRUE}.}
+\code{\link[tidycensus:get_acs]{tidycensus::get_acs()}} or \code{\link[tidycensus:get_decennial]{tidycensus::get_decennial()}}. (\code{get_adi()}
+calls the necessary \code{tidycensus} function many times in order to return
+ADIs and ADI-3s, so many tables are cached if \code{TRUE}). Defaults to \code{TRUE}.}
 
 \item{key}{Your Census API key as a character string. Obtain one at
-\url{http://api.census.gov/data/key_signup.html}. Defaults to \code{NULL}.
-Not necessary if you have already loaded your key with
-\code{\link{census_api_key}()}.}
+\url{http://api.census.gov/data/key_signup.html}. Defaults to \code{NULL}. Not
+necessary if you have already loaded your key with \code{\link[=census_api_key]{census_api_key()}}.}
 
-\item{seed}{Passed to \code{\link{calculate_adi}()}.}
+\item{seed}{Passed to \code{\link[=calculate_adi]{calculate_adi()}}.}
 
-\item{...}{Additional arguments to be passed onto
-\code{tidycensus::\link[tidycensus]{get_acs}()} or
-\code{tidycensus::\link[tidycensus]{get_decennial}()}. Currently, none of
-these functions' formal arguments can be meaningfully customized (doing so
-will either throw an error or have no effect). However, when setting
-\code{geometry = TRUE}, the \code{tidycensus} functions do pass meaningful
-arguments onto the appropriate \code{tigris} function (namely, one of
-\code{\link[tigris]{states}()}, \code{\link[tigris]{counties}()},
-\code{\link[tigris]{tracts}()}, \code{\link[tigris]{block_groups}()}, or
-\code{\link[tigris]{zctas}()}, according to the the value of
-\code{geography}). This enables the user to somewhat customize the
-shapefile data obtained.}
+\item{...}{Additional arguments to be passed onto \code{\link[tidycensus:get_acs]{tidycensus::get_acs()}} or
+\code{\link[tidycensus:get_decennial]{tidycensus::get_decennial()}}. Currently, none of these functions' formal
+arguments can be meaningfully customized (doing so will either throw an
+error or have no effect). However, when setting \code{geometry = TRUE}, the
+\code{tidycensus} functions do pass meaningful arguments onto the appropriate
+\code{tigris} function (namely, one of \code{\link[tigris:states]{tigris::states()}}, \code{\link[tigris:counties]{tigris::counties()}},
+\code{\link[tigris:tracts]{tigris::tracts()}}, \code{\link[tigris:block_groups]{tigris::block_groups()}}, or \code{\link[tigris:zctas]{tigris::zctas()}},
+according to the the value of \code{geography}). This enables the user to
+somewhat customize the shapefile data obtained.}
 }
 \value{
-If \code{geometry = FALSE}, (the default) a
-  \code{\link[tibble]{tibble}}. If \code{geometry = TRUE} is specified, an
-  \code{\link[sf]{sf}} \code{tibble}.
+If \code{geometry = FALSE}, (the default) a \code{\link[tibble:tibble]{tibble}}.
+If \code{geometry = TRUE} is specified, an \code{\link[sf:sf]{sf}}.
 }
 \description{
 Returns the ADI and ADI-3 of user-specified areas.
 }
 \details{
-Returns a \code{\link[tibble]{tibble}} or \code{\link[sf]{sf}} \code{tibble}
-of the Area Deprivation Indices (ADIs) and Berg Indices (ADI-3s) of
-user-specified locations in the United States, utilizing US Census data.
-Locations that are listed as having zero households are excluded from ADI and
-ADI-3 calculation: their ADI and ADI-3 values will be \code{NA}.
+Returns a \code{\link[tibble:tibble]{tibble}} or \code{\link[sf:sf]{sf}} object of the Area
+Deprivation Indices (ADIs) and Berg Indices (ADI-3s) of user-specified
+locations in the United States, utilizing US Census data. Locations that are
+listed as having zero households are excluded from ADI and ADI-3 calculation:
+their ADI and ADI-3 values will be \code{NA}.
 }
 \section{Reference area}{
- \strong{The concept of "reference area" is important
-  to understand when using this function.} The algorithm that produced the
-  original ADIs employs factor analysis. As a result, the ADI is a relative
-  measure; the ADI of a particular location is dynamic, varying depending on
-  which other locations were supplied to the algorithm. In other words,
-  \strong{ADI will vary depending on the reference area you specify.}
+ \strong{The concept of "reference area" is important to
+understand when using this function.} The algorithm that produced the
+original ADIs employs factor analysis. As a result, the ADI is a relative
+measure; the ADI of a particular location is dynamic, varying depending on
+which other locations were supplied to the algorithm. In other words, \strong{ADI
+will vary depending on the reference area you specify.}
 
-  For example, the ADI of Orange County, California is \emph{x} when
-  calculated alongside all other counties in California, but it is \emph{y}
-  when calculated alongside all counties in the US. The \code{get_adi()}
-  function enables the user to define a \strong{reference area} by feeding a
-  vector of GEOIDs to its \code{geoid} parameter (or alternatively for
-  convenience, states and/or counties to \code{state} and \code{county}). The
-  function then gathers data from those specified locations and performs
-  calculations using their data alone.
+For example, the ADI of Orange County, California is \emph{x} when calculated
+alongside all other counties in California, but it is \emph{y} when calculated
+alongside all counties in the US. The \code{get_adi()} function enables the user
+to define a \strong{reference area} by feeding a vector of GEOIDs to its \code{geoid}
+parameter (or alternatively for convenience, states and/or counties to
+\code{state} and \code{county}). The function then gathers data from those specified
+locations and performs calculations using their data alone.
 
-  The Berg Indices (ADI-3) were developed with this principle of relativity
-  in mind, and as such there is no set of seminal ADI-3 values. Thus, the
-  terms "Berg Indices" and "ADI-3" refer more nearly to any values generated
-  using the algorithm employed in this package.
+The Berg Indices (ADI-3) were developed with this principle of relativity
+in mind, and as such there is no set of seminal ADI-3 values. Thus, the
+terms "Berg Indices" and "ADI-3" refer more nearly to any values generated
+using the algorithm employed in this package.
 
-  Areas listed as having zero households are excluded from the reference
-  area, and their ADI and ADI-3 values will be \code{NA}.
+Areas listed as having zero households are excluded from the reference
+area, and their ADI and ADI-3 values will be \code{NA}.
 }
 
 \section{The \code{geoid} parameter}{
- Elements of \code{geoid} can represent
-  different levels of geography, but they all must be either 2 digits (for
-  states), 5 digits (for counties), 11 digits (for tracts), or 12 digits (for
-  block groups). It must contain character strings, so use quotation marks as
-  well as leading zeros where applicable.
+ Elements of \code{geoid} can represent different
+levels of geography, but they all must be either 2 digits (for states), 5
+digits (for counties), 11 digits (for tracts), or 12 digits (for block
+groups). It must contain character strings, so use quotation marks as well
+as leading zeros where applicable.
 }
 
 \section{ADI and ADI-3 factor loadings}{
  The returned
-  \code{\link[tibble]{tibble}} or \code{\link[sf]{sf}} \code{tibble} is of
-  class \code{adi}, and it contains an attribute called \code{loadings},
-  which contains a tibble of the PCA loadings of each factor. This is
-  accessible through \code{\link{attr}(name_of_tibble, "loadings")}.
+\code{\link[tibble:tibble]{tibble}} or \code{\link[sf:sf]{sf}} is of class \code{adi}, and it
+contains an attribute called \code{loadings}, which contains a tibble of the PCA
+loadings of each factor. This is accessible through
+\code{\link{attr}}\verb{(name_of_tibble, "loadings")}.
 }
 
 \section{Missingness and imputation}{
  While this function allows flexibility
-  in specifying reference areas (see the \strong{Reference area} section
-  above), data from the US Census are masked for sparsely populated places,
-  resulting in many missing values.
+in specifying reference areas (see the \strong{Reference area} section above),
+data from the US Census are masked for sparsely populated places, resulting
+in many missing values.
 
-  Imputation is attempted via \code{mice::\link[mice]{mice}(m = 1, maxit =
-  50, method = "pmm", seed = seed)}. If imputation is unsuccessful, an error
-  is thrown, but the dataset of indicators on which imputation was
-  unsuccessful is available via
-  \code{rlang::\link[rlang]{last_error}()$adi_indicators} and the raw census
-  data are available via
-  \code{rlang::\link[rlang]{last_error}()$adi_raw_data}. The former excludes
-  areas with zero households, but the latter includes them.
+Imputation is attempted via \code{\link[mice:mice]{mice::mice}}\verb{(m = 1, maxit = 50, method = "pmm", seed = seed)}. If imputation is unsuccessful, an error is thrown,
+but the dataset of indicators on which imputation was unsuccessful is
+available via \code{\link[rlang:last_error]{rlang::last_error()}}\verb{$adi_indicators} and the raw census
+data are available via \code{\link[rlang:last_error]{rlang::last_error()}}\verb{$adi_raw_data}. The former
+excludes areas with zero households, but the latter includes them.
 
-  One of the indicators of both ADI and the Financial Strength component of
-  ADI-3 is median family income, but methodological issues with the 2015 and
-  2016 ACS have rendered this variable unavailable at the block group level
-  for those years. When requested, this function will use median household
-  income in its place, with a \code{warning()}. See
-  \url{https://www.census.gov/programs-surveys/acs/technical-documentation/user-notes/2016-01.html}.
+One of the indicators of both ADI and the Financial Strength component of
+ADI-3 is median family income, but methodological issues with the 2015 and
+2016 ACS have rendered this variable unavailable at the block group level
+for those years. When requested, this function will use median household
+income in its place, with a \code{warning()}. See
+\url{https://www.census.gov/programs-surveys/acs/technical-documentation/user-notes/2016-01.html}.
 }
 
 \section{API-related error handling}{
  Depending on user input, this function
-  may call its underlying functions
-  (\code{tidycensus::\link[tidycensus]{get_acs}()} or
-  \code{tidycensus::\link[tidycensus]{get_decennial}()}) many times in order
-  to accommodate their behavior. When these calls are broken up by state or
-  by state and county, a message is printed indicating the state or state and
-  county whose data is being pulled. These calls are wrapped in
-  \code{purrr::\link[purrr]{insistently}(rate =
-  purrr::\link[purrr:rate-helpers]{rate_delay}(), quiet = FALSE)}, meaning
-  that they are attempted over and over until success, and \code{tidycensus}
-  error messages are printed as they occur.
+may call its underlying functions (\code{\link[tidycensus:get_acs]{tidycensus::get_acs()}} or
+\code{\link[tidycensus:get_decennial]{tidycensus::get_decennial()}}) many times in order to accommodate their
+behavior. When these calls are broken up by state or by state and county, a
+message is printed indicating the state or state and county whose data is
+being pulled. These calls are wrapped in
+\code{\link[purrr:insistently]{purrr::insistently}}\code{(}\code{\link[purrr:rate-helpers]{purrr::rate_delay()}}\verb{, quiet = FALSE)}, meaning
+that they are attempted over and over until success, and \code{tidycensus} error
+messages are printed as they occur.
 }
 
 \section{Warnings and disclaimers}{
  Please note that this function calls data
-  from US Census servers, so execution may take a long time depending on the
-  user's internet connection and the amount of data requested.
+from US Census servers, so execution may take a long time depending on the
+user's internet connection and the amount of data requested.
 
-  For advanced users, if changing the \code{dataset} argument, be sure to
-  know the advantages and limitations of the 1-year and 3-year ACS estimates.
-  See
-  \url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html.}
-  for details.
+For advanced users, if changing the \code{dataset} argument, be sure to know the
+advantages and limitations of the 1-year and 3-year ACS estimates. See
+\url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html.} for
+details.
 }
 
 \examples{

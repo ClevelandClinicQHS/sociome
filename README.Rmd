@@ -176,7 +176,7 @@ chautauqua %>%
 The code below calculates and maps ADIs for Ohio counties. 
 
 ```{r ohio, fig.height=7, message=FALSE, cache=TRUE}
-ohio <- get_adi(geography = "county", state = "OH", geometry = TRUE)
+ohio <- get_adi("county", state = "OH", year = 2017, geometry = TRUE)
 
 ohio %>%
   ggplot() +
@@ -188,7 +188,7 @@ The code below also calculates and maps ADIs for Ohio counties, but it uses a re
 
 ```{r ohio_ref_US, fig.height=7, message=FALSE, cache=TRUE}
 ohio_ref_US <- 
-  get_adi(geography = "county", geometry = TRUE) %>%
+  get_adi("county", year = 2017, geometry = TRUE) %>%
   dplyr::filter(substr(GEOID, 1, 2) == "39")
   # Ohio's GEOID is 39, so the GEOIDs of all Ohio counties begin with 39.
 

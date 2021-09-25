@@ -160,27 +160,43 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NA) {
     purrr::map_dfc(
       list(
         ADI =
-          c("medianFamilyIncome"                            = -1,
-            "medianMortgage"                                = -1,
-            "medianRent"                                    = -1,
-            "medianHouseValue"                              = -1,
-            "pctFamiliesInPoverty"                          = +1,
-            "pctOwnerOccupiedHousing"                       = -1,
-            "ratioThoseMakingUnder10kToThoseMakingOver50k"  = +1,
-            "pctPeopleLivingBelow150PctFederalPovertyLevel" = +1,
-            "pctHouseholdsWithChildrenThatAreSingleParent"  = +1,
-            "pctHouseholdsWithNoVehicle"                    = +1,
-            "pctPeopleWithWhiteCollarJobs"                  = -1,
-            "pctPeopleUnemployed"                           = +1,
-            "pctPeopleWithAtLeastHSEducation"               = -1,
-            "pctPeopleWithLessThan9thGradeEducation"        = +1,
-            "pctHouseholdsWithOverOnePersonPerRoom"         = +1),
+          purrr::map_dbl(
+            rlang::list2(
+              # This is so we grab the correct one of
+              # medianFamilyIncome/medianHouseholdIncome, which we made sure
+              # would be the first column name in indicators_hh_only.
+              !!names(indicators_hh_only)[1L]                := -1,
+              "medianMortgage"                                = -1,
+              "medianRent"                                    = -1,
+              "medianHouseValue"                              = -1,
+              "pctFamiliesInPoverty"                          = +1,
+              "pctOwnerOccupiedHousing"                       = -1,
+              "ratioThoseMakingUnder10kToThoseMakingOver50k"  = +1,
+              "pctPeopleLivingBelow150PctFederalPovertyLevel" = +1,
+              "pctHouseholdsWithChildrenThatAreSingleParent"  = +1,
+              "pctHouseholdsWithNoVehicle"                    = +1,
+              "pctPeopleWithWhiteCollarJobs"                  = -1,
+              "pctPeopleUnemployed"                           = +1,
+              "pctPeopleWithAtLeastHSEducation"               = -1,
+              "pctPeopleWithLessThan9thGradeEducation"        = +1,
+              "pctHouseholdsWithOverOnePersonPerRoom"         = +1
+            ),
+            identity
+          ),
         Financial_Strength =
-          c("medianFamilyIncome"           = +1,
-            "medianMortgage"               = +1,
-            "medianRent"                   = +1,
-            "medianHouseValue"             = +1,
-            "pctPeopleWithWhiteCollarJobs" = +1),
+          purrr::map_dbl(
+            rlang::list2(
+              # This is so we grab the correct one of
+              # medianFamilyIncome/medianHouseholdIncome, which we made sure
+              # would be the first column name in indicators_hh_only.
+              !!names(indicators_hh_only)[1L] := +1,
+              "medianMortgage"                 = +1,
+              "medianRent"                     = +1,
+              "medianHouseValue"               = +1,
+              "pctPeopleWithWhiteCollarJobs"   = +1
+            ),
+            identity
+          ),
         Economic_Hardship_and_Inequality =
           c("pctFamiliesInPoverty"                          = +1,
             "pctOwnerOccupiedHousing"                       = -1,
@@ -194,50 +210,10 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NA) {
             "pctPeopleWithLessThan9thGradeEducation" = -1,
             "pctHouseholdsWithOverOnePersonPerRoom"  = -1)
       ),
-      function(expected_signs, result_vec) {
-        
-        # Principal-components analysis (PCA) of the statistics that produces
-        # the raw ADI and ADI-3 scores
-        fit <- psych::principal(indicators_hh_only[names(expected_signs)])
-        
-        # Sometimes the PCA produces results that are completely reversed (i.e.,
-        # it gives deprived areas low ADIs and less deprived areas high ADIs).
-        # A check is performed below to see if this has occurred.
-        
-        # 1. The signage of the factor loadings are multiplied by their expected
-        # signage according to Singh's original research (present in the unnamed
-        # vector of 1s and -1s below). This produces a vector of 1s and -1s,
-        # with a 1 indicating a factor loading in the expected direction and a
-        # -1 indicating a factor loading in the wrong direction.
-        
-        # 2. The sum() of this vector is computed.
-        
-        # 3. The sign() of this sum is computed and saved into a variable called
-        # "signage_flipper". It will equal 1 or -1. It will equal 1 if most of
-        # the factor loadings have the same sign as the original Singh factor
-        # loadings. It will be -1 if not. It will never equal 0 because there is
-        # an odd number of factor loadings.
-        signage_flipper <- sign(sum(sign(fit$loadings) * expected_signs))
-        #   4. The variable signage_flipper is multiplied by the PCA scores
-        #   before standardization. In effect, this flips the ADIs in the right
-        #   direction (multiplies their scores by -1) if they were reversed, and
-        #   it keeps them the same (multiplies their scores by 1) if they were
-        #   not reversed.
-        
-        # The raw ADI scores are standardized to have a mean of 100 and SD of 20
-        result_vec[nonzero_hh_lgl] <-
-          as.numeric(fit$scores * signage_flipper * 20 + 100)
-        
-        # We also want the loadings tables for each of the three factors
-        attr(result_vec, "loadings") <-
-          dplyr::tibble(
-            factor = row.names(fit$loadings),
-            loading = as.double(fit$loadings)
-          )
-        
-        result_vec
-      },
-      result_vec = rep_len(NA_real_, length.out = length(nonzero_hh_lgl))
+      calc_adi_col,
+      result_vec = rep_len(NA_real_, length.out = length(nonzero_hh_lgl)),
+      indicators_hh_only = indicators_hh_only,
+      nonzero_hh_lgl = nonzero_hh_lgl
     )
   
   out <-
@@ -258,6 +234,55 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NA) {
   class(out) <- c("adi", class(out))
   
   out
+}
+
+
+
+
+calc_adi_col <- function(expected_signs, 
+                         result_vec, 
+                         indicators_hh_only,
+                         nonzero_hh_lgl) {
+  # Principal-components analysis (PCA) of the statistics that produces
+  # the raw ADI and ADI-3 scores
+  fit <- psych::principal(indicators_hh_only[names(expected_signs)])
+  
+  # Sometimes the PCA produces results that are completely reversed (i.e.,
+  # it gives deprived areas low ADIs and less deprived areas high ADIs).
+  # A check is performed below to see if this has occurred.
+  
+  # 1. The signage of the factor loadings are multiplied by their expected
+  # signage according to Singh's original research (present in the unnamed
+  # vector of 1s and -1s below). This produces a vector of 1s and -1s,
+  # with a 1 indicating a factor loading in the expected direction and a
+  # -1 indicating a factor loading in the wrong direction.
+  
+  # 2. The sum() of this vector is computed.
+  
+  # 3. The sign() of this sum is computed and saved into a variable called
+  # "signage_flipper". It will equal 1 or -1. It will equal 1 if most of
+  # the factor loadings have the same sign as the original Singh factor
+  # loadings. It will be -1 if not. It will never equal 0 because there is
+  # an odd number of factor loadings.
+  signage_flipper <- sign(sum(sign(fit$loadings) * expected_signs))
+  #   4. The variable signage_flipper is multiplied by the PCA scores
+  #   before standardization. In effect, this flips the ADIs in the right
+  #   direction (multiplies their scores by -1) if they were reversed, and
+  #   it keeps them the same (multiplies their scores by 1) if they were
+  #   not reversed.
+  
+  # The raw ADI scores are standardized to have a mean of 100 and SD of 20
+  result_vec[nonzero_hh_lgl] <-
+    as.numeric(fit$scores * signage_flipper * 20 + 100)
+  
+  # We also want the loadings tables for each of the three factors
+  attr(result_vec, "loadings") <-
+    dplyr::tibble(
+      factor = row.names(fit$loadings),
+      loading = as.double(fit$loadings)
+    )
+  
+  result_vec
 }
 
 
@@ -478,6 +503,9 @@ factors_from_acs <- function(data_raw, colnames) {
     ) %>%
     
     dplyr::select(
+      # Make sure to keep median_income_name as the first one so that the
+      # medianFamilyIncome/medianHouseholdIncome check can be properly performed
+      # later on.
       !!median_income_name                           := "B19113_001",
       "medianMortgage"                                = "B25088_002",
       "medianRent"                                    = "B25064_001",
@@ -543,6 +571,9 @@ factors_from_2000_decennial <- function(data_raw) {
     ) %>%
     
     dplyr::select(
+      # Make sure to keep "medianFamilyIncome" as the first one so that the
+      # medianFamilyIncome/medianHouseholdIncome check can be properly performed
+      # later on.
       "medianFamilyIncome"                            = "P077001",
       "medianMortgage"                                = "H091001",
       "medianRent"                                    = "H063001",
@@ -612,6 +643,9 @@ factors_from_1990_decennial <- function(data_raw) {
     ) %>% 
     
     dplyr::select(
+      # Make sure to keep "medianFamilyIncome" as the first one so that the
+      # medianFamilyIncome/medianHouseholdIncome check can be properly performed
+      # later on.
       "medianFamilyIncome"                            = "P107A001",
       "medianMortgage"                                = "H052A001",
       "medianRent"                                    = "H043A001",

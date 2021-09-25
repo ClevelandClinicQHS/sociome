@@ -3,6 +3,7 @@
 
 - 2000 decennial ADI has been added back because the US census has restored the data to its API. 1990 ADI is still unavailable.
 - Added functions `areas_in_radius()`, `lon_lat_from_area()`, and `append_dissimilarities()`
+- Fixed 2015 and 2016 block group pulls
 
 # sociome 2.0.0
 

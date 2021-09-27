@@ -160,7 +160,7 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NA) {
     purrr::map_dfc(
       list(
         ADI =
-          purrr::map_dbl(
+          unlist(
             rlang::list2(
               # This is so we grab the correct one of
               # medianFamilyIncome/medianHouseholdIncome, which we made sure
@@ -180,11 +180,10 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NA) {
               "pctPeopleWithAtLeastHSEducation"               = -1,
               "pctPeopleWithLessThan9thGradeEducation"        = +1,
               "pctHouseholdsWithOverOnePersonPerRoom"         = +1
-            ),
-            identity
+            )
           ),
         Financial_Strength =
-          purrr::map_dbl(
+          unlist(
             rlang::list2(
               # This is so we grab the correct one of
               # medianFamilyIncome/medianHouseholdIncome, which we made sure
@@ -194,8 +193,7 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NA) {
               "medianRent"                     = +1,
               "medianHouseValue"               = +1,
               "pctPeopleWithWhiteCollarJobs"   = +1
-            ),
-            identity
+            )
           ),
         Economic_Hardship_and_Inequality =
           c("pctFamiliesInPoverty"                          = +1,

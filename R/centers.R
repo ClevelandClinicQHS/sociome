@@ -67,7 +67,8 @@
 #'   thousands of unnecessary calculations. Defaults to 50.
 #'
 #' @examples
-#' # All states within 300 kilometers of the center of population of Manhattan
+#' # All states whose centers of population are within 300 kilometers of the
+#' # center of population of New York County, New York (i.e, Manhattan):
 #' areas_in_radius(
 #'   geography = "state",
 #'   center = lon_lat_from_area(state = "NY", county = "New York"),
@@ -75,24 +76,16 @@
 #'   units = "km"
 #' )
 #'
-#' # All census tracts within 24 miles of the four corners
-#' areas_in_radius("tract", center = c(-109.0452, 36.9991), radius = 24)
+#' # The four census tracts whose centers of population are closest to the
+#' # Four Corners (distance column is in meters due to setting units = NULL):
+#' closest_n_areas("tract", center = c(-109.0452, 36.9991), n = 4, units = NULL)
 #'
-#' # The 10 counties closest to the center of population of Kauai County, Hawaii
-#' # (distance column is in meters due to setting units = NULL):
-#' closest_n_areas(
+#' # The counties closest to center of population of Kauai County, Hawaii whose
+#' # total population reaches 3 million people:
+#' closest_population(  
 #'   geography = "county",
 #'   center = lon_lat_from_area("15007"),
-#'   n = 10,
-#'   units = NULL
-#' )
-#' 
-#' # The block groups closest to center of population of Florida whose total
-#' # population reaches 2000 people:
-#' closest_population(
-#'   geography = "block group",
-#'   center = lon_lat_from_area(state = "FL"),
-#'   population = 2000,
+#'   population = 3e6,
 #'   units = "barleycorns"
 #' )
 #' @return A [`tibble`][tibble::tibble] with each of the columns found in the

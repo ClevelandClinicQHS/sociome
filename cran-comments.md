@@ -9,6 +9,7 @@
 ## Test environments:
 
 * CentOS Linux 8, R 4.0.3
+* CentOS Linux 7, R 4.0.0
 * Ubuntu Linux 20.04.1 LTS, R-release 4.0.4
 * win-builder devel
 

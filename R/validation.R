@@ -16,17 +16,23 @@ validate_geography <- function(geography = c("state",
 
 
 
-validate_year <- function(year, values = NULL) {
-  
-  if (!rlang::is_scalar_integerish(year) || is.na(year)) {
-    stop("year must be a single nonmissing number", call. = FALSE)
+validate_single_positive_integer <- function(x, what) {
+  if (!rlang::is_scalar_integerish(x, finite = TRUE) || x < 1L) {
+    stop(what, " must be a single positive integer", call. = FALSE)
   }
+  as.integer(x)
+}
+
+
+
+
+validate_year <- function(year, values = NULL) {
+  year <- validate_single_positive_integer(year, "year")
   if (!is.null(values) && !any(values == year)) {
     stop("year must be one of:\n", paste0(values, collapse = ", "),
          call. = FALSE)
   }
-  
-  as.numeric(year)
+  year
 }
 
 

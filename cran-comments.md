@@ -1,7 +1,7 @@
 
 ## Resubmission
 
-* Added new functions `areas_in_radius()`, `lon_lat_from_area()`, and `append_dissimilarities()`
+* Added new functions `areas_in_radius()`, `closest_n_areas()`, `closest_population()`, `lon_lat_from_area()`, and `append_dissimilarities()`
 * Added new Suggests
 * Updated README and code and documentation
 

@@ -25,8 +25,8 @@ error if its first two digits do not match the GEOID of \code{state}. Must be
 \item{year}{Either 2000 or the default of 2010.}
 }
 \value{
-A \link{double} vector of length 2. The first element is longitude
-(positive for east, negative for west). The second element is latitude
+A \link{double} vector of length 2. The first element is LONGITUDE
+(positive for east, negative for west). The second element is LATITUDE
 (positive for north, negative for south).
 }
 \description{

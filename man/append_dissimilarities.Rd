@@ -78,7 +78,8 @@ mtdissim_dup <- append_dissimilarities(mtcars, cols = !c(wt, qsec))
 # first two rows are identical. Therefore, both values are zero.
 mtdissim_dup$dissimilarities[[1]]
 
-# And here are the corresponding sampling weights:
+# Here are the corresponding sampling weights. Notice that the first two
+# rows' sampling weights are the same as the sampling weight of row 30, which
+# is the next most similar row.
 mtdissim_dup$sampling_weights[[1]]
-
 }

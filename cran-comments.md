@@ -10,8 +10,10 @@
 
 * CentOS Linux 8, R 4.0.3
 * CentOS Linux 7, R 4.0.0
-* Ubuntu Linux 20.04.1 LTS, R-release 4.0.4
-* win-builder devel
+* Fedora Linux, R-devel
+* Ubuntu Linux 20.04.1 LTS, R 4.1.1
+* Windows Server 2008 R2 SP1, R-devel
+* winbuilder devel
 
 
 ## R CMD check results

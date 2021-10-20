@@ -56,9 +56,10 @@
 #' # first two rows are identical. Therefore, both values are zero.
 #' mtdissim_dup$dissimilarities[[1]]
 #' 
-#' # And here are the corresponding sampling weights:
+#' # Here are the corresponding sampling weights. Notice that the first two
+#' # rows' sampling weights are the same as the sampling weight of row 30, which
+#' # is the next most similar row.
 #' mtdissim_dup$sampling_weights[[1]]
-#'
 #' @return A data frame, specifically the `data` argument with one or two more
 #'   columns added to the end.
 #' @export
@@ -78,12 +79,15 @@ append_dissimilarities <- function(data,
   data2 <- dplyr::select(data, {{cols}})
   
   if (!ncol(data2)) {
-    stop("cols must specifiy and at least one column in data", call. = FALSE)
+    stop("cols must specify at least one column in data", call. = FALSE)
   }
   
   if (anyNA(data2)) {
-    warning("missing values detected among the columns in data specified by ",
-            "cols", call. = FALSE)
+    warning("missing values detected among these cols:\n", 
+            paste0(
+              names(data2)[vapply(data2, anyNA, logical(1L))],
+              collapse = "\n"
+            ), call. = FALSE)
   }
   
   validate_dissim_colnames(
@@ -91,6 +95,18 @@ append_dissimilarities <- function(data,
     sampling_weight_name,
     data
   )
+  
+  if (anyDuplicated(data2)) {
+    warning(
+      "\nDuplicate rows detected. The dissimilarity measures and sampling",
+      "\nweights of identical rows will be identical.\nRows with duplicates:\n",
+      paste0(
+        which(duplicated(data2) | duplicated(data2, fromLast = TRUE)),
+        collapse = ", "
+      ),
+      call. = FALSE
+    )
+  }
   
   dissim_measure <-
     cluster::daisy(x = data2, metric = metric, ...) %>% 
@@ -104,10 +120,6 @@ append_dissimilarities <- function(data,
   }
   
   if (!is.null(sampling_weight_name)) {
-    if (anyDuplicated(data2)) {
-      warning("Duplicate row(s) detected among the columns of data specified ",
-              "by cols.\nThese rows' results will be missing", call. = FALSE)
-    }
     data[[sampling_weight_name]] <- lapply(dissim_measure, dissim_samp_wts)
   }
   
@@ -115,7 +127,7 @@ append_dissimilarities <- function(data,
 }
 
 
-dissim_samp_wts <- function(x, i) {
+dissim_samp_wts <- function(x) {
   zeros <- x == 0
   if (all(zeros)) {
     x[] <- 1

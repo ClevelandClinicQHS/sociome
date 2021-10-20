@@ -1,5 +1,5 @@
 
-# Development version
+# sociome 2.1.0
 
 - 2000 decennial ADI has been added back because the US census has restored the data to its API. 1990 ADI is still unavailable.
 - Added functions `areas_in_radius()`, `closest_n_areas()`, `closest_population()`, `lon_lat_from_area()`, and `append_dissimilarities()`

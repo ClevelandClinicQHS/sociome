@@ -101,7 +101,14 @@ synthetic_population <- function(geography,
             .data$not_hispanic_or_latino_american_indian_and_alaska_native_alone
           ),
         ~.x / total
-      )
+      ),
+      not_hispanic_or_latino_some_other_race_alone_or_two_or_more_races =
+        1 -
+        .data$hispanic_or_latino -
+        .data$not_hispanic_or_latino_white_alone -
+        .data$not_hispanic_or_latino_black_or_african_american_alone -
+        .data$not_hispanic_or_latino_asian_alone -
+        .data$not_hispanic_or_latino_american_indian_and_alaska_native_alone
     )
   
   out <-

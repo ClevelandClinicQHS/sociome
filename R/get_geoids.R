@@ -49,7 +49,6 @@ get_geoids <- function(geography,
                        cache_tables = TRUE,
                        key          = NULL,
                        ...) {
-  
   geography <-
     match.arg(
       geography,
@@ -58,83 +57,48 @@ get_geoids <- function(geography,
   
   # Converts year to the most recent year divisible by 10.
   year <- floor(year / 10) * 10
-  
-  if (!any(c(1990, 2000, 2010) == year)) {
-    stop("year must be between 1990 and 2019", call. = FALSE)
-  }
-  
-  # Since some variable has to be passed to tidycensus::get_decennial(), it may
-  # as well be an understandable one like total population.
-  variables <-
-    stats::setNames(
-      object = if (year == 1990) "P0010001" else "P001001",
-      nm = paste0("census_", year, "_pop")
-    )
-  
-  # Set up and validate the arguments to be passed to the call to
-  # tidycensus::get_decennial()
-  args <-
-    list(
-      geography = geography,
-      variables = variables,
-      cache_table = cache_tables,
-      year = year,
-      sumfile = "sf1",
-      geometry = geometry,
-      output = "wide",
-      key = key,
-      endyear = rlang::zap(),
-      survey = rlang::zap(),
-      ...
-    )
-  if (!rlang::is_named(args)) {
-    stop("\nAdditional arguments passed to ... must all be named")
+  if (!any(c(1990, 2000, 2010, 2020) == year)) {
+    stop("year must be between 1990 and 2029", call. = FALSE)
   }
   
   # Create the call skeleton to get_decennial() using the validated argument
-  # list. It is wrapped in list() because of how these "call skeletons" are
-  # handled with respect to how they are completed with the ref_area object. See
-  # the code comments in get_adi() for more details.
-  tidycensus_call <-
-    rlang::call_modify(
-      .call = quote(tidycensus::get_decennial()),
-      !!!args,
-      .homonyms = "first"
-    ) %>% 
-    list()
-  
-  ref_area <-
-    get_ref_area(
-      geoid = geoid,
-      state = state, 
-      county = county, 
-      zcta = NULL, 
-      geography = geography, 
-      year = year,
-      dataset = "decennial",
-      tidycensus_calls = tidycensus_call
+  # list
+  partial_tidycensus_calls <-
+    list(
+      get_decennial =
+        tidycensus_call(
+          .fn = "get_decennial",
+          geography = geography,
+          variables =
+            stats::setNames(
+              object = if (year == 1990) "P0010001" else "P001001",
+              nm = paste0("census_", year, "_pop")
+            ),
+          table = NULL,
+          cache_table = cache_tables,
+          year = year,
+          sumfile = "sf1",
+          geometry = geometry,
+          output = "wide",
+          # keep_geo_vars = FALSE,
+          # summary_var = NULL,
+          key = key,
+          ...
+        )
     )
   
-  # Create call(s) iteratively over the rows of ref_area$state_county, evaluate
-  # them, bind them into one table, and extract the desired columns.
-  census_data <- 
-    ref_area$state_county %>% 
-    dplyr::mutate(.call = tidycensus_call) %>% 
-    purrr::pmap(rlang::call_modify) %>% 
-    lapply(eval) %>% 
-    do.call(rbind, .) %>% 
-    dplyr::select("GEOID", "NAME", dplyr::starts_with("census_"))
+  d <-
+    get_tidycensus(
+      geography = geography,
+      state = state,
+      county = county,
+      geoid = geoid,
+      zcta = NULL,
+      year = year,
+      dataset = "decennial",
+      partial_tidycensus_calls = partial_tidycensus_calls,
+      geometry = geometry
+    )
   
-  # Filter tidycensus output to only include the areas specified by the
-  # user-specified reference area.
-  if (!is.null(ref_area$geoid)) {
-    census_data <- census_data %>% 
-      filter_ref_area(
-        what       = "GEOID",
-        pattern    = ref_area$geoid,
-        geo_length = ref_area$geo_length
-      )
-  }
-  
-  census_data
+  d
 }

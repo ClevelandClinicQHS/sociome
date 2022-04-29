@@ -13,7 +13,6 @@ get_adi(
   year,
   dataset = c("acs5", "acs3", "acs1", "decennial"),
   geometry = FALSE,
-  shift_geo = FALSE,
   keep_indicators = FALSE,
   raw_data_only = FALSE,
   cache_tables = TRUE,
@@ -73,13 +72,8 @@ geography and data set chosen. See
 be included in the result, making the result an \code{\link[sf:sf]{sf}} object
 instead of a plain \code{\link[tibble:tibble]{tibble}}. Defaults to \code{FALSE}.
 
-The shapefile data that is returned is somewhat customizable: see the
-\code{shift_geo} and \code{...} arguments.}
-
-\item{shift_geo}{Logical value. See the \code{shift_geo} argument of
-\code{\link[tidycensus:get_acs]{tidycensus::get_acs()}} or \code{\link[tidycensus:get_decennial]{tidycensus::get_decennial()}} for details.
-
-See \code{...} below for other ways to customize the shapefile data returned.}
+The shapefile data that is returned is somewhat customizable by passing
+certain arguments along to the \code{tidycensus} functions via \code{...}.}
 
 \item{keep_indicators}{Logical value indicating whether or not the resulting
 \code{\link[tibble:tibble]{tibble}} or \code{\link[sf:sf]{sf}} object will contain the
@@ -105,18 +99,20 @@ necessary if you have already loaded your key with \code{\link[=census_api_key]{
 \item{seed}{Passed to \code{\link[=calculate_adi]{calculate_adi()}}.}
 
 \item{...}{Additional arguments to be passed onto \code{\link[tidycensus:get_acs]{tidycensus::get_acs()}} or
-\code{\link[tidycensus:get_decennial]{tidycensus::get_decennial()}}. Currently, none of these functions' formal
-arguments can be meaningfully customized (doing so will either throw an
-error or have no effect). However, when setting \code{geometry = TRUE}, the
-\code{tidycensus} functions do pass meaningful arguments onto the appropriate
-\code{tigris} function (namely, one of \code{\link[tigris:states]{tigris::states()}}, \code{\link[tigris:counties]{tigris::counties()}},
+\code{\link[tidycensus:get_decennial]{tidycensus::get_decennial()}}. These must all be named. Must not match any
+of the \code{tidycensus} formal arguments that \code{sociome} needs to set
+explicitly.
+
+This may be found to be helpful when setting \code{geometry = TRUE}, since the
+\code{tidycensus} functions pass \code{...} onto the appropriate \code{tigris} function
+(namely, one of \code{\link[tigris:states]{tigris::states()}}, \code{\link[tigris:counties]{tigris::counties()}},
 \code{\link[tigris:tracts]{tigris::tracts()}}, \code{\link[tigris:block_groups]{tigris::block_groups()}}, or \code{\link[tigris:zctas]{tigris::zctas()}},
 according to the the value of \code{geography}). This enables the user to
 somewhat customize the shapefile data obtained.}
 }
 \value{
-If \code{geometry = FALSE}, (the default) a \code{\link[tibble:tibble]{tibble}}.
-If \code{geometry = TRUE} is specified, an \code{\link[sf:sf]{sf}}.
+If \code{geometry = FALSE}, (the default) a \code{\link[tibble:tibble]{tibble}}. If
+\code{geometry = TRUE} is specified, an \code{\link[sf:sf]{sf}}.
 }
 \description{
 Returns the ADI and ADI-3 of user-specified areas.

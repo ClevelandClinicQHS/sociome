@@ -14,12 +14,10 @@ nmcounties2010 <-
     keep_indicators = FALSE,
     geometry = FALSE,
     year = 2010,
-    dataset = "decennial"
+    dataset = "decennial",
+    show_call = TRUE
   )
 
-# Not run because 2000 data is currently not easily accessible via Census API.
-# This will be restored if the Census API ever fixes it, or if I decide to 
-# perform a workaround.
 nmcounties2000 <-
   sociome::get_adi(
     geography = "county",

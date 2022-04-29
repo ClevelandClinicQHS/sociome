@@ -130,5 +130,4 @@ test_that("get_adi(), calculate_adi(), areas_in_radius() works", {
     ),
     nmcounties1990
   )
-  
 })

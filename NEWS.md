@@ -1,4 +1,8 @@
 
+# sociome development version
+- Fixed incorrect message that only 1 or 2 calls to `tidycensus` functions were going to occur when in fact many might occur.
+- Removed `shift_geo` as a formal argument from all functions. The user can still pass this via `...`.
+
 # sociome 2.1.0
 
 - 2000 decennial ADI has been added back because the US census has restored the data to its API. 1990 ADI is still unavailable.

@@ -1,7 +1,9 @@
 
 # sociome development version
+- Fixed `geography = "zcta"` behavior so that it will honor non-`NULL` values of `state`.
 - Fixed incorrect message that only 1 or 2 calls to `tidycensus` functions were going to occur when in fact many might occur.
 - Removed `shift_geo` as a formal argument from all functions. The user can still pass this via `...`.
+- Removed `censusapi` from `Imports`
 
 # sociome 2.1.0
 

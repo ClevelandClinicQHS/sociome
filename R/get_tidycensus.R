@@ -253,7 +253,7 @@ filter_ref_area <- function(d, what, pattern, geo_length = NULL) {
   
   # User gets a warning if any GEOID pattern did not match any of the GEOIDs in
   # the tidycensus results.
-  nomatch <- lapply(matches, length) == 0L
+  nomatch <- lengths(matches, use.names = FALSE) == 0L
   if (any(nomatch)) {
     warning(
       "\nThe following ", what, "s had no match in census data:\n",

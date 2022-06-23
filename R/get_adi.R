@@ -15,7 +15,7 @@
 #'   desired. Defaults to `NULL`. Can contain full state names, two-letter state
 #'   abbreviations, or a two-digit FIPS code/GEOID (must be a vector of strings,
 #'   so use quotation marks and leading zeros if necessary). Must be left as
-#'   `NULL` blank if using the `geoid` or `zcta` parameter.
+#'   `NULL` if using the `geoid` or `zcta` parameter.
 #' @param county A vector of character strings specifying the counties whose ADI
 #'   and ADI-3 data you're requesting. Defaults to `NULL`. If not `NULL`, the
 #'   `state` parameter must have a length of 1. County names and three-digit
@@ -262,8 +262,10 @@ get_adi <- function(geography,
                 .fn = "get_decennial",
                 geography = geography,
                 variables = 
-                  sociome::decennial_vars$variable[
-                    sociome::decennial_vars$year == 2010
+                  sociome::decennial_vars[
+                    sociome::decennial_vars$year == 2010,
+                    "variable",
+                    drop = TRUE
                   ],
                 table = NULL,
                 cache_table = cache_tables,
@@ -349,7 +351,11 @@ get_adi <- function(geography,
               .fn = "get_acs",
               geography = geography,
               variables = 
-                sociome::acs_vars$variable[sociome::acs_vars[[variables_set]]],
+                sociome::acs_vars[
+                  sociome::acs_vars[[variables_set]],
+                  "variable",
+                  drop = TRUE
+                ],
               table = NULL,
               cache_table = cache_tables,
               year = year,

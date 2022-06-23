@@ -10,7 +10,7 @@ ref_area <- function(geography,
                      eval_insistently) {
   switch(
     geography,
-    "zip code tabulation area" = ref_area_from_zcta(zcta),
+    "zip code tabulation area" = ref_area_from_zcta(zcta, state, county, geoid),
     switch(
       determine_input_arg(geoid = geoid, state = state, county = county),
       geoid =
@@ -36,14 +36,16 @@ ref_area <- function(geography,
 }
 
 
-ref_area_from_zcta <- function(zcta) {
-  if (!is.null(zcta)) {
+ref_area_from_zcta <- function(zcta, state, county, geoid) {
+  if (!is.null(county)) {
+    stop('county must be NULL when geography = "zcta"', call. = FALSE)
+  }
+  if (!is.null(geoid)) {
+    stop('geoid must be NULL when geography = "zcta"', call. = FALSE)
+  }
+  if (!is.null(zcta)) { 
     zcta <- trimws(zcta)
-    if (
-      length(zcta) == 0L ||
-      any(is.na(zcta)) ||
-      !all(stringr::str_detect(zcta, "^\\d{1,5}$"))
-    ) {
+    if (!length(zcta) || anyNA(zcta) || !all(grepl("^\\d{1,5}$", zcta))) {
       stop(
         "zcta argument must be a character vector of digits,",
         "\neach between 1 and 5 characters long",
@@ -54,11 +56,10 @@ ref_area_from_zcta <- function(zcta) {
   
   # Validates non-NULL input to zcta and creates reference area (ref_area). It
   # must contain one or more strings of 1-5 digits.
-  
   list(
     geoid        = NULL,
     geo_length   = NULL,
-    state_county = dplyr::tibble(state = list(NULL), county = list(NULL)),
+    state_county = dplyr::tibble(state = list(state), county = list(NULL)),
     zcta         = zcta
   )
   
@@ -108,7 +109,14 @@ ref_area_from_sc <- function(state,
         # per state. Also, state = NULL is a shortcut to "all 50 states plus
         # DC and Puerto Rico")
         dplyr::tibble(
-          state = if (is.null(state)) c(censusapi::fips, "72") else state
+          state =
+            if (is.null(state))
+              c("01", "02", "04", "05", "06", "08", "09", "10", "11", "12",
+                "13", "15", "16", "17", "18", "19", "20", "21", "22", "23",
+                "24", "25", "26", "27", "28", "29", "30", "31", "32", "33",
+                "34", "35", "36", "37", "38", "39", "40", "41", "42", "44",
+                "45", "46", "47", "48", "49", "50", "51", "53", "54", "55",
+                "56", "72") else state
         )
       } else {
         sc_from_preliminary_call(

@@ -29,7 +29,7 @@ whose ADIs and ADI-3s you'd like to obtain. Must be one of \code{c("state", "cou
 desired. Defaults to \code{NULL}. Can contain full state names, two-letter state
 abbreviations, or a two-digit FIPS code/GEOID (must be a vector of strings,
 so use quotation marks and leading zeros if necessary). Must be left as
-\code{NULL} blank if using the \code{geoid} or \code{zcta} parameter.}
+\code{NULL} if using the \code{geoid} or \code{zcta} parameter.}
 
 \item{county}{A vector of character strings specifying the counties whose ADI
 and ADI-3 data you're requesting. Defaults to \code{NULL}. If not \code{NULL}, the

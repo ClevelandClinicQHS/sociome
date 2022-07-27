@@ -13,8 +13,10 @@ synthetic_population <- function(geography,
                                  keep_indicators = FALSE,
                                  raw_data_only   = FALSE,
                                  cache_tables    = TRUE,
+                                 max_age         = 115,
+                                 rate            = 0.25,
                                  key             = NULL,
-                                 seed            = NA,
+                                 seed            = NULL,
                                  ...) {
   geography <- validate_geography(geography)
   year      <- validate_year(year)
@@ -88,22 +90,20 @@ synthetic_population <- function(geography,
   census_data_prepped <-
     dplyr::transmute(
       raw_census_data,
-      GEOID = .data$GEOID,
-      NAME = .data$NAME,
-      total = .data$total,
       dplyr::across(
-        .cols = 
-          c(dplyr::contains("males_"),
-            .data$hispanic_or_latino,
-            .data$not_hispanic_or_latino_white_alone,
-            .data$not_hispanic_or_latino_black_or_african_american_alone,
-            .data$not_hispanic_or_latino_asian_alone,
-            .data$not_hispanic_or_latino_american_indian_and_alaska_native_alone
-          ),
-        ~.x / total
+        c(.data$GEOID,
+          .data$NAME,
+          .data$total,
+          dplyr::contains("males_"),
+          .data$hispanic_or_latino,
+          .data$not_hispanic_or_latino_white_alone,
+          .data$not_hispanic_or_latino_black_or_african_american_alone,
+          .data$not_hispanic_or_latino_asian_alone,
+          .data$not_hispanic_or_latino_american_indian_and_alaska_native_alone
+        )
       ),
       not_hispanic_or_latino_some_other_race_alone_or_two_or_more_races =
-        1 -
+        total - 
         .data$hispanic_or_latino -
         .data$not_hispanic_or_latino_white_alone -
         .data$not_hispanic_or_latino_black_or_african_american_alone -
@@ -132,13 +132,69 @@ synthetic_population <- function(geography,
   
   out <- tidyr::unnest(out, cols = c(.data$age_sex, .data$race_ethnicity))
   
+  ages <- stringr::str_extract_all(out$age_sex, "\\d+", simplify = TRUE)
+  storage.mode(ages) <- "double"
+  
+  over <- stringr::str_detect(out$age_sex, "over")
+  
+  set.seed(seed)
+  
+  out <-
+    dplyr::transmute(
+      out,
+      .data$GEOID,
+      .data$NAME,
+      .data$age_sex,
+      sex = stringr::str_extract(.data$age_sex, "^(fe)?male"),
+      age_lo = 
+        ifelse(
+          test = stringr::str_detect(.data$age_sex, "under"),
+          yes = 0,
+          no = 
+            !!ages[, 1L] +
+            stringr::str_detect(
+              .data$age_sex,
+              "(more[^[:alnum:]]?than|over|>(?!=))[^[:alnum:]]?\\d"
+            )
+        ),
+      age_hi =
+        dplyr::coalesce(
+          !!ages[, 2L],
+          ifelse(
+            test = !!over,
+            yes = !!max_age,
+            no = 
+              !!ages[, 1L] -
+              stringr::str_detect(
+                .data$age_sex,
+                "(less[^[:alnum:]]?than|under|<(?!=))[^[:alnum:]]?\\d"
+              )
+          )
+        ),
+      age =
+        ifelse(
+          !!over,
+          pmin(.data$age_lo + rexp(n = dplyr::n(), rate = !!rate), !!max_age),
+          runif(dplyr::n(), min = .data$age_lo, max = .data$age_hi + 1)
+        ),
+      .data$race_ethnicity
+    )
+  
   out
 }
 
 
 synthetic_population_column <- function(colname, total, ...) {
   dots <- c(...)
+  
+  if (is.na(total) || total == 0) {
+    return(dplyr::tibble(!!colname := character()))
+  }
+  
+  dots[is.na(dots)] <- 0
+  
   dplyr::tibble(
     !!colname := sample(names(dots), size = total, replace = TRUE, prob = dots)
   )
 }
+

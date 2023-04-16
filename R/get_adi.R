@@ -15,7 +15,7 @@
 #'   desired. Defaults to `NULL`. Can contain full state names, two-letter state
 #'   abbreviations, or a two-digit FIPS code/GEOID (must be a vector of strings,
 #'   so use quotation marks and leading zeros if necessary). Must be left as
-#'   `NULL` blank if using the `geoid` or `zcta` parameter.
+#'   `NULL` if using the `geoid` or `zcta` parameter.
 #' @param county A vector of character strings specifying the counties whose ADI
 #'   and ADI-3 data you're requesting. Defaults to `NULL`. If not `NULL`, the
 #'   `state` parameter must have a length of 1. County names and three-digit
@@ -53,12 +53,8 @@
 #'   be included in the result, making the result an [`sf`][sf::sf] object
 #'   instead of a plain [`tibble`][tibble::tibble]. Defaults to `FALSE`.
 #'
-#'   The shapefile data that is returned is somewhat customizable: see the
-#'   `shift_geo` and `...` arguments.
-#' @param shift_geo Logical value. See the `shift_geo` argument of
-#'   [tidycensus::get_acs()] or [tidycensus::get_decennial()] for details.
-#'
-#'   See `...` below for other ways to customize the shapefile data returned.
+#'   The shapefile data that is returned is somewhat customizable by passing
+#'   certain arguments along to the `tidycensus` functions via `...`.
 #' @param keep_indicators Logical value indicating whether or not the resulting
 #'   [`tibble`][tibble::tibble] or [`sf`][sf::sf] object will contain the
 #'   socioeconomic measures used to calculate the ADI and ADI-3 values. Defaults
@@ -78,11 +74,13 @@
 #'   `FALSE`.
 #' @param seed Passed to [calculate_adi()].
 #' @param ... Additional arguments to be passed onto [tidycensus::get_acs()] or
-#'   [tidycensus::get_decennial()]. Currently, none of these functions' formal
-#'   arguments can be meaningfully customized (doing so will either throw an
-#'   error or have no effect). However, when setting `geometry = TRUE`, the
-#'   `tidycensus` functions do pass meaningful arguments onto the appropriate
-#'   `tigris` function (namely, one of [tigris::states()], [tigris::counties()],
+#'   [tidycensus::get_decennial()]. These must all be named. Must not match any
+#'   of the `tidycensus` formal arguments that `sociome` needs to set
+#'   explicitly.
+#'
+#'   This may be found to be helpful when setting `geometry = TRUE`, since the
+#'   `tidycensus` functions pass `...` onto the appropriate `tigris` function
+#'   (namely, one of [tigris::states()], [tigris::counties()],
 #'   [tigris::tracts()], [tigris::block_groups()], or [tigris::zctas()],
 #'   according to the the value of `geography`). This enables the user to
 #'   somewhat customize the shapefile data obtained.
@@ -140,32 +138,6 @@
 #'   for those years. When requested, this function will use median household
 #'   income in its place, with a `warning()`. See
 #'   <https://www.census.gov/programs-surveys/acs/technical-documentation/user-notes/2016-01.html>.
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
 #'
 #' @section API-related error handling: Depending on user input, this function
 #'   may call its underlying functions ([tidycensus::get_acs()] or
@@ -245,8 +217,9 @@
 #' # Obtain factor loadings:
 #' attr(queens, "loadings")
 #' }
-#' @return If `geometry = FALSE`, (the default) a [`tibble`][tibble::tibble].
-#'   If `geometry = TRUE` is specified, an [`sf`][sf::sf].
+#' @return If `geometry = FALSE`, (the default) a [`tibble`][tibble::tibble]. If
+#'   `geometry = TRUE` is specified, an [`sf`][sf::sf].
+#' @importFrom rlang .data
 #' @export
 get_adi <- function(geography,
                     state           = NULL,
@@ -256,7 +229,6 @@ get_adi <- function(geography,
                     year,
                     dataset         = c("acs5", "acs3", "acs1", "decennial"),
                     geometry        = FALSE,
-                    shift_geo       = FALSE,
                     keep_indicators = FALSE,
                     raw_data_only   = FALSE,
                     cache_tables    = TRUE,
@@ -269,374 +241,166 @@ get_adi <- function(geography,
   dataset   <- validate_dataset(dataset, year, geography)
   
   # Any given call to get_adi() necessitates one or more calls to
-  # tidycensus::get_acs() and/or tidycensus::get_decennial(). This function
-  # creates the skeletons of these calls, to be completed later according to the
-  # reference area.
-  tidycensus_calls <-
-    make_tidycensus_calls(
+  # tidycensus::get_acs() and/or tidycensus::get_decennial(). The following
+  # creates the skeletons of these calls, irrespective of location (i.e.,
+  # state/county/geoid/zcta)
+  partial_tidycensus_calls <-
+    switch(
       dataset,
-      year, 
-      geography,
-      geometry = geometry,
-      shift_geo = shift_geo,
-      cache_table = cache_tables,
-      key = key,
-      ...
+      decennial = 
+        
+        # The 2010 decennial census did not gather the same detailed data that
+        # the 2000 and 1990 censuses did (i.e., the 2010 census has no SF3), so
+        # its gaps are filled with the 2010 5-year ACS estimates (in reality,
+        # only a few data points are available from the 2010 decennial census
+        # and most of the data is taken from the ACS)
+        if (year == 2010) {
+          
+          list(
+            get_decennial =
+              tidycensus_call(
+                .fn = "get_decennial",
+                geography = geography,
+                variables = 
+                  sociome::decennial_vars[
+                    sociome::decennial_vars$year == 2010,
+                    "variable",
+                    drop = TRUE
+                  ],
+                table = NULL,
+                cache_table = cache_tables,
+                year = 2010,
+                sumfile = "sf1",
+                geometry = geometry,
+                output = "tidy",
+                keep_geo_vars = FALSE,
+                summary_var = NULL,
+                key = key,
+                ...
+              ),
+            get_acs =
+              tidycensus_call(
+                .fn = "get_acs",
+                geography = geography,
+                variables =
+                  sociome::acs_vars$variable[sociome::acs_vars$dec2010],
+                table = NULL,
+                cache_table = cache_tables,
+                year = 2010,
+                output = "tidy",
+                geomety = geometry,
+                keep_geo_vars = FALSE,
+                summary_var = NULL,
+                key = key,
+                survey = "acs5",
+                ...
+              )
+          )
+          
+        } else {
+          
+          # Everything prior to pmap() creates 2 by 2 tibble with column
+          # sumfile = c("sf1", "sf3") and list column "variables" that
+          # contains the corresponding SF1 and SF3 variables.
+          sociome::decennial_vars[sociome::decennial_vars$year == year, ] %>% 
+            eval(expr = quote(split(variable, f = sumfile))) %>% 
+            tibble::enframe(name = "sumfile", value = "variables") %>% 
+            purrr::pmap(
+              .f = tidycensus_call,
+              .fn = "get_decennial",
+              geography = geography,
+              table = NULL, 
+              cache_table = cache_tables,
+              year = year,
+              geometry = geometry,
+              output = "tidy",
+              keep_geo_vars = FALSE,
+              summary_var = NULL,
+              key = key,
+              ...
+            )
+        },
+      
+      # i.e., if ACS data requested instead of decennial
+      {
+        
+        variables_set <- 
+          if (year >= 2011) {
+            if (any(2015:2016 == year) && geography == "block group") {
+              "set2"
+            } else if (year == 2011 && dataset == "acs5") {
+              "set3"
+            } else {
+              "set1"
+            }
+          } else if (year == 2010) {
+            if (dataset == "acs5") {
+              "set5"
+            } else {
+              "set4"
+            }
+          } else if (dataset == "acs1" && year >= 2008) {
+            "set6"
+          } else {
+            "set7"
+          }
+        
+        list(
+          get_acs =
+            tidycensus_call(
+              .fn = "get_acs",
+              geography = geography,
+              variables = 
+                sociome::acs_vars[
+                  sociome::acs_vars[[variables_set]],
+                  "variable",
+                  drop = TRUE
+                ],
+              table = NULL,
+              cache_table = cache_tables,
+              year = year,
+              output = "tidy",
+              geomety = geometry,
+              keep_geo_vars = FALSE,
+              summary_var = NULL,
+              key = key,
+              survey = dataset,
+              ...
+            )
+        )
+      }
     )
   
-  # This analyzes the inputs so that the proper reference area is used in the
-  # calculation of ADI and ADI-3.
-  ref_area <-
-    get_ref_area(
-      geoid, 
-      state, 
-      county, 
-      zcta, 
-      geography, 
-      year,
-      dataset,
-      tidycensus_calls
-    )
-  
-  if (geometry) {
-    # Saves old tigris_use_cache value and puts it back when function exits
-    old <- options(tigris_use_cache = TRUE)
-    on.exit(options(old), add = TRUE)
-  }
-  
-  # Generally, the smaller the level of geography requested, the smaller the
-  # geographical scope that tidycensus::get_acs() and
-  # tidycensus::get_decennial() allow. Therefore, the tidycensus function(s) may
-  # have to be called multiple times, breaking up the requested geographical
-  # area by state and/or county. This function breaks these calls up as needed
-  # and evaluates them.
-  census_data <-
+  raw_data <-
     get_tidycensus(
-      tidycensus_calls = tidycensus_calls,
-      state_county = ref_area$state_county,
       geography = geography,
+      state = state,
+      county = county,
+      geoid = geoid,
+      zcta = zcta,
       year = year,
-      dataset = dataset
+      dataset = dataset,
+      partial_tidycensus_calls = partial_tidycensus_calls,
+      geometry = geometry
     )
-  
-  # Since the call (or calls) to tidycensus functions usually gathers data on
-  # more places than what the user specified, this pares the tidycensus-produced
-  # data down to only include the user-specified reference area.
-  if (!is.null(ref_area$geoid)) {
-    census_data <-
-      filter_ref_area(
-        data       = census_data,
-        what       = "GEOID",
-        pattern    = ref_area$geoid,
-        geo_length = ref_area$geo_length
-      )
-  } else if (!is.null(ref_area$zcta)) {
-    census_data <-
-      filter_ref_area(
-        data       = census_data,
-        what       = "ZCTA",
-        pattern    = ref_area$zcta
-      )
-  }
   
   if (raw_data_only) {
-    census_data
+    raw_data
   } else {
-    calculate_adi(census_data, keep_indicators = keep_indicators, seed = seed)
+    calculate_adi(raw_data, keep_indicators = keep_indicators, seed = seed)
   }
 }
 
 
-
-#' @importFrom rlang .data
-make_tidycensus_calls <- function(dataset, year, geography, ...) {
-  
-  if (dataset == "decennial") {
-    
-    # There is no survey argument in tidycensus::get_decennial()
-    survey <- list(rlang::zap())
-    
-    # The 2010 decennial census did not gather the same detailed data that the
-    # 2000 and 1990 censuses did (i.e., the 2010 census has no SF3), so its
-    # gaps are filled with the 2010 5-year ACS estimates (in reality, the
-    # majority of the data come from the ACS rather than the 2010 Census).
-    if (year == 2010) {
-      
-      # To be fed to the .call argument of rlang::call_modify()
-      .call <- alist(tidycensus::get_decennial(), tidycensus::get_acs())
-      variables <- 
-        list(
-          dplyr::filter(sociome::decennial_vars, .data$year == 2010)$variable,
-          dplyr::filter(sociome::acs_vars, .data$dec2010)$variable
-        )
-      
-      # rlang::zap() instead of "sf3" because the 2010 census had no SF3.
-      sumfile <- list("sf1", rlang::zap())
-      
-    } else {
-      
-      # To be fed to the .call argument of rlang::call_modify()
-      .call <- alist(tidycensus::get_decennial())
-      variables <- 
-        sociome::decennial_vars %>%
-        dplyr::filter(.data$year == !!year) %>% 
-        eval(quote(split(variable, sumfile)), .)
-      sumfile <- c("sf1", "sf3")
-      
-    }
-    
-    # i.e., if ACS data requested instead of decennial
-  } else {
-    
-    # To be fed to the .call argument of rlang::call_modify()
-    .call <- alist(tidycensus::get_acs())
-    
-    # Choosing the correct ACS variables is delegated out to its own function
-    # since it's rather convoluted.
-    variables <- list(choose_acs_variables(year, dataset, geography))
-    
-    survey <- dataset
-    
-    # There is no sumfile argument in tidycensus::get_acs()
-    sumfile <- list(rlang::zap())
-    
-  }
-  
-  # To be fed to the MoreArgs argument in mapply()
-  MoreArgs <-
-    list(
-      geography = geography,
-      table = NULL,
-      year = year,
-      output = "tidy",
-      keep_geo_vars = FALSE,
-      summary_var = NULL,
-      endyear = rlang::zap(),
-      .homonyms = "first",
-      .standardise = NULL,
-      ...
-    )
-  
-  if (!rlang::is_named(MoreArgs)) {
-    stop("\nAdditional arguments passed to ... must all be named")
-  }
-  
-  # mapply() was chosen because it conveniently will create as many list
-  # elements as the longest element in ... (viz. in this case, the longest
-  # element among .call, variables, sumfile, and survey), recycling all shorter
-  # elements until they meet the length of the longest.
-  mapply(
-    FUN = rlang::call_modify,
-    .call = .call,
-    variables = variables,
-    sumfile = sumfile,
-    survey = survey,
-    MoreArgs = MoreArgs,
-    SIMPLIFY = FALSE,
-    USE.NAMES = FALSE
-  )
-}
+# 
+# exec_tidycensus <- function(state = NULL, county = NULL, ...) {
+#   if (!is.null(state)) {
+#     message("\nState: ", paste(state, collapse = ", "))
+#     if (!is.null(county)) {
+#       message("\nCounty: ", paste(county, collapse = ", "))
+#     }
+#   }
+#   exec_insistently(..., state = state, county = county)
+# }
 
 
-
-#' @importFrom rlang .data
-get_tidycensus <- function(tidycensus_calls,
-                           state_county, 
-                           geography, 
-                           year, 
-                           dataset) {
-
-  # There is special handling of this combination of arguments because it
-  # requires tidycensus::get_decennial() to be called once for every state in
-  # the reference area and tidycensus::get_acs() to be called once for every
-  # county in the reference area. All other combinations of
-  # geography/year/dataset either only call one of the two tidycensus functions
-  # or require the same number of calls from each of them.
-  if (geography == "tract" && year == 2010 && dataset == "decennial") {
-    
-    # state_county contains one row for each county already, so a call to
-    # tidycensus::get_acs() (whose skeleton is tidycensus_calls[[2L]]) will be
-    # created for every county in the reference area.
-    acs_calls <-
-      state_county %>%
-      purrr::pmap(rlang::call_modify, .call = tidycensus_calls[[2L]])
-    
-    # The unique states within state_county are first extracted via
-    # dplyr::distinct(), and then a call to tidycensus::get_decennial() (whose
-    # skeleton is tidycensus_calls[[1L]]) will be created for each state in the
-    # reference area.
-    decennial_calls <-
-      state_county %>% 
-      dplyr::distinct(.data$state) %>% 
-      purrr::pmap(rlang::call_modify, .call = tidycensus_calls[[1L]])
-      
-    
-    message(
-      "\n",
-      length(acs_calls) + length(decennial_calls),
-      " call(s) to tidycensus beginning."
-    )
-    
-    # dplyr::select_if() pulls all non-geometry data columns to the left because
-    # the geometry column is not an atomic vector (it's a list). This allows us
-    # to select the inconsistently named Census variable name and Census
-    # variable value columns by position.
-    
-    acs_data <- 
-      acs_calls %>% 
-      lapply(eval) %>% 
-      do.call(rbind, .) %>% 
-      dplyr::select_if(is.atomic) %>% 
-      dplyr::select("GEOID", "NAME", names = 3L, values = 4L)
-    
-    data <-
-      decennial_calls %>% 
-      lapply(eval) %>% 
-      do.call(rbind, .) %>% 
-      dplyr::select_if(is.atomic) %>% 
-      dplyr::select("GEOID", "NAME", names = 3L, values = 4L) %>% 
-      dplyr::semi_join(as.data.frame(acs_data), by = "GEOID") %>% 
-      rbind(acs_data)
-    
-    # Since get_decennial() calls are only broken up by state (see above), lots
-    # of extra counties' data may be present. Since get_acs() is broken up by
-    # county, it does not have this problem. Therefore, the results of the
-    # former are filtered to only include tracts present in the results of the
-    # latter.
-    
-  } else {
-    message("\n", length(tidycensus_calls), " call(s) to tidycensus beginning.")
-    
-    # When we don't have to worry about the headache of different numbers of
-    # calls needed for get_decennial() and get_acs(), we can simply use
-    # tidyr::expand_grid() to create a separate call for each combination of the
-    # elements of state_county and the elements of tidycensus_calls.
-    data <-
-      state_county %>% 
-      tidyr::expand_grid(.call = tidycensus_calls) %>% 
-      purrr::pmap(eval_tidycensus_call) %>% 
-      do.call(rbind, .)
-    
-    # dplyr::select_if() pulls all non-geometry data columns to the left because
-    # the geometry column is not an atomic vector (it's a list). This allows us
-    # to select the inconsistently named Census variable name and Census
-    # variable value columns by position.
-    
-  }
-    
-  # Since the contents of "data" may be the results of multiple different calls
-  # to tidycensus function(s), sometimes the same geographic area (i.e., same
-  # GEOID) will have inconsistent NAME or geometry values. The code below
-  # essentially standardizes each GEOID's NAME and geometry, using the first
-  # NAME and geometry value for each GEOID (found by match()).
-  geoid_match <- data$GEOID %>% match(., .)
-  data$NAME <- data$NAME[geoid_match]
-  if (inherits(data, "sf")) {
-    data$geometry <- data$geometry[geoid_match]
-  }
-  
-  # tidyr::pivot_wider() didn't initially support sf-tibbles so we're using
-  # tidyr::spread()
-  
-  # tidyr::pivot_wider(result, names_from = "names", values_from = "values")
-  
-  tidyr::spread(data, key = "names", value = "values")
-}
-
-
-
-
-eval_tidycensus_call <- function(...) {
-  rlang::call_modify(...) %>% 
-    eval() %>% 
-    dplyr::select_if(is.atomic) %>% 
-    dplyr::select("GEOID", "NAME", names = 3L, values = 4L)
-}
-
-
-
-choose_acs_variables <- function(year, dataset, geography) {
-
-  # See ?sociome::acs_vars for more info.
-    
-  set <-
-    if (year >= 2011) {
-      if (any(2015:2016 == year) && geography == "block group") {
-        "set2"
-      } else if (year == 2011 && dataset == "acs5") {
-        "set3"
-      } else {
-        "set1"
-      }
-    } else if (year == 2010) {
-      if (dataset == "acs5") {
-        "set5"
-      } else {
-        "set4"
-      }
-    } else if (dataset == "acs1" && year >= 2008) {
-      "set6"
-    } else {
-      "set7"
-    }
-  
-  sociome::acs_vars$variable[sociome::acs_vars[[set]]]
-}
-
-
-
-exec_tidycensus <- function(state = NULL, county = NULL, ...) {
-  if (!is.null(state)) {
-    message("\nState: ", paste(state, collapse = ", "))
-    if (!is.null(county)) {
-      message("\nCounty: ", paste(county, collapse = ", "))
-    }
-  }
-  exec_insistently(..., state = state, county = county)
-}
-
-
-
-exec_insistently <- 
-  purrr::insistently(rlang::exec, rate = purrr::rate_delay(), quiet = FALSE)
-
-
-
-filter_ref_area <- function(data, what, pattern, geo_length = NULL) {
-  
-  # Pattern is the list of GEOIDs in the ref_area object (in the function
-  # environment of get_adi()). It is called "pattern" in the sense of regular
-  # expressions: each element is ultimately turned into a regular expression.
-  
-  # First, each element in "pattern" is truncated as needed to the number of
-  # characters invoked by the "geography" argument in get_adi() (e.g., 11
-  # characters if geography = "tract"). This is necessary because users are
-  # permitted (with a warning) to request ADI and ADI-3 at a level of geography
-  # larger than any GEOID entered into the "geoid" argument (e.g.,
-  # get_adi(geography = "county", geoid = c("31415926535", "271828182845905")))
-  pattern_sub <-
-    if (is.null(geo_length)) {
-      pattern
-    } else {
-      stringr::str_sub(pattern, 1L, geo_length)
-    }
-  
-  # Second, each GEOID pattern is prepended with "^" and matched to each GEOID
-  # in "data"
-  matches <-
-    lapply(paste0("^", pattern_sub), stringr::str_which, string = data$GEOID)
-  
-  # User gets a warning if any GEOID pattern did not match any of the GEOIDs in
-  # the tidycensus results.
-  nomatch <- lapply(matches, length) == 0L
-  if (any(nomatch)) {
-    warning(
-      "\nThe following ", what, "s had no match in census data:\n",
-      paste(pattern[nomatch], collapse = ",\n")
-    )
-  }
-  
-  matches <- unique(unlist(matches, use.names = FALSE))
-  # Returns any result in "data" that matched any GEOID pattern.
-  data[matches, ]
-}

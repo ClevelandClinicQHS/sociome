@@ -1,3 +1,5 @@
+library(tidyverse)
+
 decennial_vars <-
   tibble::tribble(
     ~variable, ~sumfile, ~year, ~description,
@@ -322,4 +324,85 @@ acs_vars <-
     "C24010_040",	"Civilian females age 16+ in white-collar occupations",	    FALSE, FALSE,	FALSE, FALSE,	FALSE, TRUE,  TRUE,  FALSE
   )
 
-usethis::use_data(acs_vars, decennial_vars, overwrite = TRUE, compress = "xz")
+
+acs_age_sex_race_ethnicity_vars <-
+  bind_rows(
+    tidycensus::load_variables(year = 2020, dataset = "acs5", cache = TRUE) %>% 
+      filter(str_detect(name, "^B01001_")) %>% 
+      transmute(
+        variable = name,
+        description = str_replace(label, "^Estimate!!Total:!!", ""),
+        description = str_replace(description, "^(\\w+ale):", "\\1s"),
+        description = str_replace(description, " years", ""),
+        description = str_replace_all(description, "!!| ", "_"),
+        description = c("total", description[-1]),
+        description = tolower(description)
+      ),
+    tidycensus::load_variables(year = 2020, dataset = "acs5", cache = TRUE) %>% 
+      filter(
+        str_detect(name, "^B03002_"),
+        str_detect(label, ":!!Two or more races:!!", negate = TRUE)
+      ) %>%
+      slice(-1) %>% 
+      transmute(
+        variable = name,
+        description = str_replace(label, "^Estimate!!Total:!!", ""),
+        description = str_replace_all(description, ":", ""),
+        description = str_replace_all(description, "!!| ", "_"),
+        description = tolower(description)
+      )
+  )
+
+decennial_age_sex_race_ethnicity_vars <-
+  bind_rows(
+    tidycensus::load_variables(year = 2000, dataset = "sf1", cache = TRUE) %>% 
+      filter(str_detect(name, "^P012\\d{3}$")) %>% 
+      transmute(
+        year = 2000L,
+        variable = name,
+        description = str_replace(label, "^Total!!", ""),
+        description = str_replace(description, "^(\\w+ale)", "\\1s"),
+        description = str_replace(description, " years", ""),
+        description = str_replace_all(description, "!!| ", "_"),
+        description = tolower(description)
+      ),
+    tidycensus::load_variables(year = 2000, dataset = "sf1", cache = TRUE) %>% 
+      filter(str_detect(name, "^P008\\d{3}$")) %>% 
+      slice(-1) %>% 
+      transmute(
+        year = 2000L,
+        variable = name,
+        description = str_replace(label, "^Total!!", ""),
+        description = str_replace(description, " years", ""),
+        description = str_replace_all(description, "!!| ", "_"),
+        description = tolower(description)
+      ),
+    tidycensus::load_variables(year = 2010, dataset = "sf1", cache = TRUE) %>% 
+      filter(str_detect(name, "^P012\\d{3}$")) %>% 
+      transmute(
+        year = 2010L,
+        variable = name,
+        description = str_replace(label, "^Total!!", ""),
+        description = str_replace(description, "^(\\w+ale)", "\\1s"),
+        description = str_replace(description, " years", ""),
+        description = str_replace_all(description, "!!| ", "_"),
+        description = tolower(description)
+      ),
+    tidycensus::load_variables(year = 2010, dataset = "sf1", cache = TRUE) %>% 
+      filter(str_detect(name, "^P005\\d{3}$")) %>% 
+      slice(-1) %>% 
+      transmute(
+        year = 2010L,
+        variable = name,
+        description = str_replace(label, "^Total!!", ""),
+        description = str_replace(description, " years", ""),
+        description = str_replace_all(description, "!!| ", "_"),
+        description = tolower(description)
+      )
+  )
+
+usethis::use_data(acs_vars,
+                  decennial_vars,
+                  acs_age_sex_race_ethnicity_vars,
+                  decennial_age_sex_race_ethnicity_vars,
+                  overwrite = TRUE, compress = "xz")

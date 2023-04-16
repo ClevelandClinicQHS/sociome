@@ -2,7 +2,7 @@ Type: Package
 Package: sociome
 Title: Operationalizing Social Determinants of Health Data for
     Researchers
-Version: 2.1.0
+Version: 2.1.0.9992
 Authors@R: 
     c(person(given = "Nik",
              family = "Krieger",
@@ -32,7 +32,6 @@ BugReports: https://github.com/NikKrieger/sociome/issues
 Depends:
     R (>= 3.3.0)
 Imports:
-    censusapi,
     dplyr (>= 1.0.1),
     magrittr (>= 1.5),
     mice (>= 3.10.0.1),

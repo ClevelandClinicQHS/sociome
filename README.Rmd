@@ -27,7 +27,7 @@ We have implemented a variation of Singh's area deprivation index (ADI), which a
 
 The result is a more flexible framework for representing neighborhood deprivation. The `get_adi()` function is the primary tool for generating these indices. It allows the user to customize the desired **reference population** down to the block group level when calculating ADI. This enables the user to compare only the specific locations of interest without having to include other areas in the calculation of ADI. See the section called "Choosing a **reference population**" below for more detail.
 
-The three comprising factors of the ADI, the ADI-3 (i.e., the "Berg indices"), have been incorporated and are now automatically included in the output of both `get_adi()` and `calculate_adi()`.
+The three comprising factors of the ADI, the ADI-3 ([Berg et al., 2021](https://doi.org/10.1007/s10742-021-00248-6)), have been incorporated and are now automatically included in the output of both `get_adi()` and `calculate_adi()`, along with the ADI ([Singh, 2003](https://doi.org/10.2105/AJPH.93.7.1137)).
 
 The output of `get_adi()` can be piped directly into `ggplot2::geom_sf()` for mapping.
 

@@ -122,7 +122,7 @@ calculate_adi <- function(data_raw, keep_indicators = FALSE, seed = NA) {
               'column named "', total_hh_colname, '").'
             ),
             
-            .subclass = "imputation_unsuccessful",
+            class = "imputation_unsuccessful",
             
             adi_indicators =
               # 15 ADI indicators data, accessible via

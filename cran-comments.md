@@ -1,8 +1,8 @@
 
 ## Resubmission
 
-* Added new functions `areas_in_radius()`, `closest_n_areas()`, `closest_population()`, `lon_lat_from_area()`, and `append_dissimilarities()`
-* Added new Suggests
+* Added new functions `areas_in_radius()`, `closest_n_areas()`, `closest_population()`, `append_dissimilarities()`, and `synthetic_population()`
+* Updated minimum required version of R to 3.6.0 since we now use `asplit()`
 * Updated README and code and documentation
 
 

@@ -204,7 +204,7 @@ user's internet connection and the amount of data requested.
 
 For advanced users, if changing the \code{dataset} argument, be sure to know the
 advantages and limitations of the 1-year and 3-year ACS estimates. See
-\url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html.} for
+\url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html} for
 details.
 }
 

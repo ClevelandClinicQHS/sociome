@@ -155,7 +155,7 @@
 #'
 #'   For advanced users, if changing the `dataset` argument, be sure to know the
 #'   advantages and limitations of the 1-year and 3-year ACS estimates. See
-#'   <https://www.census.gov/programs-surveys/acs/guidance/estimates.html.> for
+#'   <https://www.census.gov/programs-surveys/acs/guidance/estimates.html> for
 #'   details.
 #'
 #' @examples

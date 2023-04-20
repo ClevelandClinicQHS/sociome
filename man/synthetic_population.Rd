@@ -139,6 +139,10 @@ exponential distribution that is used.
 }
 
 \examples{
+\dontrun{
+# Wrapped in \dontrun{} because all these examples take >5 seconds
+# and require a Census API key.
+
 # Synthetic population for Utah, using the 2019 ACS 5-year estimates:
 synthetic_population(geography = "state", state = "UT", year = 2019)
 
@@ -166,4 +170,5 @@ synthetic_population(
   year = 2000,
   dataset = "decennial"
 )
+}
 }

@@ -19,4 +19,7 @@
 ## R CMD check results
 There were no ERRORs or WARNINGs.
 
-There continues to be a persistent NOTE on some platforms that the URL https://www.census.gov/programs-surveys/acs/guidance/estimates.html in get_adi.Rd may be invalid, but it is not.
+There was one NOTE from the check on Windows Server 2022, R-devel, 64 bit on Rhub:
+
+checking for detritus in the temp directory … NOTE ‘lastMiKTeXException’
+Apparently, this is a known issue with Rhub and does not suggest a problem with the package.

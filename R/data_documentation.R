@@ -47,3 +47,46 @@
 #' @seealso \code{\link{acs_vars}}
 #' @noMd
 "decennial_vars"
+
+
+
+#' ACS variables for age, sex, race, and ethnicity
+#'
+#' A two-column data set of the American Community Survey variable names and
+#' their descriptions. Contains counts of various subdivisions of the population
+#' based on age, sex, race, and ethnicity.
+#'
+#' These variable names have been consistent throughout the existence of the ACS
+#' from its beginning through 2020.
+#' 
+#' This data set is used to support \code{\link{synthetic_population}()}.
+#'
+#' @format A \code{\link[tibble]{tibble}} with 65 rows and 2 variables:
+#'   \describe{ \item{variable}{ACS variable name}
+#'   \item{description}{A description of who is present in the count}}
+#'
+#' @seealso \code{\link{decennial_age_sex_race_ethnicity_vars}}
+#' @noMd
+"acs_age_sex_race_ethnicity_vars"
+
+
+
+
+#' Decennial Census variables for age, sex, race, and ethnicity
+#'
+#' A three-column data set of the Decennial Census variable names, their
+#' descriptions, and their decennial census year. Contains counts of various
+#' subdivisions of the population based on age, sex, race, and ethnicity.
+#'
+#' Currently, the 2000 and 2010 Decennial Census variables are available.
+#'
+#' This data set is used to support \code{\link{synthetic_population}()}.
+#'
+#' @format A \code{\link[tibble]{tibble}} with 130 rows and 3 variables:
+#'   \describe{ \item{year}{The year of the decennial census with which the
+#'   variable is associated.} \item{variable}{ACS variable name}
+#'   \item{description}{A description of who is present in the count}}
+#'
+#' @seealso \code{\link{acs_age_sex_race_ethnicity_vars}}
+#' @noMd
+"decennial_age_sex_race_ethnicity_vars"

@@ -57,7 +57,7 @@
 #'   population of the areas returned. See **Details**.
 #' @param measure_from Currently can only be `"center of population"`, the
 #'   default.
-#' @param year Must be either 2000 or the default of 2010.
+#' @param year Must be 2020, 2010, or 2000. Defaults to 2010.
 #' @param distance_fun Passed to the `fun` argument of [geosphere::distm()].
 #'   Defaults to [`geosphere::distVincentyEllipsoid`], which results in the most
 #'   accurate measurement but is also the slowest.
@@ -72,6 +72,7 @@
 #' areas_in_radius(
 #'   geography = "state",
 #'   center = lon_lat_from_area(state = "NY", county = "New York"),
+#'   year = 2010,
 #'   radius = 300,
 #'   units = "km"
 #' )
@@ -128,7 +129,7 @@ areas_in_radius <- function(geography = c("state", "county", "tract",
   }
   
   geography <- match.arg(geography)
-  year <- validate_year(year, c(2010, 2000))
+  year <- validate_year(year, c(2020, 2010, 2000))
   
   batch_size <- validate_single_positive_integer(batch_size, "batch_size")
   
@@ -172,7 +173,7 @@ closest_n_areas <- function(geography = c("state", "county", "tract",
   }
   
   geography <- match.arg(geography)
-  year <- validate_year(year, c(2010, 2000))
+  year <- validate_year(year, c(2020, 2010, 2000))
   n <- validate_single_positive_integer(n, "n")
   batch_size <- validate_single_positive_integer(batch_size, "batch_size")
   
@@ -216,7 +217,7 @@ closest_population <- function(geography = c("state", "county", "tract",
   }
   
   geography <- match.arg(geography)
-  year <- validate_year(year, c(2010, 2000))
+  year <- validate_year(year, c(2020, 2010, 2000))
   population <- validate_single_positive_integer(population, "population")
   batch_size <- validate_single_positive_integer(batch_size, "batch_size")
   
@@ -427,6 +428,10 @@ centers_tbl_from_geography <- function(geography, year) {
   tbl <-
     switch(
       paste0(geography, year),
+      state2020 = USpopcenters::state2020,
+      county2020 = USpopcenters::county2020,
+      tract2020 = USpopcenters::tract2020,
+      "block group2020" = USpopcenters::block_group2020,
       state2010 = USpopcenters::state2010,
       county2010 = USpopcenters::county2010,
       tract2010 = USpopcenters::tract2010,

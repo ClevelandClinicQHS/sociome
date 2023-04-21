@@ -72,7 +72,7 @@ For \code{areas_in_radius()}, this also used for the units of \code{radius}.}
 \item{measure_from}{Currently can only be \code{"center of population"}, the
 default.}
 
-\item{year}{Must be either 2000 or the default of 2010.}
+\item{year}{Must be 2020, 2010, or 2000. Defaults to 2010.}
 
 \item{distance_fun}{Passed to the \code{fun} argument of \code{\link[geosphere:distm]{geosphere::distm()}}.
 Defaults to \code{\link[geosphere:distVincentyEllipsoid]{geosphere::distVincentyEllipsoid}}, which results in the most
@@ -132,6 +132,7 @@ Only states, counties, tracts, and block groups are currently supported.
 areas_in_radius(
   geography = "state",
   center = lon_lat_from_area(state = "NY", county = "New York"),
+  year = 2010,
   radius = 300,
   units = "km"
 )

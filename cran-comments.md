@@ -8,11 +8,10 @@
 
 ## Test environments:
 
-* CentOS Linux 8, R 4.0.3
-* CentOS Linux 7, R 4.0.0
-* Fedora Linux, R-devel
-* Ubuntu Linux 20.04.1 LTS, R 4.1.1
-* Windows Server 2008 R2 SP1, R-devel
+* Red Hat Enterprise Linux 8.7 (Ootpa), R 4.2.3
+* Fedora Linux, R-devel, clang, gfortran
+* Ubuntu Linux 20.04.1 LTS, R-release, GCC
+* Windows Server 2022, R-devel, 64 bit
 * winbuilder devel
 
 

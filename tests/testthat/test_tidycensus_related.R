@@ -5,7 +5,9 @@ test_that("get_adi(), calculate_adi(), areas_in_radius() works", {
   expect_equivalent(
     areas_in_radius(
       geography = "state",
-      center = lon_lat_from_area(state = "NY", county = "New York"),
+      center =
+        lon_lat_from_area(state = "NY", county = "New York", year = 2010),
+      year = 2010,
       radius = 300,
       units = "km"
     ),
@@ -21,7 +23,12 @@ test_that("get_adi(), calculate_adi(), areas_in_radius() works", {
   )
   
   expect_equivalent(
-    areas_in_radius("tract", center = c(-109.0452, 36.9991), radius = 24),
+    areas_in_radius(
+      "tract",
+      center = c(-109.0452, 36.9991),
+      year = 2010,
+      radius = 24
+    ),
     dplyr::tibble(
       STATEFP = c("49", "35", "04", "08"),
       COUNTYFP = c("037", "045", "001", "083"),
@@ -37,7 +44,8 @@ test_that("get_adi(), calculate_adi(), areas_in_radius() works", {
   expect_equivalent(
     closest_n_areas(
       geography = "county",
-      center = lon_lat_from_area("15007"),
+      center = lon_lat_from_area("15007", year = 2010),
+      year = 2010,
       n = 10,
       units = NULL
     ),
@@ -57,7 +65,8 @@ test_that("get_adi(), calculate_adi(), areas_in_radius() works", {
   expect_equivalent(
     closest_population(
       geography = "block group",
-      center = lon_lat_from_area(state = "FL"),
+      center = lon_lat_from_area(state = "FL", year = 2010),
+      year = 2010,
       population = 2000,
       units = "barleycorns"
     ),

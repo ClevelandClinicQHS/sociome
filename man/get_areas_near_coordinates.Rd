@@ -13,7 +13,7 @@ areas_in_radius(
   radius = 5,
   units = "miles",
   measure_from = "center of population",
-  year = 2010,
+  year = 2020,
   distance_fun = geosphere::distVincentyEllipsoid,
   batch_size = 50L
 )
@@ -23,7 +23,7 @@ closest_n_areas(
   center = lon_lat_from_area(state = "DC"),
   n = 50,
   measure_from = "center of population",
-  year = 2010,
+  year = 2020,
   distance_fun = geosphere::distVincentyEllipsoid,
   units = NULL,
   batch_size = 50L
@@ -34,7 +34,7 @@ closest_population(
   center = lon_lat_from_area(state = "DC"),
   population = 1e+06,
   measure_from = "center of population",
-  year = 2010,
+  year = 2020,
   distance_fun = geosphere::distVincentyEllipsoid,
   units = NULL,
   batch_size = 50L
@@ -57,7 +57,7 @@ longitude/latitude coordinates of the center of population of a
 user-specified census area.
 
 Defaults to the center of population of the District of Columbia according
-to the 2010 decennial census.}
+to the 2020 decennial census.}
 
 \item{radius}{A single, non-negative number specifying the radius of the
 circle. Defaults to 5.}
@@ -72,7 +72,7 @@ For \code{areas_in_radius()}, this also used for the units of \code{radius}.}
 \item{measure_from}{Currently can only be \code{"center of population"}, the
 default.}
 
-\item{year}{Must be 2020, 2010, or 2000. Defaults to 2010.}
+\item{year}{Must be 2020, 2010, or 2000. Defaults to 2020.}
 
 \item{distance_fun}{Passed to the \code{fun} argument of \code{\link[geosphere:distm]{geosphere::distm()}}.
 Defaults to \code{\link[geosphere:distVincentyEllipsoid]{geosphere::distVincentyEllipsoid}}, which results in the most
@@ -122,9 +122,11 @@ Distances are determined with \code{\link[geosphere:distm]{geosphere::distm()}}.
 Requires the packages \code{USpopcenters} and \code{geosphere} to be installed.
 Requires the \code{units} to be installed unless \code{units = NULL}.
 
-Centers of population are based on the 2010 decennial census. See
-\url{https://www.census.gov/geographies/reference-files/time-series/geo/centers-population.2010.html}
-Only states, counties, tracts, and block groups are currently supported.
+Centers of population are based on the decennial census data. Only states,
+counties, tracts, and block groups are currently supported. See the
+documentation of the \code{USpopcenters} package and
+\url{https://www.census.gov/geographies/reference-files/time-series/geo/centers-population.html}
+for more information.
 }
 \examples{
 # All states whose centers of population are within 300 kilometers of the
@@ -143,7 +145,7 @@ closest_n_areas("tract", center = c(-109.0452, 36.9991), n = 4, units = NULL)
 
 # The counties closest to center of population of Kauai County, Hawaii whose
 # total population reaches 3 million people:
-closest_population(  
+closest_population(
   geography = "county",
   center = lon_lat_from_area("15007"),
   population = 3e6,

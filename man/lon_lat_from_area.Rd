@@ -4,7 +4,7 @@
 \alias{lon_lat_from_area}
 \title{Grab the longitude/latitude of the center of population of a census area}
 \usage{
-lon_lat_from_area(geoid = NULL, state = NULL, county = NULL, year = 2010)
+lon_lat_from_area(geoid = NULL, state = NULL, county = NULL, year = 2020)
 }
 \arguments{
 \item{geoid}{A single string specifying the geoid of a census area. Must be
@@ -22,7 +22,7 @@ county names in \code{state}. If entering a five-digit GEOID, it will throw an
 error if its first two digits do not match the GEOID of \code{state}. Must be
 \code{NULL} if state is \code{NULL}.}
 
-\item{year}{Either 2000 or the default of 2010.}
+\item{year}{One of 2020, 2010, or 2000. Defaults to 2020.}
 }
 \value{
 A \link{double} vector of length 2. The first element is LONGITUDE
@@ -32,12 +32,14 @@ A \link{double} vector of length 2. The first element is LONGITUDE
 \description{
 The user specifies a census area, and the function returns the
 longitude/latitude coordinates of the area's center of population according
-to the 2010 census.
+to the decennial census.
 }
 \details{
-Centers of population are based on the 2010 decennial census. See
-\url{https://www.census.gov/geographies/reference-files/time-series/geo/centers-population.2010.html}
-Only states, counties, tracts, and block groups are currently supported.
+Centers of population are based on the decennial census. Only states,
+counties, tracts, and block groups are currently supported. See the
+documentation of the \code{USpopcenters} package and
+\url{https://www.census.gov/geographies/reference-files/time-series/geo/centers-population.html}
+for more information.
 
 Requires the data package \code{USpopcenters} to be installed.
 }

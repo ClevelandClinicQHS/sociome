@@ -1,5 +1,5 @@
 
-# sociome 2.2.0
+# sociome 2.2.1
 - Added `synthetic_population()`
 - Fixed `geography = "zcta"` behavior so that it will honor non-`NULL` values of `state`.
 - Fixed incorrect message that only 1 or 2 calls to `tidycensus` functions were going to occur when in fact many might occur.

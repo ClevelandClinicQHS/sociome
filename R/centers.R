@@ -23,9 +23,11 @@
 #' Requires the packages `USpopcenters` and `geosphere` to be installed.
 #' Requires the `units` to be installed unless `units = NULL`.
 #'
-#' Centers of population are based on the 2010 decennial census. See
-#' <https://www.census.gov/geographies/reference-files/time-series/geo/centers-population.2010.html>
-#' Only states, counties, tracts, and block groups are currently supported.
+#' Centers of population are based on the decennial census data. Only states,
+#' counties, tracts, and block groups are currently supported. See the
+#' documentation of the `USpopcenters` package and
+#' <https://www.census.gov/geographies/reference-files/time-series/geo/centers-population.html>
+#' for more information.
 #'
 #' @param geography The type of census areas that the resulting table will
 #'   contain. One of `c("state", "county", "tract", "block group")`.
@@ -42,7 +44,7 @@
 #'   user-specified census area.
 #'
 #'   Defaults to the center of population of the District of Columbia according
-#'   to the 2010 decennial census.
+#'   to the 2020 decennial census.
 #' @param radius A single, non-negative number specifying the radius of the
 #'   circle. Defaults to 5.
 #' @param units A single string specifying the units of the resulting `distance`
@@ -57,7 +59,7 @@
 #'   population of the areas returned. See **Details**.
 #' @param measure_from Currently can only be `"center of population"`, the
 #'   default.
-#' @param year Must be 2020, 2010, or 2000. Defaults to 2010.
+#' @param year Must be 2020, 2010, or 2000. Defaults to 2020.
 #' @param distance_fun Passed to the `fun` argument of [geosphere::distm()].
 #'   Defaults to [`geosphere::distVincentyEllipsoid`], which results in the most
 #'   accurate measurement but is also the slowest.
@@ -83,7 +85,7 @@
 #'
 #' # The counties closest to center of population of Kauai County, Hawaii whose
 #' # total population reaches 3 million people:
-#' closest_population(  
+#' closest_population(
 #'   geography = "county",
 #'   center = lon_lat_from_area("15007"),
 #'   population = 3e6,
@@ -105,7 +107,7 @@ areas_in_radius <- function(geography = c("state", "county", "tract",
                             radius = 5,
                             units = "miles",
                             measure_from = "center of population",
-                            year = 2010,
+                            year = 2020,
                             distance_fun = geosphere::distVincentyEllipsoid,
                             batch_size = 50L) {
   check_for_packages(c("USpopcenters", "geosphere"))
@@ -159,7 +161,7 @@ closest_n_areas <- function(geography = c("state", "county", "tract",
                             center = lon_lat_from_area(state = "DC"),
                             n = 50,
                             measure_from = "center of population",
-                            year = 2010,
+                            year = 2020,
                             distance_fun = geosphere::distVincentyEllipsoid,
                             units = NULL,
                             batch_size = 50L) {
@@ -203,7 +205,7 @@ closest_population <- function(geography = c("state", "county", "tract",
                                center = lon_lat_from_area(state = "DC"),
                                population = 1e6,
                                measure_from = "center of population",
-                               year = 2010,
+                               year = 2020,
                                distance_fun = geosphere::distVincentyEllipsoid,
                                units = NULL,
                                batch_size = 50L) {
@@ -322,11 +324,13 @@ filter_centers <- function(all_centers,
 #'
 #' The user specifies a census area, and the function returns the
 #' longitude/latitude coordinates of the area's center of population according
-#' to the 2010 census.
+#' to the decennial census.
 #'
-#' Centers of population are based on the 2010 decennial census. See
-#' <https://www.census.gov/geographies/reference-files/time-series/geo/centers-population.2010.html>
-#' Only states, counties, tracts, and block groups are currently supported.
+#' Centers of population are based on the decennial census. Only states,
+#' counties, tracts, and block groups are currently supported. See the
+#' documentation of the `USpopcenters` package and
+#' <https://www.census.gov/geographies/reference-files/time-series/geo/centers-population.html>
+#' for more information.
 #'
 #' Requires the data package `USpopcenters` to be installed.
 #'
@@ -342,7 +346,7 @@ filter_centers <- function(all_centers,
 #'   county names in `state`. If entering a five-digit GEOID, it will throw an
 #'   error if its first two digits do not match the GEOID of `state`. Must be
 #'   `NULL` if state is `NULL`.
-#' @param year Either 2000 or the default of 2010.
+#' @param year One of 2020, 2010, or 2000. Defaults to 2020.
 #'
 #' @examples
 #' # The center of population of Alaska
@@ -362,9 +366,9 @@ filter_centers <- function(all_centers,
 lon_lat_from_area <- function(geoid = NULL, 
                               state = NULL,
                               county = NULL, 
-                              year = 2010) {
+                              year = 2020) {
   check_for_packages("USpopcenters")
-  year <- validate_year(year, c(2010, 2000))
+  year <- validate_year(year, c(2020, 2010, 2000))
   switch(
     determine_input_arg(geoid = geoid, state = state, county = county),
     geoid = lon_lat_from_geoid(geoid, year = year),
@@ -425,51 +429,34 @@ row_number_batches <- function(all_centers, batch_size = 50L) {
 
 
 centers_tbl_from_geography <- function(geography, year) {
-  tbl <-
-    switch(
-      paste0(geography, year),
-      state2020 = USpopcenters::state2020,
-      county2020 = USpopcenters::county2020,
-      tract2020 = USpopcenters::tract2020,
-      "block group2020" = USpopcenters::block_group2020,
-      state2010 = USpopcenters::state2010,
-      county2010 = USpopcenters::county2010,
-      tract2010 = USpopcenters::tract2010,
-      "block group2010" = USpopcenters::block_group2010,
-      state2000 = USpopcenters::state2000,
-      county2000 = USpopcenters::county2000,
-      tract2000 = USpopcenters::tract2000,
-      "block group2000" = USpopcenters::block_group2000,
-      stop("Currently geography must be state, county, tract, or block group",
-           call. = FALSE)
-    )
+  if (!any(c("state", "county", "tract", "block group") == geography)) {
+    stop("Geography must be state, county, tract, or block group",
+         call. = FALSE)
+  }
+  
+  geography <- sub(" ", "_", geography)
+  
+  tbl <- getExportedValue("USpopcenters", paste0(geography, year))
+  
   USpopcenters_to_geoid_tbl(tbl)
 }
 
 
 centers_tbl_from_geoid <- function(geoid, year) {
-  tbl <-
-    if (year == 2010) {
-      switch(
-        match(nchar(geoid), c(2L, 5L, 11L, 12L), nomatch = 5L),
-        USpopcenters::state2010,
-        USpopcenters::county2010,
-        USpopcenters::tract2010,
-        USpopcenters::block_group2010,
-        stop("geoid must have 2, 5, 11, or 12 digits", call. = FALSE)
-      )
-    } else if (year == 2000) {
-      switch(
-        match(nchar(geoid), c(2L, 5L, 11L, 12L), nomatch = 5L),
-        USpopcenters::state2000,
-        USpopcenters::county2000,
-        USpopcenters::tract2000,
-        USpopcenters::block_group2000,
-        stop("geoid must have 2, 5, 11, or 12 digits", call. = FALSE)
-      )
-    } else {
-      stop("year must be 2010 or 2000", call. = FALSE)
-    }
+  if (!any(c(2020, 2010, 2000) == year)) {
+    stop("year must be 2020, 2010, or 2000", call. = FALSE)
+  }
+  
+  geography <- 
+    c("state", "county", "tract", "block_group")[
+      match(nchar(geoid), c(2L, 5L, 11L, 12L))
+    ]
+  
+  if (is.na(geography)) {
+    stop("geoid must have 2, 5, 11, or 12 digits", call. = FALSE)
+  }
+  
+  tbl <- getExportedValue("USpopcenters", paste0(geography, year))
   
   USpopcenters_to_geoid_tbl(tbl)
 }

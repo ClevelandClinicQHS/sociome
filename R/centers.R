@@ -74,7 +74,6 @@
 #' areas_in_radius(
 #'   geography = "state",
 #'   center = lon_lat_from_area(state = "NY", county = "New York"),
-#'   year = 2010,
 #'   radius = 300,
 #'   units = "km"
 #' )

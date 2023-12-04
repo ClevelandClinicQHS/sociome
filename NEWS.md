@@ -1,4 +1,9 @@
 
+# sociome 2.2.3
+- Fixed typo that prevented geometry from accompanying `get_adi()` results.
+- Added escape hatches for examples and tests of functions requiring `USpopcenters` and `geosphere`.
+- Updated email address of maintainer.
+
 # sociome 2.2.1
 - Added `synthetic_population()`
 - Fixed `geography = "zcta"` behavior so that it will honor non-`NULL` values of `state`.

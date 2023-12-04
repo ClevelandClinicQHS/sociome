@@ -1,9 +1,9 @@
 
 ## Resubmission
 
-* Added new functions `areas_in_radius()`, `closest_n_areas()`, `closest_population()`, `append_dissimilarities()`, and `synthetic_population()`
-* Updated minimum required version of R to 3.6.0 since we now use `asplit()`
-* Updated README and code and documentation
+* Corrected critical typo
+* Updated maintainer email address and issue URL
+* Provided escape hatch for examples and tests of functions utilizing `Suggests`.
 
 
 ## Test environments:
@@ -18,7 +18,10 @@
 ## R CMD check results
 There were no ERRORs or WARNINGs.
 
-There was one NOTE from the check on Windows Server 2022, R-devel, 64 bit on Rhub:
+NOTE acknowledging the updated maintainer email address, which has indeed changed.
 
+NOTE from the check on Windows Server 2022, R-devel, 64 bit on Rhub:
 checking for detritus in the temp directory … NOTE ‘lastMiKTeXException’
 Apparently, this is a known issue with Rhub and does not suggest a problem with the package.
+
+NOTE

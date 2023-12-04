@@ -129,6 +129,9 @@ documentation of the \code{USpopcenters} package and
 for more information.
 }
 \examples{
+if (requireNamespace("USpopcenters", quietly = TRUE) &&
+  requireNamespace("geosphere", quietly = TRUE)) {
+
 # All states whose centers of population are within 300 kilometers of the
 # center of population of New York County, New York (i.e, Manhattan):
 areas_in_radius(
@@ -150,6 +153,8 @@ closest_population(
   population = 3e6,
   units = "barleycorns"
 )
+
+}
 }
 \seealso{
 \code{\link[=lon_lat_from_area]{lon_lat_from_area()}}

@@ -2,7 +2,7 @@ Type: Package
 Package: sociome
 Title: Operationalizing Social Determinants of Health Data for
     Researchers
-Version: 2.2.2
+Version: 2.2.3
 Authors@R: 
     c(person(given = "Nik",
              family = "Krieger",
@@ -23,7 +23,7 @@ Authors@R:
       person(given = "National Institutes of Health/National Institute on Aging",
              role = "fnd",
              comment = "The development of this software package was supported by a research grant from the National Institutes of Health/National Institute on Aging, (Principal Investigators: Jarrod E. Dalton, PhD and Adam T. Perzynski, PhD; Grant Number: 5R01AG055480-02). All of its contents are solely the responsibility of the authors and do not necessarily represent the official views of the NIH."))
-Maintainer: Nik Krieger <nk@case.edu>
+Maintainer: Nik Krieger <nikkrieger@gmail.com>
 Description: Accesses raw data via API and calculates social
     determinants of health measures for user-specified locations in the
     US, returning them in tidyverse- and sf-compatible data frames.

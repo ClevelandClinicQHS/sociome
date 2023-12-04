@@ -69,6 +69,9 @@
 #'   thousands of unnecessary calculations. Defaults to 50.
 #'
 #' @examples
+#' if (requireNamespace("USpopcenters", quietly = TRUE) &&
+#'   requireNamespace("geosphere", quietly = TRUE)) {
+#' 
 #' # All states whose centers of population are within 300 kilometers of the
 #' # center of population of New York County, New York (i.e, Manhattan):
 #' areas_in_radius(
@@ -90,6 +93,8 @@
 #'   population = 3e6,
 #'   units = "barleycorns"
 #' )
+#' 
+#' }
 #' @return A [`tibble`][tibble::tibble] with each of the columns found in the
 #'   corresponding `USpopcenters` table, with two columns appended:
 #'
@@ -348,6 +353,8 @@ filter_centers <- function(all_centers,
 #' @param year One of 2020, 2010, or 2000. Defaults to 2020.
 #'
 #' @examples
+#' if (requireNamespace("USpopcenters", quietly = TRUE)) {
+#'  
 #' # The center of population of Alaska
 #' lon_lat_from_area(state = "alAskA")
 #'
@@ -356,7 +363,7 @@ filter_centers <- function(all_centers,
 #'
 #' # The center of population of some tract in Manhattan
 #' lon_lat_from_area(geoid = "36061021600")
-#'
+#' }
 #' @return A [double] vector of length 2. The first element is LONGITUDE
 #'   (positive for east, negative for west). The second element is LATITUDE
 #'   (positive for north, negative for south).

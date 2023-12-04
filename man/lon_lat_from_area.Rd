@@ -44,6 +44,8 @@ for more information.
 Requires the data package \code{USpopcenters} to be installed.
 }
 \examples{
+if (requireNamespace("USpopcenters", quietly = TRUE)) {
+ 
 # The center of population of Alaska
 lon_lat_from_area(state = "alAskA")
 
@@ -52,7 +54,7 @@ lon_lat_from_area(state = "IL", county = "Cook")
 
 # The center of population of some tract in Manhattan
 lon_lat_from_area(geoid = "36061021600")
-
+}
 }
 \seealso{
 \code{\link[=areas_in_radius]{areas_in_radius()}}

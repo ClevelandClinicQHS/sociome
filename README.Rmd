@@ -42,7 +42,7 @@ install.packages("sociome")
 You can install the development version of `sociome` from GitHub with:
 
 ```{r gh-installation, eval = FALSE}
-remotes::install_github("NikKrieger/sociome")
+remotes::install_github("ClevelandClinicQHS/sociome")
 ```
 
 ## Background on ADI
@@ -102,7 +102,7 @@ Notice the warning to the user that it is not recommended to calculate ADIs for 
 
 The aforementioned `geoid` parameter allows the user to mix different levels of geography when specifying a reference population. Employing the 2019 version of the 5-year ACS estimates, the code below stores the ADIs of the census block groups in every county entirely or partially on the Delmarva peninsula. Note that `dataset = "acs5"` by default.
 
-```{r delmarva_geoids, echo=TRUE, results='hold', message=FALSE, cache=TRUE}
+```{r delmarva_geoids, echo=TRUE, results='hide', message=FALSE, cache=TRUE}
 delmarva_geoids <-
   c("10",
     # The two-digit GEOID above stands for the state of Delaware.
@@ -140,7 +140,7 @@ delmarva %>%
 
 Careful scrutiny of this map reveals gray areas, such as the one near the northern tip. These areas have no associated ADI because they were excluded from ADI calculation due to having zero households. While these areas are present in the ADI data set, their ADI values are `NA`. To illustrate, below are the year-2009 ADI values for the then-35 census tracts of Chautauqua County, New York, where Chautauqua Lake had its own census tract (Census Tract 0 in the first row).
 
-```{r chautauqua, cache=TRUE, message=FALSE}
+```{r chautauqua, cache=TRUE, message=FALSE, results='hide'}
 chautauqua <- 
   get_adi(
     "tract",
@@ -175,7 +175,7 @@ chautauqua %>%
 
 The code below calculates and maps ADIs for Ohio counties. 
 
-```{r ohio, fig.height=7, message=FALSE, cache=TRUE}
+```{r ohio, fig.height=7, message=FALSE, cache=TRUE, results='hide'}
 ohio <- get_adi("county", state = "OH", year = 2017, geometry = TRUE)
 
 ohio %>%

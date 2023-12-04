@@ -49,7 +49,7 @@ install.packages("sociome")
 You can install the development version of `sociome` from GitHub with:
 
 ``` r
-remotes::install_github("NikKrieger/sociome")
+remotes::install_github("ClevelandClinicQHS/sociome")
 ```
 
 ## Background on ADI
@@ -179,7 +179,7 @@ Connecticut, using 2010 decennial census data:
 
 ``` r
 get_adi(geography = "county", state = "CT", year = 2010, dataset = "decennial")
-#> Warning in calculate_adi(census_data, keep_indicators = keep_indicators, : 
+#> Warning in calculate_adi(raw_data, keep_indicators = keep_indicators, seed = seed): 
 #> Calculating ADI and ADI-3 values from fewer than 30 locations.
 #> It is recommended to add more in order to obtain trustworthy results.
 #> Warning in cor.smooth(r): Matrix was not positive definite, smoothing was done
@@ -296,37 +296,37 @@ chautauqua %>%
 #>  2 36013030100 Census Tract 301, Chautauqua County, New York    131.        1327
 #>  3 36013030200 Census Tract 302, Chautauqua County, New York    102.        1600
 #>  4 36013030300 Census Tract 303, Chautauqua County, New York    147.         844
-#>  5 36013030400 Census Tract 304, Chautauqua County, New York     99.3       1900
+#>  5 36013030400 Census Tract 304, Chautauqua County, New York     98.9       1900
 #>  6 36013030500 Census Tract 305, Chautauqua County, New York    151.        1587
 #>  7 36013030600 Census Tract 306, Chautauqua County, New York    138.        1572
 #>  8 36013030700 Census Tract 307, Chautauqua County, New York    109.        1773
-#>  9 36013030800 Census Tract 308, Chautauqua County, New York     90.6       1918
-#> 10 36013035100 Census Tract 351, Chautauqua County, New York     91.3       1790
-#> 11 36013035200 Census Tract 352, Chautauqua County, New York     88.8        873
-#> 12 36013035300 Census Tract 353, Chautauqua County, New York     80.8        981
+#>  9 36013030800 Census Tract 308, Chautauqua County, New York     90.1       1918
+#> 10 36013035100 Census Tract 351, Chautauqua County, New York     91.2       1790
+#> 11 36013035200 Census Tract 352, Chautauqua County, New York     88.7        873
+#> 12 36013035300 Census Tract 353, Chautauqua County, New York     80.3        981
 #> 13 36013035400 Census Tract 354, Chautauqua County, New York    131.        1258
 #> 14 36013035500 Census Tract 355, Chautauqua County, New York    129.        1292
-#> 15 36013035600 Census Tract 356, Chautauqua County, New York     96.9       1454
-#> 16 36013035700 Census Tract 357, Chautauqua County, New York    117.        1337
-#> 17 36013035800 Census Tract 358, Chautauqua County, New York     85.6       2004
-#> 18 36013035901 Census Tract 359.01, Chautauqua County, New York  78.1       2392
-#> 19 36013035902 Census Tract 359.02, Chautauqua County, New York  88.8        102
-#> 20 36013036000 Census Tract 360, Chautauqua County, New York     89.4       1807
-#> 21 36013036100 Census Tract 361, Chautauqua County, New York     94.5       2029
-#> 22 36013036300 Census Tract 363, Chautauqua County, New York     95.1       2011
-#> 23 36013036400 Census Tract 364, Chautauqua County, New York     91.4       2620
+#> 15 36013035600 Census Tract 356, Chautauqua County, New York     96.5       1454
+#> 16 36013035700 Census Tract 357, Chautauqua County, New York    116.        1337
+#> 17 36013035800 Census Tract 358, Chautauqua County, New York     84.8       2004
+#> 18 36013035901 Census Tract 359.01, Chautauqua County, New York  77.4       2392
+#> 19 36013035902 Census Tract 359.02, Chautauqua County, New York  88.0        102
+#> 20 36013036000 Census Tract 360, Chautauqua County, New York     89.3       1807
+#> 21 36013036100 Census Tract 361, Chautauqua County, New York     94.4       2029
+#> 22 36013036300 Census Tract 363, Chautauqua County, New York     95.2       2011
+#> 23 36013036400 Census Tract 364, Chautauqua County, New York     91.2       2620
 #> 24 36013036500 Census Tract 365, Chautauqua County, New York    101.        2250
-#> 25 36013036600 Census Tract 366, Chautauqua County, New York     94.0       1496
+#> 25 36013036600 Census Tract 366, Chautauqua County, New York     93.9       1496
 #> 26 36013036700 Census Tract 367, Chautauqua County, New York    106.        1553
-#> 27 36013036800 Census Tract 368, Chautauqua County, New York     83.4       1792
-#> 28 36013036900 Census Tract 369, Chautauqua County, New York     80.4       2397
-#> 29 36013037000 Census Tract 370, Chautauqua County, New York     80.2       1380
-#> 30 36013037100 Census Tract 371, Chautauqua County, New York     86.2       1770
-#> 31 36013037200 Census Tract 372, Chautauqua County, New York     89.4       1485
-#> 32 36013037300 Census Tract 373, Chautauqua County, New York     97.0       2429
+#> 27 36013036800 Census Tract 368, Chautauqua County, New York     83.2       1792
+#> 28 36013036900 Census Tract 369, Chautauqua County, New York     80.0       2397
+#> 29 36013037000 Census Tract 370, Chautauqua County, New York     80.0       1380
+#> 30 36013037100 Census Tract 371, Chautauqua County, New York     85.7       1770
+#> 31 36013037200 Census Tract 372, Chautauqua County, New York     88.9       1485
+#> 32 36013037300 Census Tract 373, Chautauqua County, New York     96.8       2429
 #> 33 36013037400 Census Tract 374, Chautauqua County, New York     96.8       1531
-#> 34 36013037500 Census Tract 375, Chautauqua County, New York     79.7       1889
-#> 35 36013940000 Census Tract 9400, Chautauqua County, New York    81.9         14
+#> 34 36013037500 Census Tract 375, Chautauqua County, New York     79.5       1889
+#> 35 36013940000 Census Tract 9400, Chautauqua County, New York    89.1         14
 ```
 
 By having set `keep_indicators = TRUE`, the ADI factors as well as the
@@ -409,6 +409,7 @@ scale, making them comparable:
 
 ``` r
 library(gridExtra)
+#> Warning: package 'gridExtra' was built under R version 4.3.2
 # Contains grid.arrange(), which allows for side-by-side plotting of figures
 
 color_range <- range(c(ohio$ADI, ohio_ref_US$ADI))
@@ -500,7 +501,7 @@ zero households:
 
 ``` r
 get_adi("block group", state = "hi", county = "kalawao", year = 2017)
-#> Warning in calculate_adi(census_data, keep_indicators = keep_indicators, : 
+#> Warning in calculate_adi(raw_data, keep_indicators = keep_indicators, seed = seed): 
 #> Calculating ADI and ADI-3 values from fewer than 30 locations.
 #> It is recommended to add more in order to obtain trustworthy results.
 #> Error in `value[[3L]]()`:

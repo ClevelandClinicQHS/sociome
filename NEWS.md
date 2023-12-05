@@ -1,5 +1,5 @@
 
-# development version
+# sociome 2.2.5
 - Fixed typo that prevented geometry from accompanying `get_adi()` results.
 - Added escape hatches for examples and tests of functions requiring `USpopcenters` and `geosphere`.
 - Updated email address of maintainer.

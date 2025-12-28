@@ -1,3 +1,6 @@
+# sociome (development version)
+
+- Removed `seed` argument from `synthetic_population()`.
 
 # sociome 2.2.5
 - Fixed typo that prevented geometry from accompanying `get_adi()` results.

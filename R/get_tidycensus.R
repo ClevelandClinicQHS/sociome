@@ -169,7 +169,12 @@ get_tidycensus <- function(geography,
                            dataset,
                            partial_tidycensus_calls,
                            geometry,
-                           evaluator) {
+                           evaluator =
+                             purrr::insistently(
+                               eval,
+                               rate = purrr::rate_delay(),
+                               quiet = FALSE
+                             )) {
 
   # There are different location validation schemes for the three different user
   # input options concerning geography:

@@ -27,6 +27,7 @@
 #'   the arguments in [get_adi()].
 #' @param ... Additional arguments to be passed to
 #'   [tidycensus::get_decennial()]. Use at your own risk.
+#' @inheritParams get_adi
 #'
 #' @examples
 #' \dontrun{
@@ -48,6 +49,12 @@ get_geoids <- function(geography,
                        geometry     = FALSE,
                        cache_tables = TRUE,
                        key          = NULL,
+                       evaluator =
+                         purrr::insistently(
+                           eval,
+                           rate = purrr::rate_delay(),
+                           quiet = FALSE
+                          ),
                        ...) {
   geography <-
     match.arg(
@@ -99,7 +106,8 @@ get_geoids <- function(geography,
       year = year,
       dataset = "decennial",
       partial_tidycensus_calls = partial_tidycensus_calls,
-      geometry = geometry
+      geometry = geometry,
+      evaluator = evaluator
     )
 
   d

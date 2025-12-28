@@ -13,6 +13,7 @@ get_geoids(
   geometry = FALSE,
   cache_tables = TRUE,
   key = NULL,
+  evaluator = purrr::insistently(eval, rate = purrr::rate_delay(), quiet = FALSE),
   ...
 )
 }
@@ -32,6 +33,9 @@ the arguments in \code{\link[=get_adi]{get_adi()}}.}
 \item{year}{Single integer specifying the year of US Census data to use.
 Defaults to 2010. Based on this year, data from the most recent decennial
 census will be returned (specifically, \verb{year <- }\code{\link{floor}}\code{(year / 10) * 10} is run).}
+
+\item{evaluator}{A function that will evaluate the calls to the tidycensus
+functions. Defaults to \code{\link[purrr:insistently]{purrr::insistently}}\code{(}\code{\link{eval}}\verb{, rate = }\code{\link[purrr:rate-helpers]{purrr::rate_delay()}}\verb{, quiet = FALSE)}.}
 
 \item{...}{Additional arguments to be passed to
 \code{\link[tidycensus:get_decennial]{tidycensus::get_decennial()}}. Use at your own risk.}

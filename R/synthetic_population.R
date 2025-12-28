@@ -84,6 +84,7 @@
 #'   [tigris::tracts()], [tigris::block_groups()], or [tigris::zctas()],
 #'   according to the the value of `geography`). This enables the user to
 #'   somewhat customize the shapefile data obtained.
+#' @inheritParams get_adi
 #'
 #' @section Synthesizing ages from US Census Data: US Census data provides
 #'   counts of the number of people in different age brackets of varying widths.
@@ -147,6 +148,12 @@ synthetic_population <- function(geography,
                                  max_age         = 115,
                                  rate            = 0.25,
                                  key             = NULL,
+                                 evaluator =
+                                   purrr::insistently(
+                                     eval,
+                                     rate = purrr::rate_delay(),
+                                     quiet = FALSE
+                                   ),
                                  ...) {
   geography <- validate_geography(geography)
   year      <- validate_year(year)
@@ -215,7 +222,8 @@ synthetic_population <- function(geography,
       year = year,
       dataset = dataset,
       partial_tidycensus_calls = partial_tidycensus_calls,
-      geometry = geometry
+      geometry = geometry,
+      evaluator = evaluator
     )
 
   census_data_prepped <-

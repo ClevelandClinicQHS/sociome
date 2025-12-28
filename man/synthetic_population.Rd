@@ -17,6 +17,7 @@ synthetic_population(
   max_age = 115,
   rate = 0.25,
   key = NULL,
+  evaluator = purrr::insistently(eval, rate = purrr::rate_delay(), quiet = FALSE),
   ...
 )
 }
@@ -87,6 +88,9 @@ ages of the highest age bracket. Defaults to 0.25. See details.}
 \item{key}{Your Census API key as a character string. Obtain one at
 \url{http://api.census.gov/data/key_signup.html}. Defaults to \code{NULL}. Not
 necessary if you have already loaded your key with \code{\link[=census_api_key]{census_api_key()}}.}
+
+\item{evaluator}{A function that will evaluate the calls to the tidycensus
+functions. Defaults to \code{\link[purrr:insistently]{purrr::insistently}}\code{(}\code{\link{eval}}\verb{, rate = }\code{\link[purrr:rate-helpers]{purrr::rate_delay()}}\verb{, quiet = FALSE)}.}
 
 \item{...}{Additional arguments to be passed onto \code{\link[tidycensus:get_acs]{tidycensus::get_acs()}} or
 \code{\link[tidycensus:get_decennial]{tidycensus::get_decennial()}}. These must all be named. Must not match any

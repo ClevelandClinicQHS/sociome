@@ -274,7 +274,8 @@ get_adi <- function(geography,
       year = year,
       dataset = dataset,
       partial_tidycensus_calls = partial_tidycensus_calls,
-      geometry = geometry
+      geometry = geometry,
+      evaluator = evaluator
     )
 
   if (raw_data_only) {

@@ -17,7 +17,6 @@ synthetic_population(
   max_age = 115,
   rate = 0.25,
   key = NULL,
-  seed = NULL,
   ...
 )
 }
@@ -89,9 +88,6 @@ ages of the highest age bracket. Defaults to 0.25. See details.}
 \url{http://api.census.gov/data/key_signup.html}. Defaults to \code{NULL}. Not
 necessary if you have already loaded your key with \code{\link[=census_api_key]{census_api_key()}}.}
 
-\item{seed}{Passed onto \code{\link[=set.seed]{set.seed()}}, which is called before
-probabilistically synthesizing the age values with \code{\link[=sample]{sample()}}.}
-
 \item{...}{Additional arguments to be passed onto \code{\link[tidycensus:get_acs]{tidycensus::get_acs()}} or
 \code{\link[tidycensus:get_decennial]{tidycensus::get_decennial()}}. These must all be named. Must not match any
 of the \code{tidycensus} formal arguments that \code{sociome} needs to set
@@ -160,10 +156,10 @@ synthetic_population(
 # using 2000 Decennial Census data
 synthetic_population(
   geography = "tract",
-  geoid = 
+  geoid =
     # This two-digit GEOID is the state of Delaware.
     c("10",
-    
+
     # These five-digit GEOIDs are specific counties in Virginia and Maryland
       "51001", "51131", "24015", "24029", "24035", "24011", "24041", "24019",
       "24045", "24039", "24047"),

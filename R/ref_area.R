@@ -7,7 +7,7 @@ ref_area <- function(geography,
                      year,
                      dataset,
                      partial_tidycensus_calls,
-                     eval_insistently) {
+                     evaluator) {
   switch(
     geography,
     "zip code tabulation area" = ref_area_from_zcta(zcta, state, county, geoid),
@@ -16,20 +16,20 @@ ref_area <- function(geography,
       geoid =
         ref_area_from_geoid(
           geoid = geoid,
-          geography = geography, 
-          year = year, 
-          dataset = dataset, 
+          geography = geography,
+          year = year,
+          dataset = dataset,
           partial_tidycensus_calls = partial_tidycensus_calls,
-          eval_insistently = eval_insistently
-        ), 
+          evaluator = evaluator
+        ),
       ref_area_from_sc(
         state = state,
-        county = county, 
-        geography = geography, 
-        year = year, 
-        dataset = dataset, 
+        county = county,
+        geography = geography,
+        year = year,
+        dataset = dataset,
         partial_tidycensus_calls = partial_tidycensus_calls,
-        eval_insistently = eval_insistently
+        evaluator = evaluator
       )
     )
   )
@@ -43,7 +43,7 @@ ref_area_from_zcta <- function(zcta, state, county, geoid) {
   if (!is.null(geoid)) {
     stop('geoid must be NULL when geography = "zcta"', call. = FALSE)
   }
-  if (!is.null(zcta)) { 
+  if (!is.null(zcta)) {
     zcta <- trimws(zcta)
     if (!length(zcta) || anyNA(zcta) || !all(grepl("^\\d{1,5}$", zcta))) {
       stop(
@@ -53,7 +53,7 @@ ref_area_from_zcta <- function(zcta, state, county, geoid) {
       )
     }
   }
-  
+
   # Validates non-NULL input to zcta and creates reference area (ref_area). It
   # must contain one or more strings of 1-5 digits.
   list(
@@ -62,19 +62,19 @@ ref_area_from_zcta <- function(zcta, state, county, geoid) {
     state_county = dplyr::tibble(state = list(state), county = list(NULL)),
     zcta         = zcta
   )
-  
+
 }
 
 
 
-ref_area_from_sc <- function(state, 
-                             county, 
+ref_area_from_sc <- function(state,
+                             county,
                              geography,
                              year,
-                             dataset, 
+                             dataset,
                              partial_tidycensus_calls,
-                             eval_insistently) {
-  
+                             evaluator) {
+
   # Creates ref_area from user-inputted state and county.
   if (!is.null(county) && length(state) != 1L) {
     stop(
@@ -85,53 +85,46 @@ ref_area_from_sc <- function(state,
       call. = FALSE
     )
   }
-  
+
   # This is a tibble with columns "state" and "county". It is constructed so
   # that the contents of each row can be successfully passed to the
   # corresponding "state" and "county" arugments in tidycensus::get_acs() or
   # tidycensus::get_decennial().
   state_county <-
-    
+
     if (any(c("state", "county") == geography)) {
-      
+
       # If geography is "state" or "county", the state and county args are
       # passed as-is to the tidycensus function(s).
       dplyr::tibble(state = list(state), county = list(county))
-      
+
     } else if (is.null(county)) {
       # If geography = "tract" or smaller and county = NULL, preliminary
       # call(s) to tidycensus must be performed in order to obtain all county
       # GEOIDs for all states. The exception is the special case described
       # below.
-      
-      if (geography == "tract" && dataset == "decennial" && year != 2010) {
+
+      if (geography == "tract" && dataset == "decennial" && year < 2010) {
         # In this special case, the tidycensus function(s) will be called once
         # per state. Also, state = NULL is a shortcut to "all 50 states plus
         # DC and Puerto Rico")
         dplyr::tibble(
-          state =
-            if (is.null(state))
-              c("01", "02", "04", "05", "06", "08", "09", "10", "11", "12",
-                "13", "15", "16", "17", "18", "19", "20", "21", "22", "23",
-                "24", "25", "26", "27", "28", "29", "30", "31", "32", "33",
-                "34", "35", "36", "37", "38", "39", "40", "41", "42", "44",
-                "45", "46", "47", "48", "49", "50", "51", "53", "54", "55",
-                "56", "72") else state
+          state = if (is.null(state)) state_geoids else state
         )
       } else {
         sc_from_preliminary_call(
           partial_tidycensus_calls,
           state,
-          eval_insistently
+          evaluator
         )
       }
-      
+
     } else {
       # If geography = "tract" or smaller and county was not NULL, the
       # tidycensus function(s) will be called once per county.
       dplyr::tibble(state = state, county = county)
     }
-  
+
   list(
     geoid = NULL,
     geo_length = NULL,
@@ -142,15 +135,15 @@ ref_area_from_sc <- function(state,
 
 
 
-sc_from_preliminary_call <- function(partial_tidycensus_calls, 
+sc_from_preliminary_call <- function(partial_tidycensus_calls,
                                      state,
-                                     eval_insistently) {
-  
+                                     evaluator) {
+
   # Obtains a single character vector of all county GEOIDs for all states in the
   # "state" argument
   county_geoids <-
-    county_geoids_from_state(partial_tidycensus_calls, state, eval_insistently)
-  
+    county_geoids_from_state(partial_tidycensus_calls, state, evaluator)
+
   # Turns the character vector into a proper state_county object (i.e., a tibble
   # with columns "state" and "county").
   sc_from_county_geoids(county_geoids)
@@ -158,26 +151,26 @@ sc_from_preliminary_call <- function(partial_tidycensus_calls,
 
 
 
-county_geoids_from_state <- function(partial_tidycensus_calls, 
-                                     state, 
-                                     eval_insistently) {
+county_geoids_from_state <- function(partial_tidycensus_calls,
+                                     state,
+                                     evaluator) {
   message("\nPreliminary tidycensus call beginning...")
-  
+
   # The preliminary tidycensus call is performed by modifying the tidycensus
   # call skeleton that happens earlier in get_adi(). It ends up requesting data
   # on a single arbitrary variable at the county level for all user-inputted
   # states.
   counties <-
-    partial_tidycensus_calls[[1L]] %>% 
+    partial_tidycensus_calls[[1L]] %>%
     rlang::call_modify(
       geography = "county",
       variables = .$variables[1L],
       geometry = FALSE,
       shift_geo = rlang::zap(),
       state = state
-    ) %>% 
-    eval_insistently()
-  
+    ) %>%
+    evaluator()
+
   # The data requested in the "variables" argument is not actually even saved;
   # only the column of GEOIDs is returned.
   counties[["GEOID"]]
@@ -187,7 +180,7 @@ county_geoids_from_state <- function(partial_tidycensus_calls,
 
 
 sc_from_county_geoids <- function(county_geoids) {
-  
+
   # Converts a character vector of 5+ digit GEOIDs into a proper
   # state_county object (i.e., a tibble with columns "state" and "county"). The
   # tidycensus functions' "state" argument accepts two-digit GEOIDs of states,
@@ -195,7 +188,7 @@ sc_from_county_geoids <- function(county_geoids) {
   # ?tidycensus::get_acs) that are often seen concatenated onto the end of the
   # 2-digit state GEOID to make a 5-digit county GEOID (e.g., "39" (Ohio) +
   # "035" (Cuyahoga County) = "39035" (Cuyahoga County)).
-  
+
   dplyr::tibble(
     state  = substr(county_geoids, 1L, 2L),
     county = substr(county_geoids, 3L, 5L)
@@ -206,22 +199,22 @@ sc_from_county_geoids <- function(county_geoids) {
 
 
 ref_area_from_geoid <- function(geoid,
-                                geography, 
-                                year, 
-                                dataset, 
+                                geography,
+                                year,
+                                dataset,
                                 partial_tidycensus_calls,
-                                eval_insistently) {
-  
+                                evaluator) {
+
   # Validates user input to geoid and constructs a state_county object (tibble
   # with columns "state" and "county") from it.
-  
+
   geoid <- validate_geoid(geoid)
-  
+
   # Get number of characters in a GEOID of user-inputted geography level. This
   # is used later when trimming tidycensus's results to only include areas in
   # the user-inputted reference area.
   geo_length <- validate_geo_length(geography, geoid)
-  
+
   state_county <-
     sc_from_geoid(
       geoid,
@@ -229,9 +222,9 @@ ref_area_from_geoid <- function(geoid,
       year,
       dataset,
       partial_tidycensus_calls,
-      eval_insistently
+      evaluator
     )
-  
+
   list(
     geoid = geoid,
     geo_length = geo_length,
@@ -245,32 +238,32 @@ sc_from_geoid <- function(geoid,
                           year,
                           dataset,
                           partial_tidycensus_calls,
-                          eval_insistently) {
-  
+                          evaluator) {
+
   # The state GEOIDs of each element in "geoid".
   first_two <- substr(geoid, 1L, 2L)
-  
+
   if (any(c("state", "county") == geography)) {
-    
+
     # If the user specified a geography of "state" or "county", the tidycensus
     # function(s) will be called once with the state argument containing a
     # character vector of all states GEOIDs represented in the geoid argument.
     dplyr::tibble(state = list(unique(first_two)))
-    
-  } else if (geography == "tract" && dataset == "decennial" && year != 2010) {
-    
+
+  } else if (geography == "tract" && dataset == "decennial" && year < 2010) {
+
     # In this special case, the tidycensus function(s) will be called once per
     # unique state represented in the geoid argument.
     dplyr::tibble(state = unique(first_two))
-    
+
   } else {
-    
+
     # If the user specified a geography of "tract" or smaller, the tidycensus
     # function(s) will be called once per unique county represented in the geoid
     # argument.
-    
+
     state_geoids_lgl <- geoid == first_two
-    
+
     # If any elements in the "geoid" argument were state GEOIDs (i.e., 2
     # digits), they are passed to a preliminary tidycensus call in order to
     # obtain all their county GEOIDs. All the state GEOIDs are then removed, and
@@ -282,17 +275,17 @@ sc_from_geoid <- function(geoid,
           county_geoids_from_state(
             partial_tidycensus_calls = partial_tidycensus_calls,
             state = unique(geoid[state_geoids_lgl]),
-            eval_insistently = eval_insistently
+            evaluator = evaluator
           )
         )
     }
-    
+
     # All geoids are truncated to only include their 5-digit county geoids.
     county_geoids <- geoid %>% substr(1L, 5L) %>% unique()
-    
+
     # Turns the character vector into a proper state_county object (i.e., a
     # tibble with columns "state" and "county").
     sc_from_county_geoids(county_geoids)
-    
+
   }
 }

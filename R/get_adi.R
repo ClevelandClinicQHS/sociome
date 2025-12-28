@@ -73,6 +73,9 @@
 #'   of the ADI and ADI-3 and only return the census variables. Defaults to
 #'   `FALSE`.
 #' @param seed Passed to [calculate_adi()].
+#' @param evaluator A function that will evaluate the calls to the tidycensus
+#'   functions. Defaults to [`purrr::insistently`]`(`[`eval`]`, rate =
+#'   `[purrr::rate_delay()]`, quiet = FALSE)`.
 #' @param ... Additional arguments to be passed onto [tidycensus::get_acs()] or
 #'   [tidycensus::get_decennial()]. These must all be named. Must not match any
 #'   of the `tidycensus` formal arguments that `sociome` needs to set
@@ -234,143 +237,33 @@ get_adi <- function(geography,
                     cache_tables    = TRUE,
                     key             = NULL,
                     seed            = NA,
+                    evaluator =
+                      purrr::insistently(
+                        eval,
+                        rate = purrr::rate_delay(),
+                        quiet = FALSE
+                      ),
                     ...) {
-  
+
   geography <- validate_geography(geography)
   year      <- validate_year(year)
   dataset   <- validate_dataset(dataset, year, geography)
-  
+
   # Any given call to get_adi() necessitates one or more calls to
   # tidycensus::get_acs() and/or tidycensus::get_decennial(). The following
   # creates the skeletons of these calls, irrespective of location (i.e.,
   # state/county/geoid/zcta)
   partial_tidycensus_calls <-
-    switch(
-      dataset,
-      decennial = 
-        
-        # The 2010 decennial census did not gather the same detailed data that
-        # the 2000 and 1990 censuses did (i.e., the 2010 census has no SF3), so
-        # its gaps are filled with the 2010 5-year ACS estimates (in reality,
-        # only a few data points are available from the 2010 decennial census
-        # and most of the data is taken from the ACS)
-        if (year == 2010) {
-          
-          list(
-            get_decennial =
-              tidycensus_call(
-                .fn = "get_decennial",
-                geography = geography,
-                variables = 
-                  sociome::decennial_vars[
-                    sociome::decennial_vars$year == 2010,
-                    "variable",
-                    drop = TRUE
-                  ],
-                table = NULL,
-                cache_table = cache_tables,
-                year = 2010,
-                sumfile = "sf1",
-                geometry = geometry,
-                output = "tidy",
-                keep_geo_vars = FALSE,
-                summary_var = NULL,
-                key = key,
-                ...
-              ),
-            get_acs =
-              tidycensus_call(
-                .fn = "get_acs",
-                geography = geography,
-                variables =
-                  sociome::acs_vars$variable[sociome::acs_vars$dec2010],
-                table = NULL,
-                cache_table = cache_tables,
-                year = 2010,
-                output = "tidy",
-                geometry = geometry,
-                keep_geo_vars = FALSE,
-                summary_var = NULL,
-                key = key,
-                survey = "acs5",
-                ...
-              )
-          )
-          
-        } else {
-          
-          # Everything prior to pmap() creates 2 by 2 tibble with column
-          # sumfile = c("sf1", "sf3") and list column "variables" that
-          # contains the corresponding SF1 and SF3 variables.
-          sociome::decennial_vars[sociome::decennial_vars$year == year, ] %>% 
-            eval(expr = quote(split(variable, f = sumfile))) %>% 
-            tibble::enframe(name = "sumfile", value = "variables") %>% 
-            purrr::pmap(
-              .f = tidycensus_call,
-              .fn = "get_decennial",
-              geography = geography,
-              table = NULL, 
-              cache_table = cache_tables,
-              year = year,
-              geometry = geometry,
-              output = "tidy",
-              keep_geo_vars = FALSE,
-              summary_var = NULL,
-              key = key,
-              ...
-            )
-        },
-      
-      # i.e., if ACS data requested instead of decennial
-      {
-        
-        variables_set <- 
-          if (year >= 2011) {
-            if (any(2015:2016 == year) && geography == "block group") {
-              "set2"
-            } else if (year == 2011 && dataset == "acs5") {
-              "set3"
-            } else {
-              "set1"
-            }
-          } else if (year == 2010) {
-            if (dataset == "acs5") {
-              "set5"
-            } else {
-              "set4"
-            }
-          } else if (dataset == "acs1" && year >= 2008) {
-            "set6"
-          } else {
-            "set7"
-          }
-        
-        list(
-          get_acs =
-            tidycensus_call(
-              .fn = "get_acs",
-              geography = geography,
-              variables = 
-                sociome::acs_vars[
-                  sociome::acs_vars[[variables_set]],
-                  "variable",
-                  drop = TRUE
-                ],
-              table = NULL,
-              cache_table = cache_tables,
-              year = year,
-              output = "tidy",
-              geometry = geometry,
-              keep_geo_vars = FALSE,
-              summary_var = NULL,
-              key = key,
-              survey = dataset,
-              ...
-            )
-        )
-      }
+    make_partial_tidycensus_calls(
+      dataset = dataset,
+      year = year,
+      geography = geography,
+      cache_tables = cache_tables,
+      geometry = geometry,
+      key = key,
+      ...
     )
-  
+
   raw_data <-
     get_tidycensus(
       geography = geography,
@@ -383,24 +276,10 @@ get_adi <- function(geography,
       partial_tidycensus_calls = partial_tidycensus_calls,
       geometry = geometry
     )
-  
+
   if (raw_data_only) {
     raw_data
   } else {
     calculate_adi(raw_data, keep_indicators = keep_indicators, seed = seed)
   }
 }
-
-
-# 
-# exec_tidycensus <- function(state = NULL, county = NULL, ...) {
-#   if (!is.null(state)) {
-#     message("\nState: ", paste(state, collapse = ", "))
-#     if (!is.null(county)) {
-#       message("\nCounty: ", paste(county, collapse = ", "))
-#     }
-#   }
-#   exec_insistently(..., state = state, county = county)
-# }
-
-

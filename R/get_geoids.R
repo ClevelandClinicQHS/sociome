@@ -54,13 +54,13 @@ get_geoids <- function(geography,
       geography,
       c("state", "county", "tract", "block group", "block")
     )
-  
+
   # Converts year to the most recent year divisible by 10.
   year <- floor(year / 10) * 10
-  if (!any(c(1990, 2000, 2010, 2020) == year)) {
-    stop("year must be between 1990 and 2029", call. = FALSE)
+  if (!any(c(2000, 2010, 2020) == year)) {
+    stop("year must be between 2000 and 2029", call. = FALSE)
   }
-  
+
   # Create the call skeleton to get_decennial() using the validated argument
   # list
   partial_tidycensus_calls <-
@@ -71,13 +71,15 @@ get_geoids <- function(geography,
           geography = geography,
           variables =
             stats::setNames(
-              object = if (year == 1990) "P0010001" else "P001001",
+              object =
+                if (year == 2020) "P1_001N" else
+                  if (year == 1990) "P0010001" else "P001001",
               nm = paste0("census_", year, "_pop")
             ),
           table = NULL,
           cache_table = cache_tables,
           year = year,
-          sumfile = "sf1",
+          sumfile = if (year == 2020) "pl",
           geometry = geometry,
           output = "wide",
           # keep_geo_vars = FALSE,
@@ -86,7 +88,7 @@ get_geoids <- function(geography,
           ...
         )
     )
-  
+
   d <-
     get_tidycensus(
       geography = geography,
@@ -99,6 +101,6 @@ get_geoids <- function(geography,
       partial_tidycensus_calls = partial_tidycensus_calls,
       geometry = geometry
     )
-  
+
   d
 }

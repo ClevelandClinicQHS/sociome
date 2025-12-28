@@ -18,6 +18,7 @@ get_adi(
   cache_tables = TRUE,
   key = NULL,
   seed = NA,
+  evaluator = purrr::insistently(eval, rate = purrr::rate_delay(), quiet = FALSE),
   ...
 )
 }
@@ -97,6 +98,9 @@ ADIs and ADI-3s, so many tables are cached if \code{TRUE}). Defaults to \code{TR
 necessary if you have already loaded your key with \code{\link[=census_api_key]{census_api_key()}}.}
 
 \item{seed}{Passed to \code{\link[=calculate_adi]{calculate_adi()}}.}
+
+\item{evaluator}{A function that will evaluate the calls to the tidycensus
+functions. Defaults to \code{\link[purrr:insistently]{purrr::insistently}}\code{(}\code{\link{eval}}\verb{, rate = }\code{\link[purrr:rate-helpers]{purrr::rate_delay()}}\verb{, quiet = FALSE)}.}
 
 \item{...}{Additional arguments to be passed onto \code{\link[tidycensus:get_acs]{tidycensus::get_acs()}} or
 \code{\link[tidycensus:get_decennial]{tidycensus::get_decennial()}}. These must all be named. Must not match any

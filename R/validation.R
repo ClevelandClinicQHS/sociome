@@ -1,16 +1,16 @@
 
 validate_geography <- function(geography = c("state",
-                                             "county", 
+                                             "county",
                                              "tract",
                                              "block group",
                                              "zcta",
                                              "zip code tabulation area")) {
   geography <- match.arg(geography)
-  
+
   if (geography == "zcta") {
     geography <- "zip code tabulation area"
   }
-  
+
   geography
 }
 
@@ -40,19 +40,19 @@ validate_year <- function(year, values = NULL) {
 validate_dataset <- function(dataset = c("acs5", "acs3", "acs1", "decennial"),
                              year,
                              geography) {
-  
+
   dataset <- match.arg(dataset)
-  
+
   if (dataset == "decennial") {
-    
+
     if (!any(c(1990, 2000, 2010, 2020) == year)) {
       stop(
         'When setting dataset = "decennial", ',
-        'year must be 1990, 2000, 2010, or 2020.',
+        'year must be 2000, 2010, or 2020.',
         call. = FALSE
       )
     }
-    
+
     if (geography == "zip code tabulation area") {
       stop(
         'geography = "zip code tabulation area" not supported',
@@ -61,7 +61,7 @@ validate_dataset <- function(dataset = c("acs5", "acs3", "acs1", "decennial"),
         call. = FALSE
       )
     }
-    
+
   } else if (geography == "block group" && any(2015:2016 == year)) {
     warning(
       "\nMedian family income (B19113_001) is unavailable at the block group",
@@ -75,7 +75,7 @@ validate_dataset <- function(dataset = c("acs5", "acs3", "acs1", "decennial"),
       immediate. = TRUE
     )
   }
-  
+
   dataset
 }
 
@@ -84,7 +84,7 @@ validate_dataset <- function(dataset = c("acs5", "acs3", "acs1", "decennial"),
 determine_input_arg <- function(geoid = NULL, state = NULL, county = NULL) {
   args <- c("geoid"[!is.null(geoid)], "state"[!is.null(state)],
             "county"[!is.null(county)])
-  
+
   switch(
     length(args) + 1L,
     return("NULL"),
@@ -97,16 +97,16 @@ determine_input_arg <- function(geoid = NULL, state = NULL, county = NULL) {
       return("county")
     }
   )
-  
+
   stop("Enter only one of:\ngeoid,\nor state/county", call. = FALSE)
 }
 
 
 
 validate_state <- function(state) {
-  
+
   state <- validate_single_string(state, what = "state")
-  
+
   i <-
     if (stringr::str_detect(state, "^\\d{2,}$")) {
       if (nchar(state) > 2L) {
@@ -120,13 +120,13 @@ validate_state <- function(state) {
     } else {
       match(toupper(state), toupper(tidycensus::fips_codes$state_name))
     }
-  
+
   if (is.na(i)) {
     stop('state = "', state,
          '" does not match any state in tidycensus::fips_codes.',
          "\nReview that table and then review your input.", call. = FALSE)
   }
-  
+
   tidycensus::fips_codes$state_code[i]
 }
 
@@ -138,7 +138,7 @@ validate_state <- function(state) {
 validate_county <- function(state, county) {
   state <- validate_state(state)
   validate_single_string(county, what = "county")
-  
+
   if (stringr::str_detect(county, "^(\\d{2})?\\d{3}$")) {
     if (nchar(county) == 5L) {
       if (substr(county, 1L, 2L) != state) {
@@ -151,7 +151,6 @@ validate_county <- function(state, county) {
     i <- which(tidycensus::fips_codes$state_code == state &
                  tidycensus::fips_codes$county_code == county)
   } else {
-    pattern <- paste0("(?i)^", county)
     i <-
       which(
         tidycensus::fips_codes$state_code == state &
@@ -161,7 +160,7 @@ validate_county <- function(state, county) {
           )
       )
   }
-  
+
   if (length(i) != 1L) {
     if (length(i)) {
       stop('county = "', county, '" matches more than one county in state = "',
@@ -176,7 +175,7 @@ validate_county <- function(state, county) {
     stop('county = "', county, '" does not match any counties in state = "',
          state, '"', call. = FALSE)
   }
-  
+
   paste0(
     tidycensus::fips_codes$state_code[i],
     tidycensus::fips_codes$county_code[i]
@@ -201,9 +200,9 @@ validate_single_geoid <- function(geoid) {
 
 
 validate_geoid <- function(geoid) {
-  
+
   geoid <- stringr::str_trim(geoid)
-  
+
   # user_geoids must be a character vector with each element containing
   # exactly 2, 5, 11, or 12 digits.
   if (length(geoid) == 0L || any(is.na(geoid)) ||
@@ -215,7 +214,7 @@ validate_geoid <- function(geoid) {
       call. = FALSE
     )
   }
-  
+
   geoid
 }
 
@@ -233,10 +232,10 @@ validate_single_string <- function(x, what, null_ok = FALSE) {
 
 
 validate_geo_length <- function(geography, geoid) {
-  
+
   geo_length <-
     switch(
-      geography, 
+      geography,
       block         = 15L,
       "block group" = 12L,
       tract         = 11L,
@@ -248,7 +247,7 @@ validate_geo_length <- function(geography, geoid) {
         call. = FALSE
       )
     )
-  
+
   if (max(nchar(geoid)) > geo_length) {
     # Warns user if they specified in the "geography" argument a level of
     # geography larger than any of the GEOIDs in the geoid argument.
@@ -258,7 +257,7 @@ validate_geo_length <- function(geography, geoid) {
       call. = FALSE
     )
   }
-  
+
   geo_length
 }
 
@@ -300,7 +299,7 @@ validate_dissim_colnames <- function(dissimilarity_measure_name,
            call. = FALSE)
     }
   }
-  
+
   if (!is.null(sampling_weight_name)) {
     if (!rlang::is_string(sampling_weight_name) ||
         !nchar(sampling_weight_name)) {

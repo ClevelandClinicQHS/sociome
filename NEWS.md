@@ -1,6 +1,9 @@
 # sociome (development version)
 
-- Removed `seed` argument from `synthetic_population()`.
+- Removed `seed` argument from `synthetic_population()`. Just call `set.seed()` beforehand if you want.
+- Added `evaluator` argument to `get_adi()`, enabling the user to customize how the function retries calls to the census API.
+- Fixed bug in the filtering of ZCTAs reference areas: before, the GEOIDs of ZCTAS were the ZCTA itself preceded by two digits. sociome now anticipates this and looks only at the last five digits.
+- Added many unit tests.
 
 # sociome 2.2.5
 - Fixed typo that prevented geometry from accompanying `get_adi()` results.

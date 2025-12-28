@@ -71,7 +71,7 @@
 #' @examples
 #' if (requireNamespace("USpopcenters", quietly = TRUE) &&
 #'   requireNamespace("geosphere", quietly = TRUE)) {
-#' 
+#'
 #' # All states whose centers of population are within 300 kilometers of the
 #' # center of population of New York County, New York (i.e, Manhattan):
 #' areas_in_radius(
@@ -93,7 +93,7 @@
 #'   population = 3e6,
 #'   units = "barleycorns"
 #' )
-#' 
+#'
 #' }
 #' @return A [`tibble`][tibble::tibble] with each of the columns found in the
 #'   corresponding `USpopcenters` table, with two columns appended:
@@ -115,40 +115,40 @@ areas_in_radius <- function(geography = c("state", "county", "tract",
                             distance_fun = geosphere::distVincentyEllipsoid,
                             batch_size = 50L) {
   check_for_packages(c("USpopcenters", "geosphere"))
-  
+
   if (!is.numeric(radius) || length(radius) != 1L || is.na(radius) ||
-      (radius <- as.numeric(radius)) < 0) {
+      radius < 0) {
     stop("radius must be a single non-negative number", call. = FALSE)
   }
-  
+
   if (!is.null(units)) {
     check_for_packages("units")
-    radius <- radius %>% 
-      units::set_units(units, mode = "standard") %>% 
-      units::set_units("meters", mode = "standard") %>% 
+    radius <- radius %>%
+      units::set_units(units, mode = "standard") %>%
+      units::set_units("meters", mode = "standard") %>%
       as.numeric()
   }
-  
+
   if (!identical(as.character(measure_from), "center of population")) {
     stop('meaure_from currently must equal "center of population"',
          call. = FALSE)
   }
-  
+
   geography <- match.arg(geography)
   year <- validate_year(year, c(2020, 2010, 2000))
-  
+
   batch_size <- validate_single_positive_integer(batch_size, "batch_size")
-  
+
   all_centers <- centers_tbl_from_geography(geography, year)
-  
+
   center <- validate_lon_lat(center)
-  
+
   filter_centers(
     all_centers = all_centers,
-    lon_lat = center, 
+    lon_lat = center,
     distance_fun = distance_fun,
     target = radius,
-    target_type = "radius", 
+    target_type = "radius",
     units = units,
     batch_size = batch_size
   )
@@ -172,27 +172,27 @@ closest_n_areas <- function(geography = c("state", "county", "tract",
   check_for_packages(
     c("USpopcenters", "geosphere", if (!is.null(units)) "units")
   )
-  
+
   if (!identical(as.character(measure_from), "center of population")) {
     stop('meaure_from currently must equal "center of population"',
          call. = FALSE)
   }
-  
+
   geography <- match.arg(geography)
   year <- validate_year(year, c(2020, 2010, 2000))
   n <- validate_single_positive_integer(n, "n")
   batch_size <- validate_single_positive_integer(batch_size, "batch_size")
-  
+
   all_centers <- centers_tbl_from_geography(geography, year)
-  
+
   center <- validate_lon_lat(center)
-  
+
   filter_centers(
     all_centers = all_centers,
-    lon_lat = center, 
+    lon_lat = center,
     distance_fun = distance_fun,
     target = n,
-    target_type = "n", 
+    target_type = "n",
     units = units,
     batch_size = batch_size
   )
@@ -216,27 +216,27 @@ closest_population <- function(geography = c("state", "county", "tract",
   check_for_packages(
     c("USpopcenters", "geosphere", if (!is.null(units)) "units")
   )
-  
+
   if (!identical(as.character(measure_from), "center of population")) {
     stop('meaure_from currently must equal "center of population"',
          call. = FALSE)
   }
-  
+
   geography <- match.arg(geography)
   year <- validate_year(year, c(2020, 2010, 2000))
   population <- validate_single_positive_integer(population, "population")
   batch_size <- validate_single_positive_integer(batch_size, "batch_size")
-  
+
   all_centers <- centers_tbl_from_geography(geography, year)
-  
+
   center <- validate_lon_lat(center)
-  
+
   filter_centers(
     all_centers = all_centers,
-    lon_lat = center, 
+    lon_lat = center,
     distance_fun = distance_fun,
     target = population,
-    target_type = "population", 
+    target_type = "population",
     units = units,
     batch_size = batch_size
   )
@@ -248,10 +248,10 @@ closest_population <- function(geography = c("state", "county", "tract",
 
 #' @importFrom rlang .data
 filter_centers <- function(all_centers,
-                           lon_lat, 
+                           lon_lat,
                            distance_fun,
                            target,
-                           target_type = c("radius", "n", "population"), 
+                           target_type = c("radius", "n", "population"),
                            units = NULL,
                            batch_size = 50L) {
   all_centers <-
@@ -259,30 +259,30 @@ filter_centers <- function(all_centers,
       all_centers,
       abs(.data$LONGITUDE - !!lon_lat[1L]) + abs(.data$LATITUDE - !!lon_lat[2L])
     )
-  
+
   all_centers$distance <- Inf
-  
+
   break_condition <-
     switch(
       target_type,
-      
+
       # All distances in the batch are greater than the radius
       radius =
         function() all(all_centers$distance[rows] > target, na.rm = TRUE),
-      
+
       # The first row in the batch is at least n + 1 (i.e., n was reached in
       # the previous batch)
       n = function() target + 1L <= rows[1L],
-      
+
       # The total population of all previous batches meets or exceeds the
       # target population
       population =
         function() target <=
         sum(all_centers$POPULATION[1L:(rows[1L] - 1L)], na.rm = TRUE)
     )
-  
+
   for (rows in row_number_batches(all_centers)) {
-    all_centers$distance[rows] <- 
+    all_centers$distance[rows] <-
       as.numeric(
         geosphere::distm(
           x = as.matrix(all_centers[rows, c("LONGITUDE", "LATITUDE")]),
@@ -290,34 +290,34 @@ filter_centers <- function(all_centers,
           fun = distance_fun
         )
       )
-    
-    # Stop calculating distances if the break condition is met. 
+
+    # Stop calculating distances if the break condition is met.
     if (break_condition()) break
   }
-  
+
   all_centers <-
     dplyr::arrange(all_centers, .data$distance, .data$POPULATION, .data$geoid)
-  
+
   out <-
     switch(
       target_type,
       radius = all_centers[all_centers$distance <= target, ],
       n = all_centers[seq_len(target), ],
-      population = 
+      population =
         all_centers[
           dplyr::lag(cumsum(all_centers$POPULATION) < target, default = TRUE),
         ]
     )
-  
+
   if (!is.null(units)) {
-    out$distance <- out$distance %>% 
-      units::set_units("meters", mode = "standard") %>% 
-      units::set_units(units, mode = "standard") %>% 
+    out$distance <- out$distance %>%
+      units::set_units("meters", mode = "standard") %>%
+      units::set_units(units, mode = "standard") %>%
       as.numeric()
   }
-  
+
   out
-} 
+}
 
 
 
@@ -354,7 +354,7 @@ filter_centers <- function(all_centers,
 #'
 #' @examples
 #' if (requireNamespace("USpopcenters", quietly = TRUE)) {
-#'  
+#'
 #' # The center of population of Alaska
 #' lon_lat_from_area(state = "alAskA")
 #'
@@ -369,9 +369,9 @@ filter_centers <- function(all_centers,
 #'   (positive for north, negative for south).
 #' @seealso [areas_in_radius()]
 #' @export
-lon_lat_from_area <- function(geoid = NULL, 
+lon_lat_from_area <- function(geoid = NULL,
                               state = NULL,
-                              county = NULL, 
+                              county = NULL,
                               year = 2020) {
   check_for_packages("USpopcenters")
   year <- validate_year(year, c(2020, 2010, 2000))
@@ -390,9 +390,9 @@ lon_lat_from_area <- function(geoid = NULL,
 lon_lat_from_geoid <- function(geoid, year) {
   geoid <- validate_single_geoid(geoid)
   tbl <- centers_tbl_from_geoid(geoid, year)
-  
+
   i <- which(tbl$geoid == geoid)
-  
+
   if (length(i) != 1L) {
     if (length(i)) {
       stop('geoid = "', geoid, '" somehow matched multiple areas.',
@@ -401,7 +401,7 @@ lon_lat_from_geoid <- function(geoid, year) {
     stop('geoid = "', geoid, '" did not match any areas for year ', year,
          call. = FALSE)
   }
-  
+
   as.double(tbl[i, c("LONGITUDE", "LATITUDE")])
 }
 
@@ -425,9 +425,9 @@ lon_lat_from_county <- function(state, county, year) {
 
 
 row_number_batches <- function(all_centers, batch_size = 50L) {
-  all_centers %>% 
-    nrow() %>% 
-    seq_len() %>% 
+  all_centers %>%
+    nrow() %>%
+    seq_len() %>%
     split(rep(., each = batch_size, length.out = length(.)))
 }
 
@@ -439,11 +439,11 @@ centers_tbl_from_geography <- function(geography, year) {
     stop("Geography must be state, county, tract, or block group",
          call. = FALSE)
   }
-  
+
   geography <- sub(" ", "_", geography)
-  
+
   tbl <- getExportedValue("USpopcenters", paste0(geography, year))
-  
+
   USpopcenters_to_geoid_tbl(tbl)
 }
 
@@ -452,18 +452,18 @@ centers_tbl_from_geoid <- function(geoid, year) {
   if (!any(c(2020, 2010, 2000) == year)) {
     stop("year must be 2020, 2010, or 2000", call. = FALSE)
   }
-  
-  geography <- 
+
+  geography <-
     c("state", "county", "tract", "block_group")[
       match(nchar(geoid), c(2L, 5L, 11L, 12L))
     ]
-  
+
   if (is.na(geography)) {
     stop("geoid must have 2, 5, 11, or 12 digits", call. = FALSE)
   }
-  
+
   tbl <- getExportedValue("USpopcenters", paste0(geography, year))
-  
+
   USpopcenters_to_geoid_tbl(tbl)
 }
 
@@ -476,6 +476,6 @@ USpopcenters_to_geoid_tbl <- function(tbl) {
         intersect(c("STATEFP", "COUNTYFP", "TRACTCE", "BLKGRPCE"), names(tbl))
       ]
     )
-  
+
   tbl
 }

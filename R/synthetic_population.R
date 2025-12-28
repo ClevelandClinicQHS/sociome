@@ -73,8 +73,6 @@
 #' @param key Your Census API key as a character string. Obtain one at
 #'   <http://api.census.gov/data/key_signup.html>. Defaults to `NULL`. Not
 #'   necessary if you have already loaded your key with [census_api_key()].
-#' @param seed Passed onto [set.seed()], which is called before
-#'   probabilistically synthesizing the age values with [sample()].
 #' @param ... Additional arguments to be passed onto [tidycensus::get_acs()] or
 #'   [tidycensus::get_decennial()]. These must all be named. Must not match any
 #'   of the `tidycensus` formal arguments that `sociome` needs to set
@@ -98,17 +96,17 @@
 #'   distribution (via [`stats::rexp()`]) guides the age generation for this
 #'   highest age bracket, and the user can specify `rate` to customize the
 #'   exponential distribution that is used.
-#'   
+#'
 #' @return If `geometry = FALSE`, (the default) a [`tibble`][tibble::tibble]. If
 #'   `geometry = TRUE` is specified, an [`sf`][sf::sf].
 #' @examples
 #' \dontrun{
 #' # Wrapped in \dontrun{} because all these examples take >5 seconds
 #' # and require a Census API key.
-#' 
+#'
 #' # Synthetic population for Utah, using the 2019 ACS 5-year estimates:
 #' synthetic_population(geography = "state", state = "UT", year = 2019)
-#' 
+#'
 #' # Same, but make it so that survival past age 85 is highly unlikely
 #' # (via rate = 10), and so that 87 is the maximum possible age
 #' synthetic_population(
@@ -118,15 +116,15 @@
 #'   max_age = 87,
 #'   rate = 10
 #' )
-#' 
+#'
 #' # Synthetic population of the Delmarva Peninsula at the census tract level,
 #' # using 2000 Decennial Census data
 #' synthetic_population(
 #'   geography = "tract",
-#'   geoid = 
+#'   geoid =
 #'     # This two-digit GEOID is the state of Delaware.
 #'     c("10",
-#'     
+#'
 #'     # These five-digit GEOIDs are specific counties in Virginia and Maryland
 #'       "51001", "51131", "24015", "24029", "24035", "24011", "24041", "24019",
 #'       "24045", "24039", "24047"),
@@ -149,29 +147,27 @@ synthetic_population <- function(geography,
                                  max_age         = 115,
                                  rate            = 0.25,
                                  key             = NULL,
-                                 seed            = NULL,
                                  ...) {
   geography <- validate_geography(geography)
   year      <- validate_year(year)
   dataset   <- validate_dataset(dataset, year, geography)
-  
+
   partial_tidycensus_calls <-
     switch(
-      dataset, 
-      decennial =
+      dataset,
+      decennial = {
+        variables <-
+          sociome::decennial_age_sex_race_ethnicity_vars[
+            sociome::decennial_age_sex_race_ethnicity_vars$year == year,
+            c("variable", "description")
+          ]
         list(
-          get_decennial = 
+          get_decennial =
             tidycensus_call(
               .fn = "get_decennial",
               geography = geography,
               variables =
-                eval(
-                  quote(stats::setNames(object = variable, nm = description)),
-                  dplyr::filter(
-                    sociome::decennial_age_sex_race_ethnicity_vars,
-                    .data$year == !!year
-                  )
-                ),
+                stats::setNames(variables$variable, variables$description),
               table = NULL,
               cache_table = cache_tables,
               year = year,
@@ -183,30 +179,32 @@ synthetic_population <- function(geography,
               key = key,
               ...
             )
-        ),
-      list(
-        tidycensus_call(
-          .fn = "get_acs",
-          geography = geography,
-          variables =
-            stats::setNames(
-              object = sociome::acs_age_sex_race_ethnicity_vars$variable,
-              nm = sociome::acs_age_sex_race_ethnicity_vars$description
-            ),
-          table = NULL,
-          cache_table = cache_tables,
-          year = year,
-          output = "tidy",
-          geometry = geometry,
-          keep_geo_vars = FALSE,
-          summary_var = NULL,
-          key = key,
-          survey = dataset,
-          ...
         )
+      },
+      list(
+        get_acs =
+          tidycensus_call(
+            .fn = "get_acs",
+            geography = geography,
+            variables =
+              stats::setNames(
+                sociome::acs_age_sex_race_ethnicity_vars$variable,
+                sociome::acs_age_sex_race_ethnicity_vars$description
+              ),
+            table = NULL,
+            cache_table = cache_tables,
+            year = year,
+            output = "tidy",
+            geometry = geometry,
+            keep_geo_vars = FALSE,
+            summary_var = NULL,
+            key = key,
+            survey = dataset,
+            ...
+          )
       )
     )
-  
+
   raw_census_data <-
     get_tidycensus(
       geography = geography,
@@ -219,59 +217,54 @@ synthetic_population <- function(geography,
       partial_tidycensus_calls = partial_tidycensus_calls,
       geometry = geometry
     )
-  
+
   census_data_prepped <-
     dplyr::transmute(
       raw_census_data,
       dplyr::across(
-        c(.data$GEOID,
-          .data$NAME,
-          .data$total,
+        c("GEOID", "NAME", "total",
           dplyr::contains("males_"),
-          .data$hispanic_or_latino,
-          .data$not_hispanic_or_latino_white_alone,
-          .data$not_hispanic_or_latino_black_or_african_american_alone,
-          .data$not_hispanic_or_latino_asian_alone,
-          .data$not_hispanic_or_latino_american_indian_and_alaska_native_alone
-        )
+          "hispanic_or_latino",
+          "not_hispanic_or_latino_white_alone",
+          "not_hispanic_or_latino_black_or_african_american_alone",
+          "not_hispanic_or_latino_asian_alone",
+          "not_hispanic_or_latino_american_indian_and_alaska_native_alone")
       ),
       not_hispanic_or_latino_some_other_race_alone_or_two_or_more_races =
-        .data$total - 
+        .data$total -
         .data$hispanic_or_latino -
         .data$not_hispanic_or_latino_white_alone -
         .data$not_hispanic_or_latino_black_or_african_american_alone -
         .data$not_hispanic_or_latino_asian_alone -
         .data$not_hispanic_or_latino_american_indian_and_alaska_native_alone
     )
-  
+
   out <-
     dplyr::transmute(
       census_data_prepped,
       GEOID = .data$GEOID,
       NAME = .data$NAME,
-      age_sex = 
+      age_sex =
         purrr::pmap(
-          dplyr::across(c(.data$total, dplyr::contains("males_"))),
+          dplyr::across(c("total", dplyr::contains("males_"))),
           synthetic_population_column,
           colname = "age_sex"
         ),
       race_ethnicity =
         purrr::pmap(
-          dplyr::across(c(.data$total, dplyr::contains("hispanic_or_latino"))),
+          dplyr::across(c("total", dplyr::contains("hispanic_or_latino"))),
           synthetic_population_column,
           colname = "race_ethnicity"
         )
     )
-  
-  out <- tidyr::unnest(out, cols = c(.data$age_sex, .data$race_ethnicity))
-  
+
+  out <- tidyr::unnest(out, cols = c("age_sex", "race_ethnicity"))
+
   ages <- stringr::str_extract_all(out$age_sex, "\\d+", simplify = TRUE)
   storage.mode(ages) <- "double"
-  
+
   over <- stringr::str_detect(out$age_sex, "over")
-  
-  set.seed(seed)
-  
+
   out <-
     dplyr::transmute(
       out,
@@ -279,11 +272,11 @@ synthetic_population <- function(geography,
       .data$NAME,
       .data$age_sex,
       sex = stringr::str_extract(.data$age_sex, "^(fe)?male"),
-      age_lo = 
+      age_lo =
         ifelse(
           test = stringr::str_detect(.data$age_sex, "under"),
           yes = 0,
-          no = 
+          no =
             !!ages[, 1L] +
             stringr::str_detect(
               .data$age_sex,
@@ -296,7 +289,7 @@ synthetic_population <- function(geography,
           ifelse(
             test = !!over,
             yes = !!max_age,
-            no = 
+            no =
               !!ages[, 1L] -
               stringr::str_detect(
                 .data$age_sex,
@@ -314,7 +307,7 @@ synthetic_population <- function(geography,
         ),
       .data$race_ethnicity
     )
-  
+
   out
 }
 
@@ -323,11 +316,11 @@ synthetic_population_column <- function(colname, total, ...) {
   if (is.na(total) || total == 0) {
     return(dplyr::tibble(!!colname := character()))
   }
-  
+
   dots <- c(...)
-  
+
   dots[is.na(dots)] <- 0
-  
+
   dplyr::tibble(
     !!colname := sample(names(dots), size = total, replace = TRUE, prob = dots)
   )

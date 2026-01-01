@@ -410,6 +410,10 @@ test_that("non-zcta ref_area works", {
     )
   )
 
+  expect_error(calculate_adi(NULL), "data must be a tibble")
+
+  skip_if(Sys.getenv("CENSUS_API_KEY") == "")
+
   expect_snapshot(
     test_tidycensus_data <-
       eval_tidycensus_calls(
@@ -435,8 +439,6 @@ test_that("non-zcta ref_area works", {
     "The following tracts had no match in census data"
   )
 
-
-  expect_error(calculate_adi(NULL), "data must be a tibble")
   expect_warning(calculate_adi(test_tidycensus_data[1:29, ]), "fewer than 30")
 
   set.seed(20251229)

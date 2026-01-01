@@ -1,4 +1,6 @@
 test_that("synthetic_population() works", {
+
+  skip_if(Sys.getenv("CENSUS_API_KEY") == "")
   set.seed(20251229)
 
   expect_snapshot(

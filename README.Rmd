@@ -14,8 +14,11 @@ knitr::opts_chunk$set(
 
 # sociome
 
+<!-- badges: start -->
 [![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/sociome)](https://cran.r-project.org/package=sociome)
 ![CRAN\_Download\_Counter](http://cranlogs.r-pkg.org/badges/grand-total/sociome)
+[![R-CMD-check](https://github.com/ClevelandClinicQHS/sociome/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ClevelandClinicQHS/sociome/actions/workflows/R-CMD-check.yaml)
+  <!-- badges: end -->
 
 > The dimensions of existence that are social.
 

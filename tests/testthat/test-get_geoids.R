@@ -1,4 +1,7 @@
 test_that("get_geoids()_works", {
+
+  skip_if(Sys.getenv("CENSUS_API_KEY") == "")
+
   expect_error(
     get_geoids(geography = "state", year = 1776, dataset = "decennial"),
     "decennial census data are only available for 2000, 2010,( and)? 2020"

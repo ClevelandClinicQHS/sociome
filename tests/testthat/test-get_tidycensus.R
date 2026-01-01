@@ -5,29 +5,3 @@ test_that("tidycensus_call() works", {
     quote(tidycensus::get_acs(geography = "state", year = 2010))
   )
 })
-
-
-
-# test_that("getting and filtering tidycensus data works", {
-#
-#   expect_equal(
-#     partial_tidycensus_calls <-
-#       make_partial_tidycensus_calls(
-#         dataset = 2010
-#       )
-#   )
-#
-#   expect_equal(
-#     decennial_tracts_2010 <-
-#       eval_tidycensus_calls(
-#
-#       )
-#   )
-#
-#   expect_warning(
-#     filter_ref_area()
-#   )
-# })
-
-
-

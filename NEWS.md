@@ -10,7 +10,7 @@
 - Added ZCTA compatibility to `get_geoids()`. You now have to exactly specify `dataset = "decennial"` with the exact decennial census year if you want these data.
 - Fixed bug in the filtering of ZCTAs reference areas: before, the GEOIDs of ZCTAS were the ZCTA itself preceded by two digits. sociome now anticipates this and looks only at the last five digits.
 - Added default argument to `geography` argument in `get_adi()`, `get_geoids()`, and `synthetic_population()`
-- Changed default `year` argument in `get_geoids()` to 2020.
+- Removed default `year` argument in `get_geoids()`.
 - Improved documentation and added many unit tests.
 
 # sociome 2.2.5

@@ -11,7 +11,7 @@ get_geoids(
   county = NULL,
   geoid = NULL,
   zcta = NULL,
-  year = 2020,
+  year,
   dataset = c("acs5", "decennial", "acs3", "acs1"),
   geometry = FALSE,
   cache_tables = TRUE,

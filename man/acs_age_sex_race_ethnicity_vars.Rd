@@ -5,9 +5,11 @@
 \alias{acs_age_sex_race_ethnicity_vars}
 \title{ACS variables for age, sex, race, and ethnicity}
 \format{
-A \code{\link[tibble]{tibble}} with 65 rows and 2 variables:
-  \describe{ \item{variable}{ACS variable name}
-  \item{description}{A description of who is present in the count}}
+A \code{\link[tibble:tibble]{tibble}} with 65 rows and 2 variables:
+\itemize{
+\item \strong{variable}: ACS variable name.
+\item \strong{description}: A description of who is present in the count.
+}
 }
 \usage{
 acs_age_sex_race_ethnicity_vars
@@ -24,6 +26,7 @@ from its beginning through 2020.
 This data set is used to support \code{\link{synthetic_population}()}.
 }
 \seealso{
+\code{\link[=synthetic_population]{synthetic_population()}} and
 \code{\link{decennial_age_sex_race_ethnicity_vars}}
 }
 \keyword{datasets}

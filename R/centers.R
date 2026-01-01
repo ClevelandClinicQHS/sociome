@@ -434,13 +434,10 @@ row_number_batches <- function(all_centers, batch_size = 50L) {
 
 
 
-centers_tbl_from_geography <- function(geography, year) {
-  if (!any(c("state", "county", "tract", "block group") == geography)) {
-    stop("Geography must be state, county, tract, or block group",
-         call. = FALSE)
-  }
-
-  geography <- sub(" ", "_", geography)
+centers_tbl_from_geography <- function(geography = c("state", "county", "tract",
+                                                     "block group"),
+                                       year) {
+  geography <- switch(geography, "block group" = "block_group", geography)
 
   tbl <- getExportedValue("USpopcenters", paste0(geography, year))
 

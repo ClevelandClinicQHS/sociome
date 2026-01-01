@@ -16,7 +16,7 @@
          GEOID       NAME                                          ADI
          <chr>       <chr>                                       <dbl>
        1 39035101101 Census Tract 1011.01, Cuyahoga County, Ohio 130. 
-       2 39035101102 Census Tract 1011.02, Cuyahoga County, Ohio  97.2
+       2 39035101102 Census Tract 1011.02, Cuyahoga County, Ohio  97.1
        3 39035101200 Census Tract 1012, Cuyahoga County, Ohio    131. 
        4 39035101300 Census Tract 1013, Cuyahoga County, Ohio    125. 
        5 39035101400 Census Tract 1014, Cuyahoga County, Ohio    112. 
@@ -29,13 +29,13 @@
                       <dbl>                            <dbl>                  <dbl>
        1               81.2                             131.                   64.5
        2              104.                              101.                  112. 
-       3               82.7                             130.                   54.2
+       3               82.7                             130.                   54.3
        4               85.5                             127.                   76.6
-       5               86.3                             102.                   61.6
-       6               82.9                             120.                   85.1
-       7               82.2                             120.                   66.4
-       8               85.5                             126.                   79.2
-       9               82.0                             126.                   65.9
+       5               86.4                             102.                   61.7
+       6               82.9                             119.                   85.1
+       7               82.3                             120.                   66.5
+       8               85.5                             125.                   79.2
+       9               82.0                             126.                   66.0
       10               81.6                             124.                   96.7
          medianFamilyIncome medianMortgage medianRent medianHouseValue
                       <dbl>          <dbl>      <dbl>            <dbl>
@@ -330,156 +330,40 @@
 ---
 
     Code
-      get_adi(geography = "block group", state = "DE", year = 2015, dataset = "acs5",
-        keep_indicators = TRUE, cache_tables = FALSE, raw_data_only = TRUE)
-    Condition
-      Warning:
-      
-      Median family income (B19113_001) is unavailable at the block group
-      level in the years 2015 and 2016.
-      
-      Median household income (B19013_001) will be used instead.
-      
-      See the "Missingness and imputation" section of ?get_adi, as well as:
-      https://www.census.gov/programs-surveys/acs/technical-documentation/user-notes/2016-01.html
-    Message
-      
-      Preliminary tidycensus call beginning...
-      Getting data from the 2011-2015 5-year ACS
-      
-      3 call(s) to tidycensus beginning.
-      Getting data from the 2011-2015 5-year ACS
-      Getting data from the 2011-2015 5-year ACS
-      Getting data from the 2011-2015 5-year ACS
+      set2_adi_results
     Output
-      # A tibble: 574 x 62
-         GEOID        NAME                                                     
-         <chr>        <chr>                                                    
-       1 100010401001 Block Group 1, Census Tract 401, Kent County, Delaware   
-       2 100010401002 Block Group 2, Census Tract 401, Kent County, Delaware   
-       3 100010401003 Block Group 3, Census Tract 401, Kent County, Delaware   
-       4 100010402011 Block Group 1, Census Tract 402.01, Kent County, Delaware
-       5 100010402012 Block Group 2, Census Tract 402.01, Kent County, Delaware
-       6 100010402021 Block Group 1, Census Tract 402.02, Kent County, Delaware
-       7 100010402022 Block Group 2, Census Tract 402.02, Kent County, Delaware
-       8 100010402031 Block Group 1, Census Tract 402.03, Kent County, Delaware
-       9 100010402032 Block Group 2, Census Tract 402.03, Kent County, Delaware
-      10 100010405011 Block Group 1, Census Tract 405.01, Kent County, Delaware
-         B11005_001 B11005_002 B11005_005 B15003_001 B15003_002 B15003_003 B15003_004
-              <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
-       1       1148        443        145       2254         18          0         15
-       2        661        241        120       1139         16          0          0
-       3        534        120         62       1119         89          0          0
-       4        842        373        190       1749         11          0          0
-       5       1091        359        153       1819         24          0          0
-       6       1682        503        198       3330        109          0          0
-       7       3234       1448        380       6517         10          0          0
-       8       1416        575        216       2512         10          0          0
-       9        548        215         13       1265          4          0          0
-      10        936        221        100       1577          9          0          0
-         B15003_005 B15003_006 B15003_007 B15003_008 B15003_009 B15003_010 B15003_011
-              <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
-       1          0          0          0          0          0        103          0
-       2          0          0          6          0          0         11          0
-       3          0          0          0          0          0         23          0
-       4          0          0          0          0          0          0          0
-       5          0          7          0          0          0          0          0
-       6          0          0          0          0          2         34          4
-       7          0          0          0          0          0         22          0
-       8          0          0          0          0          0          0          0
-       9          0          0          0          0          0          7          0
-      10          0          0          0          0          0          0          0
-         B15003_012 B15003_017 B15003_018 B15003_019 B15003_020 B15003_021 B15003_022
-              <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
-       1         81        981         96         43        239        217        131
-       2          1        515         44         47        137        105         89
-       3         60        408         55         14        143         51         47
-       4         28        653         98         81        208        141        243
-       5          0        615         88        143        234        129        325
-       6         10        857        187        223        356        333        653
-       7         96       2102        166        531       1048        537       1019
-       8         10        605        172        133        556        341        326
-       9         46        366        119         86        181        131        133
-      10          0        446         69         78        183        155        326
-         B15003_023 B15003_024 B15003_025 B17010_001 B17010_002 B19001_002 B19001_011
-              <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
-       1        134         16          0        955         84         95         41
-       2         44          0          0        517         27          7         88
-       3          0          0          0        388         54         24         26
-       4         94          0          0        705         77         12         79
-       5         48          8          0        678         73         47        169
-       6        228         68         29       1172         79         44        135
-       7        302         84         25       2564         84         45        289
-       8         41          6         20        976        104        154        193
-       9         72          0          6        475         18          4         69
-      10        113          0          0        615         75         88        130
-         B19001_012 B19001_013 B19001_014 B19001_015 B19001_016 B19001_017 B19013_001
-              <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
-       1         65        297        117        100         39         41      77930
-       2         27        140         61          4         49          0      55524
-       3         62        100          0         29         12         14      46364
-       4        111         91         82         31         21         21      52206
-       5        130        134         71         14         28         38      51250
-       6        187        248        211        205         76         78      72788
-       7        299        702        376        289        154         24      68947
-       8        173        259        104         51          5          0      55469
-       9         90         42        142         62         52         40     103790
-      10        136        100         52         29         52         39      56042
-         B23025_003 B23025_005 B25003_001 B25003_002 B25014_001 B25014_005 B25014_006
-              <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
-       1       1828        249       1148        961       1148          0          0
-       2        850         52        661        516        661          0          0
-       3        783        181        534        517        534          0          0
-       4       1322        167        842        733        842         15          0
-       5       1554        108       1091        556       1091          0         17
-       6       2268         38       1682       1330       1682          0          0
-       7       4844        216       3234       2898       3234        111          0
-       8       1795         99       1416        918       1416         25          0
-       9        929         55        548        443        548          0          0
-      10        983        108        936        795        936         26          0
-         B25014_007 B25014_011 B25014_012 B25014_013 B25044_001 B25044_003 B25044_010
-              <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
-       1          0          0          0          0       1148         18         46
-       2          0         10          0          0        661          4         16
-       3          0          0          0          0        534          0          0
-       4          0          0          0          0        842         35          0
-       5          0          0          0          0       1091         49         56
-       6          0         27          0          0       1682         32         48
-       7          0          0          0          0       3234         22          0
-       8          0         16          0         16       1416         16        127
-       9          0          0          0          0        548          0          0
-      10          0          0          0          0        936         26         54
-         B25064_001 B25077_001 B25088_002 C17002_001 C17002_002 C17002_003 C17002_004
-              <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
-       1       1146     238900       1304       3410        304        140         28
-       2        918     214000       1589       1628         55         65         47
-       3         NA     173100       1318       1428        129        170         14
-       4       1160     188800       1490       2581        107        200         55
-       5        971     174100       1517       2582        152        152        131
-       6       1063     267300       1737       4269        149        145         89
-       7       1339     219600       1482       9903         73        398        111
-       8        742     186600       1520       3932        177        347        294
-       9       1240     213700       1640       1851         13         82         62
-      10        863     186100       1510       2052        216        105         60
-         C17002_005 C24010_001 C24010_003 C24010_039
-              <dbl>      <dbl>      <dbl>      <dbl>
-       1         18       1579        207        288
-       2        150        798        122        133
-       3         40        602         25         57
-       4         91       1155        104        227
-       5         70       1446        119        273
-       6        260       2230        408        623
-       7        113       4628        786        812
-       8         99       1696        172        318
-       9          0        874        167        150
-      10         10        875         73        234
+      # A tibble: 574 x 6
+         GEOID        NAME                                                        ADI
+         <chr>        <chr>                                                     <dbl>
+       1 100010401001 Block Group 1, Census Tract 401, Kent County, Delaware    102. 
+       2 100010401002 Block Group 2, Census Tract 401, Kent County, Delaware     98.3
+       3 100010401003 Block Group 3, Census Tract 401, Kent County, Delaware    119. 
+       4 100010402011 Block Group 1, Census Tract 402.01, Kent County, Delaware 100. 
+       5 100010402012 Block Group 2, Census Tract 402.01, Kent County, Delaware 106. 
+       6 100010402021 Block Group 1, Census Tract 402.02, Kent County, Delaware  92.4
+       7 100010402022 Block Group 2, Census Tract 402.02, Kent County, Delaware  88.7
+       8 100010402031 Block Group 1, Census Tract 402.03, Kent County, Delaware 108. 
+       9 100010402032 Block Group 2, Census Tract 402.03, Kent County, Delaware  83.2
+      10 100010405011 Block Group 1, Census Tract 405.01, Kent County, Delaware 105. 
+         Financial_Strength Economic_Hardship_and_Inequality Educational_Attainment
+                      <dbl>                            <dbl>                  <dbl>
+       1               97.4                             98.5                   88.2
+       2               93.2                             91.5                  100. 
+       3               80.4                            104.                    61.2
+       4               92.7                             95.7                  102. 
+       5               89.5                            104.                   104. 
+       6              106.                              90.7                   98.7
+       7              101.                              81.6                  101. 
+       8               88.3                            105.                   100. 
+       9              109.                              77.9                  101. 
+      10               91.6                            103.                   103. 
       # i 564 more rows
 
 ---
 
     Code
-      get_adi(geography = "zcta", zcta = c("99", "44147"), year = 2011, dataset = "acs5",
-      keep_indicators = TRUE, cache_tables = FALSE)
+      get_adi(geography = "zcta", zcta = c("99", "44147"), state = c("AK", "OH"),
+      year = 2011, dataset = "acs5", keep_indicators = TRUE, cache_tables = FALSE)
     Message
       
       1 call(s) to tidycensus beginning.
@@ -487,29 +371,29 @@
       
       Single imputation performed
     Output
-      # A tibble: 387 x 85
+      # A tibble: 239 x 85
          GEOID   NAME          ADI Financial_Strength Economic_Hardship_and_Inequality
          <chr>   <chr>       <dbl>              <dbl>                            <dbl>
-       1 0299501 ZCTA5 99501  87.6               123.                             97.2
-       2 0299502 ZCTA5 99502  72.3               138.                             80.6
-       3 0299503 ZCTA5 99503  92.4               116.                             99.3
-       4 0299504 ZCTA5 99504  80.1               129.                             86.9
-       5 0299505 ZCTA5 99505  81.4               127.                             92.6
-       6 0299506 ZCTA5 99506  74.2               134.                             84.7
-       7 0299507 ZCTA5 99507  72.4               138.                             78.3
-       8 0299508 ZCTA5 99508  88.6               120.                             95.4
+       1 0299501 ZCTA5 99501  84.7               120.                             90.2
+       2 0299502 ZCTA5 99502  72.2               133.                             77.1
+       3 0299503 ZCTA5 99503  88.9               113.                             92.3
+       4 0299504 ZCTA5 99504  78.9               125.                             82.6
+       5 0299505 ZCTA5 99505  78.6               120.                             84.8
+       6 0299506 ZCTA5 99506  70.1               134.                             77.4
+       7 0299507 ZCTA5 99507  72.5               133.                             75.3
+       8 0299508 ZCTA5 99508  85.8               117.                             89.4
        9 0299510 ZCTA5 99510  NA                  NA                              NA  
       10 0299513 ZCTA5 99513  NA                  NA                              NA  
          Educational_Attainment medianFamilyIncome medianMortgage medianRent
                           <dbl>              <dbl>          <dbl>      <dbl>
-       1                   107.              65739           1784        880
-       2                   115.              89159           2031       1093
-       3                   103.              58277           1753        899
-       4                   109.              79755           1848       1086
-       5                   118.              51646           1944       1714
-       6                   120.              59400           2073       1824
-       7                   111.              89337           1927       1181
-       8                   106.              64459           1754        964
+       1                   112.              65739           1784        880
+       2                   119.              89159           2031       1093
+       3                   108.              58277           1753        899
+       4                   113.              79755           1848       1086
+       5                   122.              51646           1811       1714
+       6                   124.              59400           2058       1824
+       7                   115.              89337           1927       1181
+       8                   110.              64459           1754        964
        9                    NA                  NA             NA         NA
       10                    NA                  NA             NA         NA
          medianHouseValue pctFamiliesInPoverty pctOwnerOccupiedHousing
@@ -518,8 +402,8 @@
        2           278800               0.0509                 0.693  
        3           213400               0.111                  0.325  
        4           242500               0.0726                 0.626  
-       5           179200               0.0714                 0.00656
-       6           146200               0.0586                 0.00510
+       5           164400               0.0714                 0.00656
+       6           201300               0.0586                 0.00510
        7           264100               0.0338                 0.722  
        8           224100               0.112                  0.480  
        9               NA              NA                     NA      
@@ -704,7 +588,7 @@
        8       2432       1405      16751       2263       2960
        9          0          0        309        154          0
       10          0          0          0          0          0
-      # i 377 more rows
+      # i 229 more rows
 
 ---
 
@@ -2172,5 +2056,325 @@
        8  169559   17227   11834   13993   13528   11923   42983    8676
        9   50908    3549    2237    2983    3122    3951   14118    1922
       10   30365    2525    1493    1658    1965    2407    8535    1287
+      # i 23 more rows
+
+---
+
+    Code
+      get_adi(geography = "county", state = "NM", year = 2020, dataset = "decennial",
+        keep_indicators = TRUE, cache_tables = FALSE)
+    Message
+      
+      2 call(s) to tidycensus beginning.
+      Getting data from the 2020 decennial Census
+      Using the Demographic and Housing Characteristics File
+      Note: 2020 decennial Census data use differential privacy, a technique that
+      introduces errors into data to preserve respondent confidentiality.
+      i Small counts should be interpreted with caution.
+      i See https://www.census.gov/library/fact-sheets/2021/protecting-the-confidentiality-of-the-2020-census-redistricting-data.html for additional guidance.
+      This message is displayed once per session.
+      Getting data from the 2016-2020 5-year ACS
+    Output
+      # A tibble: 33 x 137
+         GEOID NAME                            ADI Financial_Strength
+         <chr> <chr>                         <dbl>              <dbl>
+       1 35001 Bernalillo County, New Mexico  84.3              120. 
+       2 35003 Catron County, New Mexico     102.                87.3
+       3 35005 Chaves County, New Mexico     106.                94.9
+       4 35006 Cibola County, New Mexico     119.                86.4
+       5 35007 Colfax County, New Mexico     107.                89.2
+       6 35009 Curry County, New Mexico      103.                99.0
+       7 35011 De Baca County, New Mexico     97.5              102. 
+       8 35013 Doña Ana County, New Mexico   111.               101. 
+       9 35015 Eddy County, New Mexico        85.3              113. 
+      10 35017 Grant County, New Mexico      107.                94.3
+         Economic_Hardship_and_Inequality Educational_Attainment medianFamilyIncome
+                                    <dbl>                  <dbl>              <dbl>
+       1                             94.3                  115.               69003
+       2                             98.8                  123.               46264
+       3                             95.8                   75.0              56190
+       4                            123.                    87.2              55325
+       5                            109.                   113.               49984
+       6                            101.                    85.9              54162
+       7                             96.3                  103.               65893
+       8                            115.                    72.4              51928
+       9                             80.2                   97.1              78029
+      10                            112.                   107.               54879
+         medianMortgage medianRent medianHouseValue pctFamiliesInPoverty
+                  <dbl>      <dbl>            <dbl>                <dbl>
+       1           1351        892           205500               0.118 
+       2            978        720           162400               0.173 
+       3           1115        808           115400               0.151 
+       4            980        676            88800               0.209 
+       5           1011        634           108900               0.169 
+       6           1150        893           132400               0.164 
+       7           1368        616           130000               0.0586
+       8           1190        765           153600               0.207 
+       9           1249        970           161100               0.132 
+      10           1054        690           127100               0.179 
+         pctOwnerOccupiedHousing ratioThoseMakingUnder10kToThoseMakingOver50k
+                           <dbl>                                        <dbl>
+       1                   0.617                                         2.70
+       2                   0.852                                         3.21
+       3                   0.678                                         2.81
+       4                   0.744                                         3.16
+       5                   0.704                                         3.16
+       6                   0.580                                         2.77
+       7                   0.749                                         3.25
+       8                   0.647                                         3.11
+       9                   0.691                                         2.38
+      10                   0.723                                         3.43
+         pctPeopleLivingBelow150PctFederalPovertyLevel
+                                                 <dbl>
+       1                                         0.261
+       2                                         0.449
+       3                                         0.345
+       4                                         0.374
+       5                                         0.362
+       6                                         0.324
+       7                                         0.280
+       8                                         0.381
+       9                                         0.247
+      10                                         0.373
+         pctHouseholdsWithChildrenThatAreSingleParent pctHouseholdsWithNoVehicle
+                                                <dbl>                      <dbl>
+       1                                        0.311                     0.0688
+       2                                        0.245                     0.0440
+       3                                        0.283                     0.0497
+       4                                        0.379                     0.0657
+       5                                        0.328                     0.0824
+       6                                        0.300                     0.0362
+       7                                        0.230                     0.110 
+       8                                        0.327                     0.0620
+       9                                        0.258                     0.0471
+      10                                        0.314                     0.0565
+         pctPeopleWithWhiteCollarJobs pctPeopleUnemployed
+                                <dbl>               <dbl>
+       1                        0.426              0.0559
+       2                        0.203              0.0526
+       3                        0.279              0.0521
+       4                        0.283              0.116 
+       5                        0.345              0.0466
+       6                        0.287              0.0788
+       7                        0.318              0.0976
+       8                        0.352              0.0768
+       9                        0.316              0.0430
+      10                        0.344              0.0804
+         pctPeopleWithAtLeastHSEducation pctPeopleWithLessThan9thGradeEducation
+                                   <dbl>                                  <dbl>
+       1                           0.900                                 0.0398
+       2                           0.927                                 0.0451
+       3                           0.794                                 0.109 
+       4                           0.815                                 0.0438
+       5                           0.875                                 0.0345
+       6                           0.809                                 0.0766
+       7                           0.820                                 0.0489
+       8                           0.806                                 0.113 
+       9                           0.836                                 0.0575
+      10                           0.874                                 0.0492
+         pctHouseholdsWithOverOnePersonPerRoom P16_001N B15002_001 B15002_003
+                                         <dbl>    <dbl>      <dbl>      <dbl>
+       1                               0.0256    279298     469939       2916
+       2                               0.00259     1835       2858          0
+       3                               0.0259     23521      41417        641
+       4                               0.0773      9080      18217         31
+       5                               0.0225      5519       9121         22
+       6                               0.0346     18563      30515        278
+       7                               0.00722      770        941          0
+       8                               0.0417     82366     132723       1190
+       9                               0.0316     22751      37467        321
+      10                               0.0281     12269      19959         71
+         B15002_004 B15002_005 B15002_006 B15002_011 B15002_012 B15002_013 B15002_014
+              <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
+       1       1381       2502       2158      54316      12777      39579      19024
+       2         22          3        104        467         50        336        169
+       3        577        778        463       5893       1446       3651       1132
+       4         55         78        275       3316        416       1465        808
+       5          8          9        134       1547        318        769        327
+       6        156        413        219       4202       1244       2974       1248
+       7          0          0          1        155         30        199         33
+       8       1315       3634       1077      14359       3951      10039       4972
+       9        265        467        189       6495       1464       2871       1142
+      10         25        101        284       3103        504       2153        599
+         B15002_015 B15002_016 B15002_017 B15002_018 B15002_020 B15002_021 B15002_022
+              <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
+       1      41577      21690       6731       6939       2759        861       3512
+       2        129         54         88          0          0          0          0
+       3       2398        582        255        144        471        270        651
+       4        780        485        141         11        102         19         44
+       5        635        294         74         18         24          6         10
+       6       1951        716        155         64        319         90        496
+       7         31         24          0          0          0          1         39
+       8      10401       5200       1194       1298       1246       1591       3386
+       9       2037        817         62        172        243        104        327
+      10       1437        564         87        117         36         44         66
+         B15002_023 B15002_028 B15002_029 B15002_030 B15002_031 B15002_032 B15002_033
+              <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
+       1       2619      53414      15941      40302      21760      50209      28702
+       2          0        733         81        305         32        157         36
+       3        678       5120       2144       3480       2684       2524       1178
+       4        193       2210        534       1831       1105       1225        385
+       5        102       1224        438        856        549        554        285
+       6        365       3672       1006       2583       1601       2182        914
+       7          5        105         18         91         16         32         38
+       8       1506      14180       4394      10064       5809      12514       6800
+       9        238       5676       1305       3340       2603       1984       1303
+      10        354       2552        459       1875       1087       1663       1017
+         B15002_034 B15002_035 B17010_001 B17010_002 B19001_002 B19001_011 B19001_012
+              <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
+       1       5524       4430     159218      18794      21750      21474      26988
+       2          0         12        874        151        120        151        128
+       3        105        135      15888       2405       1860       2186       2160
+       4         88         39       5807       1211        920        758        864
+       5         23         71       3339        563        531        555        500
+       6        152         36      12131       1985       1449       1713       2066
+       7          0          0        273         16         56         32         52
+       8       1093        654      52075      10769       8071       7188       7018
+       9         19         39      15122       1994       1419       1511       2318
+      10        107        123       6146       1100       1407        679        702
+         B19001_013 B19001_014 B19001_015 B19001_016 B19001_017 B19113_001 B23001_006
+              <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
+       1      33601      23279      13509      13924      13587      69003       6925
+       2         72         85         25         14          7      46264          0
+       3       2775       1447       1216        830        581      56190        968
+       4        873        730        275        283        101      55325        251
+       5        392        452        111        153         99      49984        112
+       6       2739       1097        668        485        319      54162        728
+       7         62         49          8         14          1      65893         51
+       8       7549       6035       3559       2655       1919      51928       2626
+       9       2348       2512       1349       1978       1064      78029        928
+      10       1225       1101        230        296        315      54879        198
+         B23001_008 B23001_013 B23001_015 B23001_020 B23001_022 B23001_027 B23001_029
+              <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
+       1        990       6387        940      10670        888      22348       1578
+       2          0         15          0          2          0          4          0
+       3        198        713         88        998        115       1777         63
+       4         95        122         35        382         53        648         80
+       5          0         89          0        194          0        352         75
+       6        125        586        225       1055         98       1632         38
+       7          0         42          0          0          0        111          0
+       8        473       3277        378       4679        469       5999        417
+       9         71        532          0        964        118       1882        113
+      10          0        206         18        345         23        649         12
+         B23001_034 B23001_036 B23001_041 B23001_043 B23001_048 B23001_050 B23001_055
+              <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
+       1      21851       1331      37290       1338      32753       1443      15139
+       2          0          0        145          0         29          0        146
+       3       1657        106       2840         47       2702         79       1184
+       4        703         78       1106         90        818         69        520
+       5        212          0        598          1        426         17        230
+       6       1247         72       2321        101       1867         70       1000
+       7         55          0         61          0         59          4         29
+       8       5812        378       9744        732       8487        344       3699
+       9       1986        227       3399        182       2748         22       1211
+      10        335          5       1249        217        771         35        487
+         B23001_057 B23001_062 B23001_064 B23001_069 B23001_071 B23001_074 B23001_076
+              <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
+       1        535       5162        286       6012        231       6034        267
+       2         40          3          0         11          0         49          0
+       3         11        433         24        622         77        503          0
+       4         54        136         11        125          3         84          0
+       5         19        135         14        155         23        158         23
+       6         90        340          0        434         34        275          0
+       7          0         16          0         11          0         12          0
+       8        222       1508         82       1522         19       1845        107
+       9         47        648          0        583         12        460          5
+      10         21        206          0        172         28        218         14
+         B23001_079 B23001_081 B23001_084 B23001_086 B23001_092 B23001_094 B23001_099
+              <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
+       1       2450        179       1587         55       6968       1254       6623
+       2          0          0         41          0          0          0         14
+       3        202         10        183          0        529         24        482
+       4         24          0          0          0        229        110        214
+       5        101          0         10          0        147         14         56
+       6        155          0        201          0        449         89        441
+       7          3          0          0          0          0          0          0
+       8        870         15        377         21       2057        350       2482
+       9        212          0         76          0        539        102        605
+      10         94          0         26          0        281         20        197
+         B23001_101 B23001_106 B23001_108 B23001_113 B23001_115 B23001_120 B23001_122
+              <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
+       1        432       9972        681      19994       1217      19615        958
+       2          0         21          7         14          0          3          0
+       3         17        974         96       1507        100       1438         39
+       4         46        317         63        741         44        470        115
+       5          0        131          0        207          0        231          7
+       6         26        704         44       1397        153       1316        278
+       7          0         50          0         20          0         12          8
+       8        462       5442        381       5580        918       4191        251
+       9          0        636          0       1137         81       1264         39
+      10         28        263          4        528         20        506         11
+         B23001_127 B23001_129 B23001_134 B23001_136 B23001_141 B23001_143 B23001_148
+              <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
+       1      33818       1354      30899       1241      16430        962       5524
+       2        157          0         84          0         55          0         56
+       3       2866        131       2840        131       1324         87        599
+       4       1052         79        807         60        370          7        260
+       5        399          8        438         20        291         18         67
+       6       1812        139       1525         49       1026         40        300
+       7        113         53         16          0         21          0          9
+       8       8451        499       8331        341       3764        198       1444
+       9       2698        123       2293         11       1047          7        381
+      10        964        313       1019         46        632          9        190
+         B23001_150 B23001_155 B23001_157 B23001_160 B23001_162 B23001_165 B23001_167
+              <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
+       1        138       5665        225       5861        300       2419         92
+       2          0          0          0         38          0          0          0
+       3         14        403          0        387         22        410          0
+       4         71        205          0        260          0        141          0
+       5          0        173          0        144          0         46          0
+       6          0        192         20        275          0        103          3
+       7          0          3          0          1          0          8          0
+       8         95       1777         23       1219         89        458        109
+       9         20        488          0        374          0        241          0
+      10          6        453          6        243          0        121          0
+         B23001_170 B23001_172 B25014_001 B25014_005 B25014_006 B25014_007 B25014_011
+              <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
+       1        890         53     272528       1583        426        349       2884
+       2          6          0       1546          4          0          0          0
+       3         93         14      23641        283         37         76        183
+       4         38          0       8408        300         87         48        134
+       5         25          0       5946         22         31          0         81
+       6        124          0      18620        178         70         40        220
+       7          4          4        554          0          4          0          0
+       8        365          0      79421        877        328        145       1476
+       9        140          0      21548        164         71         19        312
+      10         45          0      11496         79        149          0         66
+         B25014_012 B25014_013 B25044_001 B25044_003 B25044_010 B25064_001 B25077_001
+              <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
+       1       1562        174     272528       4414      14345        892     205500
+       2          0          0       1546         12         56        720     162400
+       3         19         14      23641        377        797        808     115400
+       4         61         20       8408        284        268        676      88800
+       5          0          0       5946        140        350        634     108900
+       6        102         34      18620        161        513        893     132400
+       7          0          0        554          1         60        616     130000
+       8        175        312      79421       1409       3516        765     153600
+       9        115          0      21548        522        492        970     161100
+      10         17         12      11496        325        325        690     127100
+         B25088_002 C17002_001 C17002_002 C17002_003 C17002_004 C17002_005 C24010_001
+              <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
+       1       1351     670607      50232      56413      35374      32772     320318
+       2        978       3505        166        699        211        497        846
+       3       1115      62522       4751       7377       5706       3756      27141
+       4        980      25362       2468       4011       1516       1501       8860
+       5       1011      11520        730       1743        877        819       4888
+       6       1150      48422       4464       4690       3089       3446      19811
+       7       1368       1974         46        229        223         54        638
+       8       1190     211956      20965      31670      14281      13890      88633
+       9       1249      57049       3988       5130       1879       3106      26292
+      10       1054      26530       2794       3947        997       2145       9562
+         C24010_003 C24010_039 H10_002N H3_002N P20_003N P20_006N P20_011N P20_017N
+              <dbl>      <dbl>    <dbl>   <dbl>    <dbl>    <dbl>    <dbl>    <dbl>
+       1      63636      72717   172281  279298    37977     8033     5535    15225
+       2        113         59     1563    1835       95       16       16       20
+       3       3114       4463    15957   23521     4169      945      484     1532
+       4       1187       1318     6754    9080      918      405      214      593
+       5        761        923     3886    5519      525      160       98      236
+       6       2355       3326    10761   18563     3322      581      416     1256
+       7         73        130      577     770       93       21       10       24
+       8      14424      16766    53271   82366    12393     2655     1501     5800
+       9       3862       4435    15710   22751     4255      884      542     1242
+      10       1117       2176     8867   12269     1229      336      175      543
       # i 23 more rows
 

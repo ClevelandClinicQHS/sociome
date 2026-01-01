@@ -22,15 +22,15 @@ make_partial_tidycensus_calls <- function(dataset = c("decennial", "acs5",
     dataset,
     decennial =
 
-      # The 2010 decennial census did not gather the same detailed data that
-      # the 2000 and 1990 censuses did (i.e., the 2010 census has no SF3), so
-      # its gaps are filled with the 2010 5-year ACS estimates (in reality,
-      # only a few data points are available from the 2010 decennial census
-      # and most of the data is taken from the ACS)
-      if (year == 2010) {
+      # Starting with the 2010 census, the US census no longer collected the
+      # same detailed data as before (i.e., the SF3 file). The US census points
+      # users to the 5-year 2010 and 2020 estimates as a replacement. In
+      # practice, only a few data points are available from the 2010 and 2020
+      # decennial censuses, and most of the data is taken from the ACS5.
+      if (year >= 2010) {
         get_decennial_vars <-
           sociome::decennial_vars[
-            sociome::decennial_vars$year == 2010,
+            sociome::decennial_vars$year == year,
             "variable",
             drop = TRUE
           ]
@@ -45,8 +45,8 @@ make_partial_tidycensus_calls <- function(dataset = c("decennial", "acs5",
               variables = get_decennial_vars,
               table = NULL,
               cache_table = cache_tables,
-              year = 2010,
-              sumfile = "sf1",
+              year = year,
+              sumfile = if (year == 2010) "sf1" else if (year == 2020) "dhc",
               geometry = geometry,
               output = "tidy",
               keep_geo_vars = FALSE,
@@ -61,7 +61,7 @@ make_partial_tidycensus_calls <- function(dataset = c("decennial", "acs5",
               variables = get_acs_vars,
               table = NULL,
               cache_table = cache_tables,
-              year = 2010,
+              year = year,
               output = "tidy",
               geometry = geometry,
               keep_geo_vars = FALSE,

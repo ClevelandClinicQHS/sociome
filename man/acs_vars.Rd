@@ -5,28 +5,38 @@
 \alias{acs_vars}
 \title{ACS variable names for ADI and ADI-3 calculation}
 \format{
-A [`tibble`][tibble::tibble] with 139 rows and 10 variables:
-  \describe{ \item{variable}{ACS variable name} \item{description}{Brief
-  description of the data the variable contains} \item{set1}{Logical,
-  indicating the variables to be used when calculating ADI and ADI-3 using
-  the 1- or 3-year estimates from 2011 and later or when using the 5-year
-  estimates from 2012 or later} \item{set2}{Logical, indicating the variables
-  to be used when calculating ADI and ADI-3 at the block group level using
-  the 2015 or 2016 estimates} \item{set3}{Logical, indicating the variables
-  to be used when calculating ADI using the 2011 5-year estimates}
-  \item{set4}{Logical, indicating the variables to be used when calculating
-  ADI and ADI-3 using the 2010 1- or 3-year estimates} \item{set5}{Logical,
-  indicating the variables to be used when calculating ADI and ADI-3 using
-  the 2010 5-year estimates} \item{set6}{Logical, indicating the variables to
-  be used when calculating ADI and ADI-3 using the 2008 or 2009 1-year
-  estimates} \item{set7}{Logical, indicating the variables to be used when
-  calculating ACS estimates not previously mentioned, including the 2009
-  5-year estimates} \item{dec2010}{Logical, indicating the variables to use
-  in conjunction with the few actual 2010 decennial census variables when
-  running \code{\link{get_adi}(year = 2010, dataset = "decennial")}}}
+A \code{\link[tibble:tibble]{tibble}} with 139 rows and 10 variables:
+\itemize{
+\item \strong{variable}: ACS variable name.
+\item \strong{description}: Brief description of the data the variable contains.
+\item \strong{set1}: Logical,
+indicating the variables to be used when calculating ADI and ADI-3 using
+the 1- or 3-year estimates from 2011 and later or when using the 5-year
+estimates from 2012 or later, with the exception of requesting
+block-group-level data from 2015 or 2016.
+\item \strong{set2}: Logical, indicating the variables
+to be used when calculating ADI and ADI-3 at the block group level using
+the 2015 or 2016 estimates.
+\item \strong{set3}: Logical, indicating the variables
+to be used when calculating ADI using the 2011 5-year estimates.
+\item \strong{set4}: Logical, indicating the variables to be used when calculating
+ADI and ADI-3 using the 2010 1- or 3-year estimates.
+\item \strong{set5}: Logical,
+indicating the variables to be used when calculating ADI and ADI-3 using
+the 2010 5-year estimates.
+\item \strong{set6}: Logical, indicating the variables to
+be used when calculating ADI and ADI-3 using the 2008 or 2009 1-year
+estimates.
+\item \strong{set7}: Logical, indicating the variables to be used when
+calculating ADI and ADI-3 estimates not previously mentioned, including the
+2009 5-year estimates.
+\item \strong{dec2010}: Logical, indicating the ACS variables to be used
+when calculating ADI and ADI-3 estimates using 2010 or 2020 decennial
+census data.
 
-  Note that not all year/estimate combinations are currently supported by the
-  census API and/or \code{tidycensus}, and some may never be supported.
+Note that not all year/estimate combinations are currently supported by the
+census API and/or \code{tidycensus}, and some may never be supported.
+}
 }
 \usage{
 acs_vars
@@ -36,6 +46,6 @@ A dataset of the ACS variable names used to calculate the Area Deprivation
 Index (ADI) and Berg Indices (ADI-3).
 }
 \seealso{
-\code{\link{decennial_vars}}
+\code{\link{decennial_vars}} and \code{\link{dataset_year_geography_availability}}
 }
 \keyword{datasets}

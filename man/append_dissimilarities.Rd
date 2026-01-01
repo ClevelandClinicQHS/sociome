@@ -47,14 +47,18 @@ row, its dissimilarity vector represents the row's dissimilarity to every
 row.
 
 The optional/alternative "sampling weight" column is a transformed version of
-the dissimilarity list: 1. All dissimilarity measures of 0 are replaced with
-the next smallest dissimilarity value in the vector. In effect, this means
-that a row's dissimilarity to itself (and any rows identical to it) is
-replaced with the dissimilarity value of its next most similar row.
-(Exception: if all elements are 0, all of them are replaced with 1). 2. Then
-the reciprocal of each element is taken so that larger values represent
-greater similarity. 3. Each element is divided by the sum of the vector,
-which standardizes the elements to add to 1.
+the dissimilarity list:
+\enumerate{
+\item All dissimilarity measures of 0 are replaced with the next smallest
+dissimilarity value in the vector. In effect, this means that a row's
+dissimilarity to itself (and any rows identical to it) is replaced with the
+dissimilarity value of its next most similar row. (Exception: if all elements
+are 0, all of them are replaced with 1).
+\item Then the reciprocal of each element is taken so that larger values
+represent greater similarity.
+\item Each element is divided by the sum of the vector, which standardizes the
+elements to add to 1.
+}
 
 Requires the package \code{cluster} to be installed.
 }

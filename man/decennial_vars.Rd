@@ -5,11 +5,13 @@
 \alias{decennial_vars}
 \title{Decennial census variable names for ADI calculation}
 \format{
-A \code{\link[tibble]{tibble}} with 137 rows and 4 variables:
-  \describe{ \item{variable}{Decennial census variable name}
-  \item{sumfile}{The summary tape file of the decennial census variable}
-  \item{year}{The year of the decennial census variable}
-  \item{description}{Brief description of the data the variable contains}}
+A \code{\link[tibble:tibble]{tibble}} with 144 rows and 4 variables:
+\itemize{
+\item \strong{variable}: Decennial census variable name.
+\item \strong{sumfile}: The summary tape file of the decennial census variable.
+\item \strong{year}: The year of the decennial census variable.
+\item \strong{description}: Brief description of the data the variable contains.
+}
 }
 \usage{
 decennial_vars
@@ -19,6 +21,7 @@ A dataset of the decennial census variable names used to calculate the Area
 Deprivation Index (ADI) and the Berg Indices (ADI-3).
 }
 \seealso{
-\code{\link{acs_vars}}
+\code{\link[tidycensus:get_decennial]{tidycensus::get_decennial()}}, \code{\link{acs_vars}}, and
+\code{\link{dataset_year_geography_availability}}
 }
 \keyword{datasets}

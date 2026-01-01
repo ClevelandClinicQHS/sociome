@@ -16,15 +16,20 @@
 #' row.
 #'
 #' The optional/alternative "sampling weight" column is a transformed version of
-#' the dissimilarity list: 1. All dissimilarity measures of 0 are replaced with
-#' the next smallest dissimilarity value in the vector. In effect, this means
-#' that a row's dissimilarity to itself (and any rows identical to it) is
-#' replaced with the dissimilarity value of its next most similar row.
-#' (Exception: if all elements are 0, all of them are replaced with 1). 2. Then
-#' the reciprocal of each element is taken so that larger values represent
-#' greater similarity. 3. Each element is divided by the sum of the vector,
-#' which standardizes the elements to add to 1.
-#' 
+#' the dissimilarity list:
+#'
+#' 1. All dissimilarity measures of 0 are replaced with the next smallest
+#' dissimilarity value in the vector. In effect, this means that a row's
+#' dissimilarity to itself (and any rows identical to it) is replaced with the
+#' dissimilarity value of its next most similar row. (Exception: if all elements
+#' are 0, all of them are replaced with 1).
+#'
+#' 2. Then the reciprocal of each element is taken so that larger values
+#' represent greater similarity.
+#'
+#' 3. Each element is divided by the sum of the vector, which standardizes the
+#' elements to add to 1.
+#'
 #' Requires the package `cluster` to be installed.
 #'
 #' @param data A data frame that has at least one row and at least one column.
@@ -39,14 +44,14 @@
 #' @examples
 #' # Running this on all mtcars columns
 #' mtdissim <- append_dissimilarities(mtcars)
-#' 
+#'
 #' # Therefore, these numbers represent the dissimilarity of each row to the
 #' # fifth row:
 #' mtdissim$dissimilarities[[5]]
-#' 
+#'
 #' # And these are the dissimilarities' corresponding sampling weights:
 #' mtdissim$sampling_weights[[5]]
-#' 
+#'
 #' # Now we run it on mtcars without the wt and qsec colums so that we purposely
 #' # end up with some duplicate rows (the first and second).
 #' mtdissim_dup <- append_dissimilarities(mtcars, cols = !c(wt, qsec))
@@ -55,7 +60,7 @@
 #' # Since we specifically told it not to take wt and qsec into account, the
 #' # first two rows are identical. Therefore, both values are zero.
 #' mtdissim_dup$dissimilarities[[1]]
-#' 
+#'
 #' # Here are the corresponding sampling weights. Notice that the first two
 #' # rows' sampling weights are the same as the sampling weight of row 30, which
 #' # is the next most similar row.
@@ -75,27 +80,27 @@ append_dissimilarities <- function(data,
   if (!is.data.frame(data) || !nrow(data)) {
     stop("data must be a data frame with at least one row", call. = FALSE)
   }
-  
+
   data2 <- dplyr::select(data, {{cols}})
-  
+
   if (!ncol(data2)) {
     stop("cols must specify at least one column in data", call. = FALSE)
   }
-  
+
   if (anyNA(data2)) {
-    warning("missing values detected among these cols:\n", 
+    warning("missing values detected among these cols:\n",
             paste0(
               names(data2)[vapply(data2, anyNA, logical(1L))],
               collapse = "\n"
             ), call. = FALSE)
   }
-  
+
   validate_dissim_colnames(
     dissimilarity_measure_name,
     sampling_weight_name,
     data
   )
-  
+
   if (anyDuplicated(data2)) {
     warning(
       "\nDuplicate rows detected. The dissimilarity measures and sampling",
@@ -107,22 +112,22 @@ append_dissimilarities <- function(data,
       call. = FALSE
     )
   }
-  
+
   dissim_measure <-
-    cluster::daisy(x = data2, metric = metric, ...) %>% 
-    as.matrix() %>% 
-    unname() %>% 
-    asplit(MARGIN = 2L) %>% 
+    cluster::daisy(x = data2, metric = metric, ...) %>%
+    as.matrix() %>%
+    unname() %>%
+    asplit(MARGIN = 2L) %>%
     lapply(as.numeric)
-  
+
   if (!is.null(dissimilarity_measure_name)) {
     data[[dissimilarity_measure_name]] <- dissim_measure
   }
-  
+
   if (!is.null(sampling_weight_name)) {
     data[[sampling_weight_name]] <- lapply(dissim_measure, dissim_samp_wts)
   }
-  
+
   data
 }
 
@@ -135,7 +140,7 @@ dissim_samp_wts <- function(x) {
     x[zeros] <- min(x[!zeros])
     x <- 1 / x
   }
-  
+
   x / sum(x)
 }
 

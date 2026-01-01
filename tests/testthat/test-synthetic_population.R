@@ -1,10 +1,6 @@
 test_that("synthetic_population() works", {
-  expect_snapshot(
-    synthetic_population(geography = "state", state = "UT", year = 2019)
-  )
+  set.seed(20251229)
 
-  # Same, but make it so that survival past age 85 is highly unlikely
-  # (via rate = 10), and so that 87 is the maximum possible age
   expect_snapshot(
     synthetic_population(
       geography = "state",
@@ -15,20 +11,35 @@ test_that("synthetic_population() works", {
     )
   )
 
-  # Synthetic population of the Delmarva Peninsula at the census tract level,
-  # using 2000 Decennial Census data
+  # Synthetic population of blocks in mixed GEOIDs
   expect_snapshot(
     synthetic_population(
-      geography = "tract",
-      geoid =
-        # This two-digit GEOID is the state of Delaware.
-        c("10",
-
-          # These five-digit GEOIDs are specific counties in Virginia and Maryland
-          "51001", "51131", "24015", "24029", "24035", "24011", "24041", "24019",
-          "24045", "24039", "24047"),
+      geography = "block",
+      geoid = c("51001", "40117957200", "490572105041"),
       year = 2000,
       dataset = "decennial"
+    )
+  )
+
+  # Synthetic population of some random ZCTAs
+  expect_snapshot(
+    synthetic_population(
+      geography = "zcta",
+      state = c("CA", "OH", "AL"),
+      zcta = c("90210", "44133", "44147", "44136", "01001", "01010"),
+      year = 2013,
+      dataset = "acs5"
+    )
+  )
+
+  # Synthetic population
+  expect_snapshot(
+    synthetic_population(
+      geography = "county",
+      state = "NY",
+      county = c("New York", "Queen", "King", "Bronx", "Richmond"),
+      year = 2005,
+      dataset = "acs1"
     )
   )
 })

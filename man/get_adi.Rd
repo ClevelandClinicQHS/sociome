@@ -5,7 +5,8 @@
 \title{Get Area Deprivation Index (ADI) and Berg Indices (ADI-3)}
 \usage{
 get_adi(
-  geography,
+  geography = c("state", "county", "tract", "block group", "zcta",
+    "zip code tabulation area"),
   state = NULL,
   county = NULL,
   geoid = NULL,
@@ -17,26 +18,32 @@ get_adi(
   raw_data_only = FALSE,
   cache_tables = TRUE,
   key = NULL,
-  seed = NA,
   evaluator = purrr::insistently(eval, rate = purrr::rate_delay(), quiet = FALSE),
   ...
 )
 }
 \arguments{
 \item{geography}{A character string denoting the level of census geography
-whose ADIs and ADI-3s you'd like to obtain. Must be one of \code{c("state", "county", "tract", "block group", "zcta")}. Required.}
+whose ADIs and ADI-3s you'd like to obtain. Must be one of \code{c("state", "county", "tract", "block group", "zcta")} (\code{"zip code tabulation area"}
+will be changed to \code{"zcta"}).}
 
 \item{state}{A character string specifying states whose ADI and ADI-3 data is
 desired. Defaults to \code{NULL}. Can contain full state names, two-letter state
 abbreviations, or a two-digit FIPS code/GEOID (must be a vector of strings,
 so use quotation marks and leading zeros if necessary). Must be left as
-\code{NULL} if using the \code{geoid} or \code{zcta} parameter.}
+\code{NULL} if using the \code{geoid}.
+
+If \code{geography = "zcta"} and \code{year} is earlier than 2020, this argument can
+be used to only include ZCTAs associated with specific states, as
+determined by the US Census bureau. If year is 2020 or later, this argument
+will be ignored with a \link{warning}.}
 
 \item{county}{A vector of character strings specifying the counties whose ADI
 and ADI-3 data you're requesting. Defaults to \code{NULL}. If not \code{NULL}, the
 \code{state} parameter must have a length of 1. County names and three-digit
 FIPS codes are accepted (must contain strings, so use quotation marks and
-leading zeros if necessary). Must be blank if using the \code{geoid} parameter.}
+leading zeros if necessary). Must be \code{NULL} if using the \code{geoid} parameter
+or if \code{geography = "zcta"}.}
 
 \item{geoid}{A character vector of GEOIDs (use quotation marks and leading
 zeros). Defaults to \code{NULL}. Must be blank if \code{state}, \code{county}, or \code{zcta}
@@ -44,12 +51,12 @@ is used. Can contain different levels of geography (see details).}
 
 \item{zcta}{A character vector of ZCTAs or the leading digit(s) of ZCTAs (use
 quotation marks and leading zeros). Defaults to \code{NULL}. Must be blank if
-\code{state}, \code{county}, or \code{geoid} is used.
+\code{county} or \code{geoid} is used.
 
 Strings under 5 digits long will yield all ZCTAs that begin with those
 digits.
 
-Requires that \code{geography = "zcta"}. If \code{geography = "zcta"} and \code{zcta = NULL}, all ZCTAs in the US will be used.}
+Requires that \code{geography = "zcta"}. If \code{geography = "zcta"} and \code{zcta = NULL}, all ZCTAs in the 50 states plus DC and Puerto Rico will be used.}
 
 \item{year}{Single integer specifying the year of US Census data to use.}
 
@@ -57,17 +64,16 @@ Requires that \code{geography = "zcta"}. If \code{geography = "zcta"} and \code{
 \code{c("acs5", "acs3", "acs1", "decennial")}, denoting the 5-, 3-, and 1-year
 ACS along with the decennial census. Defaults to \code{"acs5"}.
 
-When \code{dataset = "decennial"}, \code{year} must be in \code{c(1990, 2000, 2010)}.
+When \code{dataset = "decennial"}, \code{year} must be in \code{c(2000, 2010, 2020)}.
 
-The 2010 decennial census did not include the long-form questionnaire used
-in the 1990 and 2000 censuses, so this function uses the 5-year estimates
-from the 2010 ACS to supply the data not included in the 2010 decennial
-census. In fact, the only 2010 decennial variables used are H003002,
-H014002, P020002, and P020008.
+The 2010 and 2020 decennial censuses did not include the long-form
+questionnaire used in the 1990 and 2000 censuses, so this function uses the
+5-year estimates from the 2010/2020 ACS to supply the data not included in
+the decennial censuses.
 
 Important: data are not always available depending on the level of
-geography and data set chosen. See
-\url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html}.}
+geography and data set chosen. See \code{\link{dataset_year_geography_availability}}
+and \url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html}.}
 
 \item{geometry}{Logical value indicating whether or not shapefile data should
 be included in the result, making the result an \code{\link[sf:sf]{sf}} object
@@ -96,8 +102,6 @@ ADIs and ADI-3s, so many tables are cached if \code{TRUE}). Defaults to \code{TR
 \item{key}{Your Census API key as a character string. Obtain one at
 \url{http://api.census.gov/data/key_signup.html}. Defaults to \code{NULL}. Not
 necessary if you have already loaded your key with \code{\link[=census_api_key]{census_api_key()}}.}
-
-\item{seed}{Passed to \code{\link[=calculate_adi]{calculate_adi()}}.}
 
 \item{evaluator}{A function that will evaluate the calls to the tidycensus
 functions. Defaults to \code{\link[purrr:insistently]{purrr::insistently}}\code{(}\code{\link{eval}}\verb{, rate = }\code{\link[purrr:rate-helpers]{purrr::rate_delay()}}\verb{, quiet = FALSE)}.}
@@ -129,7 +133,9 @@ listed as having zero households are excluded from ADI and ADI-3 calculation:
 their ADI and ADI-3 values will be \code{NA}.
 }
 \section{Reference area}{
- \strong{The concept of "reference area" is important to
+
+
+\strong{The concept of "reference area" is important to
 understand when using this function.} The algorithm that produced the
 original ADIs employs factor analysis. As a result, the ADI is a relative
 measure; the ADI of a particular location is dynamic, varying depending on
@@ -175,11 +181,11 @@ in specifying reference areas (see the \strong{Reference area} section above),
 data from the US Census are masked for sparsely populated places, resulting
 in many missing values.
 
-Imputation is attempted via \code{\link[mice:mice]{mice::mice}}\verb{(m = 1, maxit = 50, method = "pmm", seed = seed)}. If imputation is unsuccessful, an error is thrown,
-but the dataset of indicators on which imputation was unsuccessful is
-available via \code{\link[rlang:last_error]{rlang::last_error()}}\verb{$adi_indicators} and the raw census
-data are available via \code{\link[rlang:last_error]{rlang::last_error()}}\verb{$adi_raw_data}. The former
-excludes areas with zero households, but the latter includes them.
+Imputation is attempted via \code{\link[mice:mice]{mice::mice}}\verb{(m = 1, maxit = 50, method = "pmm")}. If imputation is unsuccessful, an error is thrown, but the dataset
+of indicators on which imputation was unsuccessful is available via
+\code{\link[rlang:last_error]{rlang::last_error()}}\verb{$adi_indicators} and the raw census data are
+available via \code{\link[rlang:last_error]{rlang::last_error()}}\verb{$adi_raw_data}. The former excludes
+areas with zero households, but the latter includes them.
 
 One of the indicators of both ADI and the Financial Strength component of
 ADI-3 is median family income, but methodological issues with the 2015 and
@@ -271,4 +277,8 @@ queens \%>\%
 # Obtain factor loadings:
 attr(queens, "loadings")
 }
+}
+\seealso{
+\code{\link{dataset_year_geography_availability}} for usable combinations of
+\code{geography}, \code{year}, and \code{dataset}.
 }

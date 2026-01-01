@@ -1,15 +1,15 @@
 
-validate_geography <- function(geography = c("state",
-                                             "county",
-                                             "tract",
-                                             "block group",
-                                             "zcta",
-                                             "zip code tabulation area")) {
-  geography <- match.arg(geography)
+validate_geography <- function(geography,
+                               choices = c("state",
+                                           "county",
+                                           "tract",
+                                           "block group",
+                                           "block",
+                                           "zcta",
+                                           "zip code tabulation area")) {
+  geography <- match.arg(geography, choices = choices)
 
-  if (geography == "zcta") {
-    geography <- "zip code tabulation area"
-  }
+  geography <- switch(geography, "zip code tabulation area" = "zcta", geography)
 
   geography
 }
@@ -37,44 +37,148 @@ validate_year <- function(year, values = NULL) {
 
 
 
+
+availability_error <- function(geography = NULL, dataset = NULL) {
+  switch(
+    geography,
+    block =
+      stop(
+        "ACS data are not available at the block level. They are only ",
+        "available from the decennial census.",
+        call. = FALSE
+      )
+  )
+  stop(
+    dataset, " data are not available at the ", geography, " level. ",
+    "They are only available from acs5 and the decennial census.",
+    call. = FALSE
+  )
+}
+
+
 validate_dataset <- function(dataset = c("acs5", "acs3", "acs1", "decennial"),
                              year,
-                             geography) {
-
+                             geography,
+                             type =
+                               c("adi", "population", "synthetic_population")) {
+  type <- match.arg(type)
   dataset <- match.arg(dataset)
 
-  if (dataset == "decennial") {
-
-    if (!any(c(1990, 2000, 2010, 2020) == year)) {
-      stop(
-        'When setting dataset = "decennial", ',
-        'year must be 2000, 2010, or 2020.',
-        call. = FALSE
+  # Errors for a level of geography that is never available from the requested
+  # dataset.
+  switch(
+    geography,
+    tract = ,
+    "block group" = ,
+    zcta =
+      switch(dataset, acs3 = , acs1 = availability_error(geography, dataset)),
+    block =
+      switch(
+        dataset,
+        acs5 = ,
+        acs3 = ,
+        acs1 = availability_error(geography, dataset)
       )
-    }
+  )
 
-    if (geography == "zip code tabulation area") {
-      stop(
-        'geography = "zip code tabulation area" not supported',
-        '\nfor the decennial census data.',
-        '\nTry dataset = "acs5" (or "acs3" or "acs1")',
-        call. = FALSE
-      )
-    }
+  availability <-
+    switch(
+      type,
+      adi =
+        dplyr::filter(sociome::dataset_year_geography_availability, .data$adi),
+      sociome::dataset_year_geography_availability
+    )
 
-  } else if (geography == "block group" && any(2015:2016 == year)) {
-    warning(
-      "\nMedian family income (B19113_001) is unavailable at the block group",
-      "\nlevel in the years 2015 and 2016.",
-      "\n\nMedian household income (B19013_001) will be used instead.",
-      '\n\nSee the "Missingness and imputation" section of ?get_adi, ',
-      "as well as:",
-      "\nhttps://www.census.gov/programs-surveys/acs/",
-      "technical-documentation/user-notes/2016-01.html",
-      call. = FALSE,
-      immediate. = TRUE
+  if (
+    !any(
+      availability$dataset == dataset &
+      availability$year == year &
+      availability$geography == geography
+    )
+  ) {
+    switch(
+      dataset,
+      decennial =
+        stop(
+          "decennial census data are only available for 2000, 2010, and 2020",
+          call. = FALSE
+        ),
+      acs5 =
+        if (year < 2009) {
+          stop(
+            "acs5 data are available starting for the year 2009.",
+            call. = FALSE
+          )
+        } else if (year > 2023) {
+          stop("acs5 data are not yet available for ", year, ".", call. = FALSE)
+        } else {
+          switch(
+            geography,
+            "block group" =
+              stop(
+                "acs5 block group data are available starting for the year ",
+                "2013.",
+                call. = FALSE
+              ),
+            zcta =
+              stop(
+                "acs5 ZCTA data are available starting for the year 2011.",
+                call. = FALSE
+              )
+          )
+        },
+      acs3 =
+        stop(
+          "acs3 data are only available for the years 2007, 2008, 2009, ",
+          "2011, 2012, and 2013.", call. = FALSE
+        ),
+      acs1 =
+        if (year == 2020) {
+          stop("acs1 data are not available for 2020.", call. = FALSE)
+        } else if (year > 2024) {
+          stop(
+            "acs1 data are not yet available for the year ", year, ".",
+            call. = FALSE
+          )
+        } else {
+          switch(
+            type,
+            adi =
+              stop(
+                "Calculating ADI and ADI-3 using acs1 data is available ",
+                "starting for the year 2007.",
+                call. = FALSE
+              )
+          )
+          stop(
+            "acs1 data are available starting for the year 2005.",
+            call. = FALSE
+          )
+        }
     )
   }
+
+  switch(
+    type,
+    adi =
+      switch(
+        geography,
+        "block group" =
+          if (any(2015:2016 == year)) {
+            warning(
+              "\nMedian family income (B19113_001) is unavailable at the ",
+              "block group level in the years 2015 and 2016.",
+              "\n\nMedian household income (B19013_001) will be used instead.",
+              '\nSee the "Missingness and imputation" section of ?get_adi, ',
+              "as well as:",
+              "\nhttps://www.census.gov/programs-surveys/acs/",
+              "technical-documentation/user-notes/2016-01.html",
+              call. = FALSE,
+              immediate. = TRUE
+            )
+          }
+      )
+  )
 
   dataset
 }

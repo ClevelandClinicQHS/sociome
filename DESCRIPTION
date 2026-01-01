@@ -2,7 +2,7 @@ Type: Package
 Package: sociome
 Title: Operationalizing Social Determinants of Health Data for
     Researchers
-Version: 2.2.6.9000
+Version: 2.2.6.9001
 Authors@R: 
     c(person(given = "Nik",
              family = "Krieger",
@@ -39,6 +39,7 @@ Imports:
     purrr (>= 0.3.4),
     rlang (>= 0.4.7),
     stringr (>= 1.4.0),
+    tibble (>= 3.0.3),
     tidycensus (>= 1.0),
     tidyr (>= 1.1.0)
 Suggests:
@@ -48,7 +49,6 @@ Suggests:
     ggplot2 (>= 3.3.2),
     sf (>= 0.9-7),
     testthat (>= 3.0.0),
-    tibble (>= 3.0.3),
     tigris (>= 1.0),
     units
 Encoding: UTF-8

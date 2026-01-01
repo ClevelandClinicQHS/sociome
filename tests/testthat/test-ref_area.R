@@ -20,7 +20,7 @@ test_that("zcta ref_area works", {
 
   expect_error(
     ref_area(
-      geography = "zip code tabulation area",
+      geography = "zcta",
       zcta = "44136",
       state = "oh",
       county = "lake",
@@ -34,7 +34,7 @@ test_that("zcta ref_area works", {
   )
   expect_error(
     ref_area(
-      geography = "zip code tabulation area",
+      geography = "zcta",
       zcta = "44136",
       state = "oh",
       county = NULL,
@@ -48,7 +48,7 @@ test_that("zcta ref_area works", {
   )
   expect_error(
     ref_area(
-      geography = "zip code tabulation area",
+      geography = "zcta",
       zcta = character(),
       state = "oh",
       county = NULL,
@@ -62,7 +62,7 @@ test_that("zcta ref_area works", {
   )
   expect_error(
     ref_area(
-      geography = "zip code tabulation area",
+      geography = "zcta",
       zcta = c(NA, " 44136"),
       state = "oh",
       county = NULL,
@@ -76,7 +76,7 @@ test_that("zcta ref_area works", {
   )
   expect_error(
     ref_area(
-      geography = "zip code tabulation area",
+      geography = "zcta",
       zcta = c(" 44136  ", "foo "),
       state = "oh",
       county = NULL,
@@ -88,9 +88,25 @@ test_that("zcta ref_area works", {
     ),
     "be a character vector of digits"
   )
+
+  expect_warning(
+    ref_area(
+      geography = "zcta",
+      zcta = c(" 44136  ", "44147 "),
+      state = "oh",
+      county = NULL,
+      geoid = NULL,
+      year = 2020,
+      dataset = "acs5",
+      partial_tidycensus_calls = test_partial_tidycensus_calls,
+      evaluator = evaluator
+    ),
+    'state argument is ignored when geography = "zcta" and year is in the range 2020-2023'
+  )
+
   expect_equal(
     ref_area(
-      geography = "zip code tabulation area",
+      geography = "zcta",
       zcta = c(" 44136  ", "44147 "),
       state = "oh",
       county = NULL,
@@ -216,7 +232,7 @@ test_that("non-zcta ref_area works", {
     list(
       geoid = NULL,
       geo_length = NULL,
-      state_county = dplyr::tibble(state = state_geoids),
+      state_county = dplyr::tibble(state = sociome::state_geoids),
       zcta = NULL
     )
   )
@@ -423,6 +439,7 @@ test_that("non-zcta ref_area works", {
   expect_error(calculate_adi(NULL), "data must be a tibble")
   expect_warning(calculate_adi(test_tidycensus_data[1:29, ]), "fewer than 30")
 
+  set.seed(20251229)
   expect_error(
     get_adi("tract", state = "ny", county = "new york", year = 2015),
     "Imputation unsuccessful"

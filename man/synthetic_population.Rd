@@ -5,7 +5,8 @@
 \title{Create a synthetic population simulating US Census areas}
 \usage{
 synthetic_population(
-  geography,
+  geography = c("state", "county", "tract", "block group", "block", "zcta",
+    "zip code tabulation area"),
   state = NULL,
   county = NULL,
   geoid = NULL,
@@ -60,11 +61,12 @@ use.The data set used to calculate ADIs and ADI-3s.
 the 5-, 3-, and 1-year ACS along with the decennial census. Defaults to
 \code{"acs5"}.
 
-When \code{dataset = "decennial"}, \code{year} must be in \code{c(1990, 2000, 2010)}.
+When \code{dataset = "decennial"}, \code{year} must be in \code{c(2000, 2010, 2020)}.
 
 Important: data are not always available depending on the level of
 geography and data set chosen. See
-\url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html}.}
+\url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html} as
+well as \code{\link{dataset_year_geography_availability}}.}
 
 \item{geometry}{Logical value indicating whether or not shapefile data should
 be included in the result, making the result an \code{\link[sf:sf]{sf}} object
@@ -171,4 +173,8 @@ synthetic_population(
   dataset = "decennial"
 )
 }
+}
+\seealso{
+\code{\link{dataset_year_geography_availability}} for usable combinations of
+\code{dataset}, \code{year}, and \code{geography}.
 }

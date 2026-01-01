@@ -1,9 +1,17 @@
 # sociome (development version)
 
-- Removed `seed` argument from `synthetic_population()`. Just call `set.seed()` beforehand if you want.
+- Completed support of 2020 decennial census.
+- Moved tibble from Suggests to Imports.
+- Removed `seed` argument from `get_adi()`, `calculate_adi()`, and `synthetic_population()`. Just call `set.seed()` beforehand if you want.
+- Added the helper objects `state_geoids` and `dataset_year_geography_availability`.
 - Added `evaluator` argument to `get_adi()`, enabling the user to customize how the function retries calls to the census API.
+- Made `synthetic_population()` and `get_geoids()` work with all `dataset` options (decennial census, acs1, acs3, and acs5).
+- Added census block compatibility to `synthetic_population()` and `get_geoids()` with `dataset = "decennial"`.
+- Added ZCTA compatibility to `get_geoids()`. You now have to exactly specify `dataset = "decennial"` with the exact decennial census year if you want these data.
 - Fixed bug in the filtering of ZCTAs reference areas: before, the GEOIDs of ZCTAS were the ZCTA itself preceded by two digits. sociome now anticipates this and looks only at the last five digits.
-- Added many unit tests.
+- Added default argument to `geography` argument in `get_adi()`, `get_geoids()`, and `synthetic_population()`
+- Changed default `year` argument in `get_geoids()` to 2020.
+- Improved documentation and added many unit tests.
 
 # sociome 2.2.5
 - Fixed typo that prevented geometry from accompanying `get_adi()` results.

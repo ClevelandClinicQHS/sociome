@@ -4,7 +4,7 @@
 \alias{calculate_adi}
 \title{Calculate ADI and ADI-3 from census data.}
 \usage{
-calculate_adi(data_raw, keep_indicators = FALSE, seed = NA)
+calculate_adi(data_raw, keep_indicators = FALSE)
 }
 \arguments{
 \item{data_raw}{A data frame, \code{\link[tibble:tibble]{tibble}}, or \code{\link[sf:sf]{sf}}
@@ -24,9 +24,6 @@ variables used to calculate them. Defaults to \code{FALSE}.
 
 See \code{\link{acs_vars}} and \code{\link{decennial_vars}} for basic descriptions of the raw
 census variables.}
-
-\item{seed}{Passed to the \code{seed} argument of \code{\link[mice:mice]{mice::mice()}} when imputation
-is needed.}
 }
 \value{
 A \code{\link[tibble:tibble]{tibble}} (or \code{\link[sf:sf]{sf}}) with the same number
@@ -54,7 +51,7 @@ calculation. Their resulting ADIs and ADI-3s will be \code{NA}.
 If calling this function directly (i.e., not via \code{\link[=get_adi]{get_adi()}}) on a data set
 that contains median household income (B19013_001) and does not contain
 median family income (B19113_001), median household income will be used in
-place of median family income, with a \code{warning()}. See the "Missingness and
+place of median family income, with a \link{warning}. See the "Missingness and
 imputation" section of \code{\link[=get_adi]{get_adi()}}.
 }
 \examples{

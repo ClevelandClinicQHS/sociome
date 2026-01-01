@@ -12,23 +12,15 @@
 #'
 #' @param geography A character string denoting the level of census geography
 #'   whose GEOIDs you'd like to obtain. Must be one of `c("state", "county",
-#'   "tract", "block group", "block")`.
-#'
-#'   Note that block-level data cannot be obtained from 1990 and 2000 decennial
-#'   census data due to limitations in [tidycensus::get_decennial()]. Whereas
-#'   block-level 2010 decennial census data are available, block-level ADI and
-#'   ADI-3 cannot be calculated due to the removal of the long-form
-#'   questionnaire from the 2010 decennial census.
+#'   "tract", "block group", "block", "zcta")` (`"zip code tabulation area"`
+#'   will be automatically changed to `"zcta"`).
 #' @param year Single integer specifying the year of US Census data to use.
-#'   Defaults to 2010. Based on this year, data from the most recent decennial
-#'   census will be returned (specifically, `year <- `[`floor`]`(year / 10) *
-#'   10` is run).
-#' @param state,county,geoid,geometry,cache_tables,key See the descriptions of
-#'   the arguments in [get_adi()].
 #' @param ... Additional arguments to be passed to
 #'   [tidycensus::get_decennial()]. Use at your own risk.
 #' @inheritParams get_adi
 #'
+#' @seealso [`dataset_year_geography_availability`] for usable combinations of
+#'   `dataset`, `year`, and `geography`.
 #' @examples
 #' \dontrun{
 #' # Wrapped in \dontrun{} because it requires a Census API key.
@@ -41,14 +33,18 @@
 #' get_geoids(geography = "block", geoid = tracts$GEOID[5])
 #' }
 #' @export
-get_geoids <- function(geography,
-                       state        = NULL,
-                       county       = NULL,
-                       geoid        = NULL,
-                       year         = 2010,
-                       geometry     = FALSE,
+get_geoids <- function(geography = c("state", "county", "tract", "block group",
+                                     "block", "zcta",
+                                     "zip code tabulation area"),
+                       state = NULL,
+                       county = NULL,
+                       geoid = NULL,
+                       zcta = NULL,
+                       year = 2020,
+                       dataset = c("acs5", "decennial", "acs3", "acs1"),
+                       geometry = FALSE,
                        cache_tables = TRUE,
-                       key          = NULL,
+                       key = NULL,
                        evaluator =
                          purrr::insistently(
                            eval,
@@ -56,44 +52,59 @@ get_geoids <- function(geography,
                            quiet = FALSE
                           ),
                        ...) {
-  geography <-
-    match.arg(
-      geography,
-      c("state", "county", "tract", "block group", "block")
-    )
-
-  # Converts year to the most recent year divisible by 10.
-  year <- floor(year / 10) * 10
-  if (!any(c(2000, 2010, 2020) == year)) {
-    stop("year must be between 2000 and 2029", call. = FALSE)
-  }
+  geography <- validate_geography(match.arg(geography))
+  year <- validate_year(year)
+  dataset <-
+    validate_dataset(match.arg(dataset), year, geography, type = "population")
 
   # Create the call skeleton to get_decennial() using the validated argument
   # list
   partial_tidycensus_calls <-
-    list(
-      get_decennial =
-        tidycensus_call(
-          .fn = "get_decennial",
-          geography = geography,
-          variables =
-            stats::setNames(
-              object =
-                if (year == 2020) "P1_001N" else
-                  if (year == 1990) "P0010001" else "P001001",
-              nm = paste0("census_", year, "_pop")
-            ),
-          table = NULL,
-          cache_table = cache_tables,
-          year = year,
-          sumfile = if (year == 2020) "pl",
-          geometry = geometry,
-          output = "wide",
-          # keep_geo_vars = FALSE,
-          # summary_var = NULL,
-          key = key,
-          ...
-        )
+    switch(
+      dataset,
+      decennial =
+        list(
+          get_decennial =
+            tidycensus_call(
+              .fn = "get_decennial",
+              geography = geography,
+              variables =
+                stats::setNames(
+                  object =
+                    if (year == 2020) "P1_001N" else
+                      if (year == 1990) "P0010001" else "P001001",
+                  nm = paste0("census_", year, "_pop")
+                ),
+              table = NULL,
+              cache_table = cache_tables,
+              year = year,
+              sumfile = if (year == 2010) "sf1" else if (year == 2020) "dhc",
+              geometry = geometry,
+              output = "wide",
+              key = key,
+              ...
+            )
+        ),
+      list(
+        get_acs =
+          tidycensus_call(
+            .fn = "get_acs",
+            geography = geography,
+            variables =
+              stats::setNames(
+                "B01001_001",
+                paste(dataset, year, "pop", sep = "_")
+              ),
+            table = NULL,
+            cache_table = cache_tables,
+            year = year,
+            output = "wide",
+            geometry = geometry,
+            key = key,
+            survey = dataset,
+            ...
+          )
+      )
     )
 
   d <-
@@ -102,13 +113,15 @@ get_geoids <- function(geography,
       state = state,
       county = county,
       geoid = geoid,
-      zcta = NULL,
+      zcta = zcta,
       year = year,
-      dataset = "decennial",
+      dataset = dataset,
       partial_tidycensus_calls = partial_tidycensus_calls,
       geometry = geometry,
       evaluator = evaluator
     )
+
+  names(d) <- stringr::str_replace(names(d), "_popE$", "_pop")
 
   d
 }

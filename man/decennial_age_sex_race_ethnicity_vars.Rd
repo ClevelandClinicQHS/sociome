@@ -5,10 +5,13 @@
 \alias{decennial_age_sex_race_ethnicity_vars}
 \title{Decennial Census variables for age, sex, race, and ethnicity}
 \format{
-A \code{\link[tibble]{tibble}} with 130 rows and 3 variables:
-  \describe{ \item{year}{The year of the decennial census with which the
-  variable is associated.} \item{variable}{ACS variable name}
-  \item{description}{A description of who is present in the count}}
+A \code{\link[tibble:tibble]{tibble}} with 195 rows and 3 variables:
+\itemize{
+\item \strong{year}: The year of the decennial census with which the
+variable is associated.
+\item \strong{variable}: ACS variable name.
+\item \strong{description}: A description of who is present in the count.
+}
 }
 \usage{
 decennial_age_sex_race_ethnicity_vars
@@ -19,11 +22,12 @@ descriptions, and their decennial census year. Contains counts of various
 subdivisions of the population based on age, sex, race, and ethnicity.
 }
 \details{
-Currently, the 2000 and 2010 Decennial Census variables are available.
+Currently, the 2000, 2010, and 2020 Decennial Census variables are available.
 
 This data set is used to support \code{\link{synthetic_population}()}.
 }
 \seealso{
+\code{\link[=synthetic_population]{synthetic_population()}} and
 \code{\link{acs_age_sex_race_ethnicity_vars}}
 }
 \keyword{datasets}

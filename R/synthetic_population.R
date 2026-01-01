@@ -50,11 +50,12 @@
 #'   the 5-, 3-, and 1-year ACS along with the decennial census. Defaults to
 #'   `"acs5"`.
 #'
-#'   When `dataset = "decennial"`, `year` must be in `c(1990, 2000, 2010)`.
+#'   When `dataset = "decennial"`, `year` must be in `c(2000, 2010, 2020)`.
 #'
 #'   Important: data are not always available depending on the level of
 #'   geography and data set chosen. See
-#'   <https://www.census.gov/programs-surveys/acs/guidance/estimates.html>.
+#'   <https://www.census.gov/programs-surveys/acs/guidance/estimates.html> as
+#'   well as [`dataset_year_geography_availability`].
 #' @param geometry Logical value indicating whether or not shapefile data should
 #'   be included in the result, making the result an [`sf`][sf::sf] object
 #'   instead of a plain [`tibble`][tibble::tibble]. Defaults to `FALSE`.
@@ -100,6 +101,8 @@
 #'
 #' @return If `geometry = FALSE`, (the default) a [`tibble`][tibble::tibble]. If
 #'   `geometry = TRUE` is specified, an [`sf`][sf::sf].
+#' @seealso [`dataset_year_geography_availability`] for usable combinations of
+#'   `dataset`, `year`, and `geography`.
 #' @examples
 #' \dontrun{
 #' # Wrapped in \dontrun{} because all these examples take >5 seconds
@@ -135,7 +138,10 @@
 #' }
 #' @importFrom rlang .data
 #' @export
-synthetic_population <- function(geography,
+synthetic_population <- function(geography =
+                                   c("state", "county", "tract", "block group",
+                                     "block", "zcta",
+                                     "zip code tabulation area"),
                                  state           = NULL,
                                  county          = NULL,
                                  geoid           = NULL,
@@ -155,9 +161,15 @@ synthetic_population <- function(geography,
                                      quiet = FALSE
                                    ),
                                  ...) {
-  geography <- validate_geography(geography)
-  year      <- validate_year(year)
-  dataset   <- validate_dataset(dataset, year, geography)
+  geography <- validate_geography(match.arg(geography))
+  year <- validate_year(year)
+  dataset <-
+    validate_dataset(
+      match.arg(dataset),
+      year,
+      geography,
+      type = "synthetic_population"
+    )
 
   partial_tidycensus_calls <-
     switch(
@@ -166,19 +178,19 @@ synthetic_population <- function(geography,
         variables <-
           sociome::decennial_age_sex_race_ethnicity_vars[
             sociome::decennial_age_sex_race_ethnicity_vars$year == year,
-            c("variable", "description")
+            c("description", "variable"),
+            drop = FALSE
           ]
         list(
           get_decennial =
             tidycensus_call(
               .fn = "get_decennial",
               geography = geography,
-              variables =
-                stats::setNames(variables$variable, variables$description),
+              variables = tibble::deframe(variables),
               table = NULL,
               cache_table = cache_tables,
               year = year,
-              sumfile = "sf1",
+              sumfile = if (year == 2020) "dhc",
               geometry = geometry,
               output = "tidy",
               keep_geo_vars = FALSE,

@@ -1,7 +1,7 @@
 test_that("get_adi works", {
 
   skip_if(Sys.getenv("CENSUS_API_KEY") == "")
-
+  set.seed(20251229)
 
   # set1
   expect_snapshot(
@@ -17,23 +17,31 @@ test_that("get_adi works", {
   )
 
   # set2
-  expect_snapshot(
-    get_adi(
-      geography = "block group",
-      state = "DE",
-      year = 2015,
-      dataset = "acs5",
-      keep_indicators = TRUE,
-      cache_tables = FALSE,
-      raw_data_only = TRUE
-    )
+  expect_warning(
+    set2_raw_only <-
+      get_adi(
+        geography = "block group",
+        state = "DE",
+        year = 2015,
+        dataset = "acs5",
+        keep_indicators = TRUE,
+        cache_tables = FALSE,
+        raw_data_only = TRUE
+      ),
+    "(?i)median (family|household) income"
   )
+  expect_warning(
+    set2_adi_results <- calculate_adi(set2_raw_only),
+    "(?i)median (family|household) income"
+  )
+  expect_snapshot(set2_adi_results)
 
   # set3
   expect_snapshot(
     get_adi(
       geography = "zcta",
       zcta = c("99", "44147"),
+      state =  c("AK", "OH"),
       year = 2011,
       dataset = "acs5",
       keep_indicators = TRUE,
@@ -92,6 +100,18 @@ test_that("get_adi works", {
       geography = "county",
       state = "NM",
       year = 2000,
+      dataset = "decennial",
+      keep_indicators = TRUE,
+      cache_tables = FALSE
+    )
+  )
+
+  # 2020 decennial
+  expect_snapshot(
+    get_adi(
+      geography = "county",
+      state = "NM",
+      year = 2020,
       dataset = "decennial",
       keep_indicators = TRUE,
       cache_tables = FALSE

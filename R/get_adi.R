@@ -10,45 +10,51 @@
 #'
 #' @param geography A character string denoting the level of census geography
 #'   whose ADIs and ADI-3s you'd like to obtain. Must be one of `c("state",
-#'   "county", "tract", "block group", "zcta")`. Required.
+#'   "county", "tract", "block group", "zcta")` (`"zip code tabulation area"`
+#'   will be changed to `"zcta"`).
 #' @param state A character string specifying states whose ADI and ADI-3 data is
 #'   desired. Defaults to `NULL`. Can contain full state names, two-letter state
 #'   abbreviations, or a two-digit FIPS code/GEOID (must be a vector of strings,
 #'   so use quotation marks and leading zeros if necessary). Must be left as
-#'   `NULL` if using the `geoid` or `zcta` parameter.
+#'   `NULL` if using the `geoid`.
+#'
+#'   If `geography = "zcta"` and `year` is earlier than 2020, this argument can
+#'   be used to only include ZCTAs associated with specific states, as
+#'   determined by the US Census bureau. If year is 2020 or later, this argument
+#'   will be ignored with a [warning].
 #' @param county A vector of character strings specifying the counties whose ADI
 #'   and ADI-3 data you're requesting. Defaults to `NULL`. If not `NULL`, the
 #'   `state` parameter must have a length of 1. County names and three-digit
 #'   FIPS codes are accepted (must contain strings, so use quotation marks and
-#'   leading zeros if necessary). Must be blank if using the `geoid` parameter.
+#'   leading zeros if necessary). Must be `NULL` if using the `geoid` parameter
+#'   or if `geography = "zcta"`.
 #' @param geoid A character vector of GEOIDs (use quotation marks and leading
 #'   zeros). Defaults to `NULL`. Must be blank if `state`, `county`, or `zcta`
 #'   is used. Can contain different levels of geography (see details).
 #' @param zcta A character vector of ZCTAs or the leading digit(s) of ZCTAs (use
 #'   quotation marks and leading zeros). Defaults to `NULL`. Must be blank if
-#'   `state`, `county`, or `geoid` is used.
+#'   `county` or `geoid` is used.
 #'
 #'   Strings under 5 digits long will yield all ZCTAs that begin with those
 #'   digits.
 #'
 #'   Requires that `geography = "zcta"`. If `geography = "zcta"` and `zcta =
-#'   NULL`, all ZCTAs in the US will be used.
+#'   NULL`, all ZCTAs in the 50 states plus DC and Puerto Rico will be used.
 #' @param year Single integer specifying the year of US Census data to use.
 #' @param dataset The data set used to calculate ADIs and ADI-3s. Must be one of
 #'   `c("acs5", "acs3", "acs1", "decennial")`, denoting the 5-, 3-, and 1-year
 #'   ACS along with the decennial census. Defaults to `"acs5"`.
 #'
-#'   When `dataset = "decennial"`, `year` must be in `c(1990, 2000, 2010)`.
+#'   When `dataset = "decennial"`, `year` must be in `c(2000, 2010, 2020)`.
 #'
-#'   The 2010 decennial census did not include the long-form questionnaire used
-#'   in the 1990 and 2000 censuses, so this function uses the 5-year estimates
-#'   from the 2010 ACS to supply the data not included in the 2010 decennial
-#'   census. In fact, the only 2010 decennial variables used are H003002,
-#'   H014002, P020002, and P020008.
+#'   The 2010 and 2020 decennial censuses did not include the long-form
+#'   questionnaire used in the 1990 and 2000 censuses, so this function uses the
+#'   5-year estimates from the 2010/2020 ACS to supply the data not included in
+#'   the decennial censuses.
 #'
 #'   Important: data are not always available depending on the level of
-#'   geography and data set chosen. See
-#'   <https://www.census.gov/programs-surveys/acs/guidance/estimates.html>.
+#'   geography and data set chosen. See [`dataset_year_geography_availability`]
+#'   and <https://www.census.gov/programs-surveys/acs/guidance/estimates.html>.
 #' @param geometry Logical value indicating whether or not shapefile data should
 #'   be included in the result, making the result an [`sf`][sf::sf] object
 #'   instead of a plain [`tibble`][tibble::tibble]. Defaults to `FALSE`.
@@ -72,7 +78,6 @@
 #' @param raw_data_only Logical, indicating whether or not to skip calculation
 #'   of the ADI and ADI-3 and only return the census variables. Defaults to
 #'   `FALSE`.
-#' @param seed Passed to [calculate_adi()].
 #' @param evaluator A function that will evaluate the calls to the tidycensus
 #'   functions. Defaults to [`purrr::insistently`]`(`[`eval`]`, rate =
 #'   `[purrr::rate_delay()]`, quiet = FALSE)`.
@@ -88,7 +93,9 @@
 #'   according to the the value of `geography`). This enables the user to
 #'   somewhat customize the shapefile data obtained.
 #'
-#' @section Reference area: **The concept of "reference area" is important to
+#' @section Reference area:
+#'
+#'   **The concept of "reference area" is important to
 #'   understand when using this function.** The algorithm that produced the
 #'   original ADIs employs factor analysis. As a result, the ADI is a relative
 #'   measure; the ADI of a particular location is dynamic, varying depending on
@@ -129,11 +136,11 @@
 #'   in many missing values.
 #'
 #'   Imputation is attempted via [`mice::mice`]`(m = 1, maxit = 50, method =
-#'   "pmm", seed = seed)`. If imputation is unsuccessful, an error is thrown,
-#'   but the dataset of indicators on which imputation was unsuccessful is
-#'   available via [rlang::last_error()]`$adi_indicators` and the raw census
-#'   data are available via [rlang::last_error()]`$adi_raw_data`. The former
-#'   excludes areas with zero households, but the latter includes them.
+#'   "pmm")`. If imputation is unsuccessful, an error is thrown, but the dataset
+#'   of indicators on which imputation was unsuccessful is available via
+#'   [rlang::last_error()]`$adi_indicators` and the raw census data are
+#'   available via [rlang::last_error()]`$adi_raw_data`. The former excludes
+#'   areas with zero households, but the latter includes them.
 #'
 #'   One of the indicators of both ADI and the Financial Strength component of
 #'   ADI-3 is median family income, but methodological issues with the 2015 and
@@ -160,6 +167,9 @@
 #'   advantages and limitations of the 1-year and 3-year ACS estimates. See
 #'   <https://www.census.gov/programs-surveys/acs/guidance/estimates.html> for
 #'   details.
+#'
+#' @seealso [`dataset_year_geography_availability`] for usable combinations of
+#'   `geography`, `year`, and `dataset`.
 #'
 #' @examples
 #' \dontrun{
@@ -224,7 +234,8 @@
 #'   `geometry = TRUE` is specified, an [`sf`][sf::sf].
 #' @importFrom rlang .data
 #' @export
-get_adi <- function(geography,
+get_adi <- function(geography = c("state", "county", "tract", "block group",
+                                  "zcta", "zip code tabulation area"),
                     state           = NULL,
                     county          = NULL,
                     geoid           = NULL,
@@ -236,7 +247,6 @@ get_adi <- function(geography,
                     raw_data_only   = FALSE,
                     cache_tables    = TRUE,
                     key             = NULL,
-                    seed            = NA,
                     evaluator =
                       purrr::insistently(
                         eval,
@@ -244,10 +254,9 @@ get_adi <- function(geography,
                         quiet = FALSE
                       ),
                     ...) {
-
-  geography <- validate_geography(geography)
+  geography <- validate_geography(match.arg(geography))
   year      <- validate_year(year)
-  dataset   <- validate_dataset(dataset, year, geography)
+  dataset   <- validate_dataset(match.arg(dataset), year, geography)
 
   # Any given call to get_adi() necessitates one or more calls to
   # tidycensus::get_acs() and/or tidycensus::get_decennial(). The following
@@ -281,6 +290,6 @@ get_adi <- function(geography,
   if (raw_data_only) {
     raw_data
   } else {
-    calculate_adi(raw_data, keep_indicators = keep_indicators, seed = seed)
+    calculate_adi(raw_data, keep_indicators = keep_indicators)
   }
 }

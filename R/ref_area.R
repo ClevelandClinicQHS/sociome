@@ -10,7 +10,7 @@ ref_area <- function(geography,
                      evaluator) {
   switch(
     geography,
-    "zip code tabulation area" = ref_area_from_zcta(zcta, state, county, geoid),
+    zcta = ref_area_from_zcta(zcta, state, county, geoid, year, dataset),
     switch(
       determine_input_arg(geoid = geoid, state = state, county = county),
       geoid =
@@ -36,7 +36,7 @@ ref_area <- function(geography,
 }
 
 
-ref_area_from_zcta <- function(zcta, state, county, geoid) {
+ref_area_from_zcta <- function(zcta, state, county, geoid, year, dataset) {
   if (!is.null(county)) {
     stop('county must be NULL when geography = "zcta"', call. = FALSE)
   }
@@ -52,6 +52,15 @@ ref_area_from_zcta <- function(zcta, state, county, geoid) {
         call. = FALSE
       )
     }
+
+    switch(
+      dataset,
+      acs5 = if (!is.null(state) && any(2020:2023 == year)) {
+        state <- NULL
+        warning('state argument is ignored when geography = "zcta" and year is',
+                " in the range 2020-2023.", call. = FALSE, immediate. = TRUE)
+      }
+    )
   }
 
   # Validates non-NULL input to zcta and creates reference area (ref_area). It
@@ -109,7 +118,7 @@ ref_area_from_sc <- function(state,
         # per state. Also, state = NULL is a shortcut to "all 50 states plus
         # DC and Puerto Rico")
         dplyr::tibble(
-          state = if (is.null(state)) state_geoids else state
+          state = if (is.null(state)) sociome::state_geoids else state
         )
       } else {
         sc_from_preliminary_call(

@@ -1,5 +1,5 @@
 test_that("validate_geography() works", {
-  expect_equal(validate_geography("zcta"), "zip code tabulation area")
+  expect_equal(validate_geography("zcta"), "zcta")
 })
 
 test_that("validate_single_positive_integer() works", {
@@ -14,9 +14,32 @@ test_that("validate_year() works", {
 })
 
 test_that("validate_dataset() works", {
-  expect_error(validate_dataset("decennial", 2011), "year must be 2000, 2010, or 2020")
-  expect_error(validate_dataset("decennial", 2000, "zip code tabulation area"), '"zip code tabulation area" not supported')
+  expect_error(validate_dataset("decennial", 2011, "state"), "decennial census data are only available for 2000, 2010, and 2020")
+
+  expect_error(validate_dataset("acs5", 2020, "block"), "ACS data are not available at the block level.")
+  expect_error(validate_dataset("acs5", 2008, "tract"), "acs5 data are available starting for the year 2009")
+  expect_error(validate_dataset("acs5", 2024, "tract"), "acs5 data are not yet available for 2024")
+  expect_error(validate_dataset("acs5", 2011, "block group"), "acs5 block group data are available starting for the year 2013")
+  expect_error(validate_dataset("acs5", 2010, "zcta"), "acs5 ZCTA data are available starting for the year 2011")
+
+  expect_error(validate_dataset("acs3", 2012, "tract"), "acs3 data are not available at the tract level")
+  expect_error(validate_dataset("acs3", 2008, "block group"), "acs3 data are not available at the block group level")
+  expect_error(validate_dataset("acs3", 2011, "zcta"), "acs3 data are not available at the zcta level")
+  expect_error(validate_dataset("acs3", 2006, "state"), "acs3 data are only available for the years 2007, 2008, 2009, 2011, 2012, and 2013")
+  expect_error(validate_dataset("acs3", 2010, "state"), "acs3 data are only available for the years 2007, 2008, 2009, 2011, 2012, and 2013")
+  expect_error(validate_dataset("acs3", 2015, "state"), "acs3 data are only available for the years 2007, 2008, 2009, 2011, 2012, and 2013")
+
+  expect_error(validate_dataset("acs1", 2012, "tract"), "acs1 data are not available at the tract level")
+  expect_error(validate_dataset("acs1", 2021, "block group"), "acs1 data are not available at the block group level")
+  expect_error(validate_dataset("acs1", 2009, "zcta"), "acs1 data are not available at the zcta level")
+  expect_error(validate_dataset("acs1", 2003, "county", type = "population"), "acs1 data are available starting for the year 2005")
+  expect_error(validate_dataset("acs1", 2006, "state"), "Calculating ADI .+ using acs1 data is available starting for the year 2007")
+  expect_error(validate_dataset("acs1", 2020, "state"), "acs1 data are not available for 2020")
+  expect_error(validate_dataset("acs1", 2025, "state"), "acs1 data are not yet available for the year 2025")
+
   expect_warning(validate_dataset("acs5", 2015, "block group"), "Median family income")
+
+  expect_equal(validate_dataset("acs3", 2009, "county"), "acs3")
 })
 
 test_that("determine_input_arg() works", {

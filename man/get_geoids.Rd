@@ -5,11 +5,14 @@
 \title{Obtain GEOIDs of areas}
 \usage{
 get_geoids(
-  geography,
+  geography = c("state", "county", "tract", "block group", "block", "zcta",
+    "zip code tabulation area"),
   state = NULL,
   county = NULL,
   geoid = NULL,
-  year = 2010,
+  zcta = NULL,
+  year = 2020,
+  dataset = c("acs5", "decennial", "acs3", "acs1"),
   geometry = FALSE,
   cache_tables = TRUE,
   key = NULL,
@@ -19,20 +22,72 @@ get_geoids(
 }
 \arguments{
 \item{geography}{A character string denoting the level of census geography
-whose GEOIDs you'd like to obtain. Must be one of \code{c("state", "county", "tract", "block group", "block")}.
+whose GEOIDs you'd like to obtain. Must be one of \code{c("state", "county", "tract", "block group", "block", "zcta")} (\code{"zip code tabulation area"}
+will be automatically changed to \code{"zcta"}).}
 
-Note that block-level data cannot be obtained from 1990 and 2000 decennial
-census data due to limitations in \code{\link[tidycensus:get_decennial]{tidycensus::get_decennial()}}. Whereas
-block-level 2010 decennial census data are available, block-level ADI and
-ADI-3 cannot be calculated due to the removal of the long-form
-questionnaire from the 2010 decennial census.}
+\item{state}{A character string specifying states whose ADI and ADI-3 data is
+desired. Defaults to \code{NULL}. Can contain full state names, two-letter state
+abbreviations, or a two-digit FIPS code/GEOID (must be a vector of strings,
+so use quotation marks and leading zeros if necessary). Must be left as
+\code{NULL} if using the \code{geoid}.
 
-\item{state, county, geoid, geometry, cache_tables, key}{See the descriptions of
-the arguments in \code{\link[=get_adi]{get_adi()}}.}
+If \code{geography = "zcta"} and \code{year} is earlier than 2020, this argument can
+be used to only include ZCTAs associated with specific states, as
+determined by the US Census bureau. If year is 2020 or later, this argument
+will be ignored with a \link{warning}.}
 
-\item{year}{Single integer specifying the year of US Census data to use.
-Defaults to 2010. Based on this year, data from the most recent decennial
-census will be returned (specifically, \verb{year <- }\code{\link{floor}}\code{(year / 10) * 10} is run).}
+\item{county}{A vector of character strings specifying the counties whose ADI
+and ADI-3 data you're requesting. Defaults to \code{NULL}. If not \code{NULL}, the
+\code{state} parameter must have a length of 1. County names and three-digit
+FIPS codes are accepted (must contain strings, so use quotation marks and
+leading zeros if necessary). Must be \code{NULL} if using the \code{geoid} parameter
+or if \code{geography = "zcta"}.}
+
+\item{geoid}{A character vector of GEOIDs (use quotation marks and leading
+zeros). Defaults to \code{NULL}. Must be blank if \code{state}, \code{county}, or \code{zcta}
+is used. Can contain different levels of geography (see details).}
+
+\item{zcta}{A character vector of ZCTAs or the leading digit(s) of ZCTAs (use
+quotation marks and leading zeros). Defaults to \code{NULL}. Must be blank if
+\code{county} or \code{geoid} is used.
+
+Strings under 5 digits long will yield all ZCTAs that begin with those
+digits.
+
+Requires that \code{geography = "zcta"}. If \code{geography = "zcta"} and \code{zcta = NULL}, all ZCTAs in the 50 states plus DC and Puerto Rico will be used.}
+
+\item{year}{Single integer specifying the year of US Census data to use.}
+
+\item{dataset}{The data set used to calculate ADIs and ADI-3s. Must be one of
+\code{c("acs5", "acs3", "acs1", "decennial")}, denoting the 5-, 3-, and 1-year
+ACS along with the decennial census. Defaults to \code{"acs5"}.
+
+When \code{dataset = "decennial"}, \code{year} must be in \code{c(2000, 2010, 2020)}.
+
+The 2010 and 2020 decennial censuses did not include the long-form
+questionnaire used in the 1990 and 2000 censuses, so this function uses the
+5-year estimates from the 2010/2020 ACS to supply the data not included in
+the decennial censuses.
+
+Important: data are not always available depending on the level of
+geography and data set chosen. See \code{\link{dataset_year_geography_availability}}
+and \url{https://www.census.gov/programs-surveys/acs/guidance/estimates.html}.}
+
+\item{geometry}{Logical value indicating whether or not shapefile data should
+be included in the result, making the result an \code{\link[sf:sf]{sf}} object
+instead of a plain \code{\link[tibble:tibble]{tibble}}. Defaults to \code{FALSE}.
+
+The shapefile data that is returned is somewhat customizable by passing
+certain arguments along to the \code{tidycensus} functions via \code{...}.}
+
+\item{cache_tables}{The plural version of the \code{cache_table} argument in
+\code{\link[tidycensus:get_acs]{tidycensus::get_acs()}} or \code{\link[tidycensus:get_decennial]{tidycensus::get_decennial()}}. (\code{get_adi()}
+calls the necessary \code{tidycensus} function many times in order to return
+ADIs and ADI-3s, so many tables are cached if \code{TRUE}). Defaults to \code{TRUE}.}
+
+\item{key}{Your Census API key as a character string. Obtain one at
+\url{http://api.census.gov/data/key_signup.html}. Defaults to \code{NULL}. Not
+necessary if you have already loaded your key with \code{\link[=census_api_key]{census_api_key()}}.}
 
 \item{evaluator}{A function that will evaluate the calls to the tidycensus
 functions. Defaults to \code{\link[purrr:insistently]{purrr::insistently}}\code{(}\code{\link{eval}}\verb{, rate = }\code{\link[purrr:rate-helpers]{purrr::rate_delay()}}\verb{, quiet = FALSE)}.}
@@ -63,4 +118,8 @@ tracts
 # Get all block GEOIDs for the fifth tract on that list
 get_geoids(geography = "block", geoid = tracts$GEOID[5])
 }
+}
+\seealso{
+\code{\link{dataset_year_geography_availability}} for usable combinations of
+\code{dataset}, \code{year}, and \code{geography}.
 }

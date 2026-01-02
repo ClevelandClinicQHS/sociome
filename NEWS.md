@@ -1,13 +1,16 @@
-# sociome (development version)
+# sociome 3.0.0
+
+Large overhaul with a few breaking changes in the form of altered default arguments, but for the most part this update will in fact expand `sociome`'s usability.
 
 - Completed support of 2020 decennial census.
 - Moved tibble from Suggests to Imports.
-- Removed `seed` argument from `get_adi()`, `calculate_adi()`, and `synthetic_population()`. Just call `set.seed()` beforehand if you want.
-- Added the helper objects `state_geoids` and `dataset_year_geography_availability`.
-- Added `evaluator` argument to `get_adi()`, enabling the user to customize how the function retries calls to the census API.
-- Made `synthetic_population()` and `get_geoids()` work with all `dataset` options (decennial census, acs1, acs3, and acs5).
+- Removed `seed` argument from `get_adi()`, `calculate_adi()`, and `synthetic_population()`. Any given call to one of these functions only resulted in one operation employing randomization (imputation with `mice::mice()`). Just call `set.seed()` beforehand if you want.
+- Added the helper objects `state_geoids` and `dataset_year_geography_availability`. 
+- The API-utilizing functions have better input checking, informing users when they've provided a combination of inputs that the US Census API will not tolerate. 
+- `get_geoids()` and `synthetic_population()` now support more year/geography/dataset combinations, supporting ACS data now.
 - Added census block compatibility to `synthetic_population()` and `get_geoids()` with `dataset = "decennial"`.
 - Added ZCTA compatibility to `get_geoids()`. You now have to exactly specify `dataset = "decennial"` with the exact decennial census year if you want these data.
+- Added `evaluator` argument to `get_adi()`, enabling the user to customize how the function retries calls to the census API.
 - Fixed bug in the filtering of ZCTAs reference areas: before, the GEOIDs of ZCTAS were the ZCTA itself preceded by two digits. sociome now anticipates this and looks only at the last five digits.
 - Added default argument to `geography` argument in `get_adi()`, `get_geoids()`, and `synthetic_population()`
 - Removed default `year` argument in `get_geoids()`.

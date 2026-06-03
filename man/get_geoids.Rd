@@ -16,7 +16,7 @@ get_geoids(
   geometry = FALSE,
   cache_tables = TRUE,
   key = NULL,
-  evaluator = purrr::insistently(eval, rate = purrr::rate_delay(), quiet = FALSE),
+  evaluator = purrr::insistently(eval, quiet = FALSE),
   ...
 )
 }
@@ -90,7 +90,7 @@ ADIs and ADI-3s, so many tables are cached if \code{TRUE}). Defaults to \code{TR
 necessary if you have already loaded your key with \code{\link[=census_api_key]{census_api_key()}}.}
 
 \item{evaluator}{A function that will evaluate the calls to the tidycensus
-functions. Defaults to \code{\link[purrr:insistently]{purrr::insistently}}\code{(}\code{\link{eval}}\verb{, rate = }\code{\link[purrr:rate-helpers]{purrr::rate_delay()}}\verb{, quiet = FALSE)}.}
+functions. Defaults to \code{\link[purrr:insistently]{purrr::insistently}}\code{(}\code{\link{eval}}\verb{, quiet = FALSE)}.}
 
 \item{...}{Additional arguments to be passed to
 \code{\link[tidycensus:get_decennial]{tidycensus::get_decennial()}}. Use at your own risk.}

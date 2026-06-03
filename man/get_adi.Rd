@@ -18,7 +18,7 @@ get_adi(
   raw_data_only = FALSE,
   cache_tables = TRUE,
   key = NULL,
-  evaluator = purrr::insistently(eval, rate = purrr::rate_delay(), quiet = FALSE),
+  evaluator = purrr::insistently(eval, quiet = FALSE),
   ...
 )
 }
@@ -104,7 +104,7 @@ ADIs and ADI-3s, so many tables are cached if \code{TRUE}). Defaults to \code{TR
 necessary if you have already loaded your key with \code{\link[=census_api_key]{census_api_key()}}.}
 
 \item{evaluator}{A function that will evaluate the calls to the tidycensus
-functions. Defaults to \code{\link[purrr:insistently]{purrr::insistently}}\code{(}\code{\link{eval}}\verb{, rate = }\code{\link[purrr:rate-helpers]{purrr::rate_delay()}}\verb{, quiet = FALSE)}.}
+functions. Defaults to \code{\link[purrr:insistently]{purrr::insistently}}\code{(}\code{\link{eval}}\verb{, quiet = FALSE)}.}
 
 \item{...}{Additional arguments to be passed onto \code{\link[tidycensus:get_acs]{tidycensus::get_acs()}} or
 \code{\link[tidycensus:get_decennial]{tidycensus::get_decennial()}}. These must all be named. Must not match any
@@ -201,10 +201,8 @@ may call its underlying functions (\code{\link[tidycensus:get_acs]{tidycensus::g
 \code{\link[tidycensus:get_decennial]{tidycensus::get_decennial()}}) many times in order to accommodate their
 behavior. When these calls are broken up by state or by state and county, a
 message is printed indicating the state or state and county whose data is
-being pulled. These calls are wrapped in
-\code{\link[purrr:insistently]{purrr::insistently}}\code{(}\code{\link[purrr:rate-helpers]{purrr::rate_delay()}}\verb{, quiet = FALSE)}, meaning
-that they are attempted over and over until success, and \code{tidycensus} error
-messages are printed as they occur.
+being pulled. These calls are wrapped in \code{\link[purrr:insistently]{purrr::insistently}}\code{(quiet = FALSE)}, meaning that they are attempted over and over until success, and
+\code{tidycensus} error messages are printed as they occur.
 }
 
 \section{Warnings and disclaimers}{

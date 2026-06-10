@@ -109,7 +109,7 @@ validate_dataset <- function(dataset = c("acs5", "acs3", "acs1", "decennial"),
             "acs5 data are available starting for the year 2009.",
             call. = FALSE
           )
-        } else if (year > 2023) {
+        } else if (year > 2024) {
           stop("acs5 data are not yet available for ", year, ".", call. = FALSE)
         } else {
           switch(

@@ -15,8 +15,7 @@ test_that("zcta ref_area works", {
           summary_var = NULL)
       )
     )
-  evaluator <-
-    purrr::insistently(eval, rate = purrr::rate_delay(), quiet = FALSE)
+  evaluator <- purrr::insistently(eval, quiet = FALSE)
 
   expect_error(
     ref_area(
@@ -144,43 +143,12 @@ test_that("non-zcta ref_area works", {
           summary_var = NULL)
       )
     )
-  evaluator <-
-    purrr::insistently(eval, rate = purrr::rate_delay(), quiet = FALSE)
+  evaluator <- purrr::insistently(eval, quiet = FALSE)
 
   # State/county
 
-  expect_message(
-    counties_from_state <-
-      county_geoids_from_state(
-        partial_tidycensus_calls = test_partial_tidycensus_calls,
-        state = "de",
-        evaluator = evaluator
-      ),
-    "Preliminary"
-  )
-
-  expect_equal(
-    counties_from_state,
-    c("10001", "10003", "10005")
-  )
-
   expect_equal(
     sc_from_county_geoids(c("10001", "10003", "10005")),
-    dplyr::tibble(state = "10", county = c("001", "003", "005"))
-  )
-
-  expect_message(
-    sc_from_delaware <-
-      sc_from_preliminary_call(
-        partial_tidycensus_calls = test_partial_tidycensus_calls,
-        state = "de",
-        evaluator = evaluator
-      ),
-    "Preliminary"
-  )
-
-  expect_equal(
-    sc_from_delaware,
     dplyr::tibble(state = "10", county = c("001", "003", "005"))
   )
 
@@ -237,32 +205,6 @@ test_that("non-zcta ref_area works", {
     )
   )
 
-  expect_message(
-    granular_ref_area_from_delware <-
-      ref_area(
-        geography = "tract",
-        zcta = NULL,
-        state = "de",
-        county = NULL,
-        geoid = NULL,
-        year = 2010,
-        dataset = "acs5",
-        partial_tidycensus_calls = test_partial_tidycensus_calls,
-        evaluator = evaluator
-      )
-  )
-
-  expect_equal(
-    granular_ref_area_from_delware,
-    list(
-      geoid = NULL,
-      geo_length = NULL,
-      state_county =
-        dplyr::tibble(state = "10", county = c("001", "003", "005")),
-      zcta = NULL
-    )
-  )
-
   expect_equal(
     ref_area(
       geography = "tract",
@@ -307,6 +249,103 @@ test_that("non-zcta ref_area works", {
     ),
     dplyr::tibble(state = c("10", "39"))
   )
+
+  expect_equal(
+    test_partial_tidycensus_call <-
+      make_partial_tidycensus_calls(
+        dataset = "acs5",
+        year = 2015,
+        geography = "tract",
+        cache_tables = FALSE,
+        geometry = FALSE,
+        key = NULL
+      ),
+    rlang::exprs(
+      get_acs =
+        tidycensus::get_acs(
+          geography = "tract",
+          variables =
+            !!sociome::acs_vars[
+              sociome::acs_vars$set1,
+              "variable",
+              drop = TRUE
+            ],
+          table = NULL,
+          cache_table = FALSE,
+          year = 2015,
+          output = "tidy",
+          geometry = FALSE,
+          keep_geo_vars = FALSE,
+          summary_var = NULL,
+          key = NULL,
+          survey = "acs5"
+        )
+    )
+  )
+
+  expect_error(calculate_adi(NULL), "data must be a tibble")
+
+  skip_if(Sys.getenv("CENSUS_API_KEY") == "")
+
+
+  # State/county
+
+  expect_message(
+    counties_from_state <-
+      county_geoids_from_state(
+        partial_tidycensus_calls = test_partial_tidycensus_calls,
+        state = "de",
+        evaluator = evaluator
+      ),
+    "Preliminary"
+  )
+
+  expect_equal(
+    counties_from_state,
+    c("10001", "10003", "10005")
+  )
+
+  expect_message(
+    sc_from_delaware <-
+      sc_from_preliminary_call(
+        partial_tidycensus_calls = test_partial_tidycensus_calls,
+        state = "de",
+        evaluator = evaluator
+      ),
+    "Preliminary"
+  )
+
+  expect_equal(
+    sc_from_delaware,
+    dplyr::tibble(state = "10", county = c("001", "003", "005"))
+  )
+
+  expect_message(
+    granular_ref_area_from_delware <-
+      ref_area(
+        geography = "tract",
+        zcta = NULL,
+        state = "de",
+        county = NULL,
+        geoid = NULL,
+        year = 2010,
+        dataset = "acs5",
+        partial_tidycensus_calls = test_partial_tidycensus_calls,
+        evaluator = evaluator
+      )
+  )
+
+  expect_equal(
+    granular_ref_area_from_delware,
+    list(
+      geoid = NULL,
+      geo_length = NULL,
+      state_county =
+        dplyr::tibble(state = "10", county = c("001", "003", "005")),
+      zcta = NULL
+    )
+  )
+
   expect_message(
     sc_from_random_geoids <-
       sc_from_geoid(
@@ -377,43 +416,6 @@ test_that("non-zcta ref_area works", {
     "Preliminary"
   )
 
-  expect_equal(
-    test_partial_tidycensus_call <-
-      make_partial_tidycensus_calls(
-        dataset = "acs5",
-        year = 2015,
-        geography = "tract",
-        cache_tables = FALSE,
-        geometry = FALSE,
-        key = NULL
-      ),
-    rlang::exprs(
-      get_acs =
-        tidycensus::get_acs(
-          geography = "tract",
-          variables =
-            !!sociome::acs_vars[
-              sociome::acs_vars$set1,
-              "variable",
-              drop = TRUE
-            ],
-          table = NULL,
-          cache_table = FALSE,
-          year = 2015,
-          output = "tidy",
-          geometry = FALSE,
-          keep_geo_vars = FALSE,
-          summary_var = NULL,
-          key = NULL,
-          survey = "acs5"
-        )
-    )
-  )
-
-  expect_error(calculate_adi(NULL), "data must be a tibble")
-
-  skip_if(Sys.getenv("CENSUS_API_KEY") == "")
-
   expect_snapshot(
     test_tidycensus_data <-
       eval_tidycensus_calls(
@@ -423,8 +425,7 @@ test_that("non-zcta ref_area works", {
         dataset = "acs5",
         state_county = ref_area_random_geoids$state_county,
         geometry = FALSE,
-        evaluator =
-          purrr::insistently(eval, rate = purrr::rate_delay(), quiet = FALSE)
+        evaluator = purrr::insistently(eval, quiet = FALSE)
       )
   )
 

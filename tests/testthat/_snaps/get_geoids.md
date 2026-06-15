@@ -760,37 +760,34 @@
       1 call(s) to tidycensus beginning.
       Getting data from the 2010 decennial Census
       Using Census Summary File 1
+    Condition
+      Warning in `min()`:
+      no non-missing arguments to min; returning Inf
+      Warning in `min()`:
+      no non-missing arguments to min; returning Inf
+      Warning in `max()`:
+      no non-missing arguments to max; returning -Inf
+      Warning in `max()`:
+      no non-missing arguments to max; returning -Inf
     Output
-      Simple feature collection with 179 features and 3 fields
-      Geometry type: MULTIPOLYGON
+      Simple feature collection with 179 features and 3 fields (with 179 geometries empty)
+      Geometry type: GEOMETRYCOLLECTION
       Dimension:     XY
-      Bounding box:  xmin: -111.0569 ymin: 40.99461 xmax: -104.0522 ymax: 45.00589
+      Bounding box:  xmin: NA ymin: NA xmax: NA ymax: NA
       Geodetic CRS:  NAD83
       # A tibble: 179 x 4
-         GEOID   NAME                 census_2010_pop
-       * <chr>   <chr>                          <dbl>
-       1 5682052 ZCTA5 82052, Wyoming              23
-       2 5682731 ZCTA5 82731, Wyoming             135
-       3 5682325 ZCTA5 82325, Wyoming             878
-       4 5682225 ZCTA5 82225, Wyoming            2067
-       5 5682430 ZCTA5 82430, Wyoming             100
-       6 5683124 ZCTA5 83124, Wyoming             137
-       7 5683114 ZCTA5 83114, Wyoming             828
-       8 5682635 ZCTA5 82635, Wyoming             207
-       9 5682450 ZCTA5 82450, Wyoming             177
-      10 5682842 ZCTA5 82842, Wyoming             843
-                                                                              geometry
-       *                                                            <MULTIPOLYGON [°]>
-       1 (((-105.2875 41.06376, -105.2877 41.06378, -105.2881 41.06386, -105.2886 41.~
-       2 (((-105.0767 44.99458, -105.0767 44.98802, -105.0767 44.97935, -105.0767 44.~
-       3 (((-107.6938 41.22284, -107.694 41.22353, -107.6941 41.22411, -107.6943 41.2~
-       4 (((-104.0531 42.97149, -104.0531 42.96754, -104.0531 42.9537, -104.0531 42.9~
-       5 (((-108.1775 43.80303, -108.1778 43.80295, -108.1784 43.80269, -108.1786 43.~
-       6 (((-110.4015 41.75898, -110.4012 41.75951, -110.401 41.75979, -110.4007 41.7~
-       7 (((-111.0464 41.88595, -111.0465 41.88932, -111.0465 41.8904, -111.0465 41.8~
-       8 (((-106.2149 43.42703, -106.2139 43.42737, -106.2138 43.42742, -106.2113 43.~
-       9 (((-109.5092 44.47737, -109.5092 44.47743, -109.5092 44.4775, -109.5092 44.4~
-      10 (((-106.9343 44.55846, -106.9472 44.55859, -106.9812 44.55893, -106.9817 44.~
+         GEOID NAME                        census_2010_pop                 geometry
+       * <chr> <chr>                                 <dbl> <GEOMETRYCOLLECTION [°]>
+       1 57717 ZCTA5 57717 (part), Wyoming              70 GEOMETRYCOLLECTION EMPTY
+       2 82001 ZCTA5 82001, Wyoming                  35484 GEOMETRYCOLLECTION EMPTY
+       3 82005 ZCTA5 82005, Wyoming                    417 GEOMETRYCOLLECTION EMPTY
+       4 82007 ZCTA5 82007, Wyoming                  19096 GEOMETRYCOLLECTION EMPTY
+       5 82009 ZCTA5 82009, Wyoming                  31703 GEOMETRYCOLLECTION EMPTY
+       6 82050 ZCTA5 82050, Wyoming                    401 GEOMETRYCOLLECTION EMPTY
+       7 82051 ZCTA5 82051, Wyoming                     60 GEOMETRYCOLLECTION EMPTY
+       8 82052 ZCTA5 82052, Wyoming                     23 GEOMETRYCOLLECTION EMPTY
+       9 82053 ZCTA5 82053, Wyoming                   1524 GEOMETRYCOLLECTION EMPTY
+      10 82054 ZCTA5 82054, Wyoming                    920 GEOMETRYCOLLECTION EMPTY
       # i 169 more rows
 
 ---

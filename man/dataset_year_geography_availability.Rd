@@ -5,7 +5,7 @@
 \alias{dataset_year_geography_availability}
 \title{Working Combinations of \code{dataset}, \code{year}, and \code{geography} in \code{\link[=get_adi]{get_adi()}}}
 \format{
-A \code{\link[tibble:tibble]{tibble}} with 130 rows and 4 variables:
+A \code{\link[tibble:tibble]{tibble}} with 135 rows and 4 variables:
 \itemize{
 \item \strong{dataset}: Value that can be supplied to the \code{dataset} argument of \code{\link[=get_adi]{get_adi()}}.
 \item \strong{year}: Value that can be supplied to the \code{year} argument of \code{\link[=get_adi]{get_adi()}}.

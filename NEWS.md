@@ -1,3 +1,12 @@
+# sociome 3.1.0
+
+- Made 2024 ACS5 estimates available since they're now available from the US census.
+
+# sociome 3.0.1
+
+- Made more tests skipped if they require a census API key. The US Census requires an API key for more operations now, so some tests that were previously able to be ran without a key are no longer able to be ran.
+- Now, `rate_backoff()` is used instead of `rate_delay()` for `purrr::insistently(eval)`. This is to ensure that infinite failing API calls do not occur.
+
 # sociome 3.0.0
 
 Large overhaul with a few breaking changes in the form of altered default arguments, but for the most part this update will in fact expand `sociome`'s usability.

@@ -45,12 +45,7 @@ get_geoids <- function(geography = c("state", "county", "tract", "block group",
                        geometry = FALSE,
                        cache_tables = TRUE,
                        key = NULL,
-                       evaluator =
-                         purrr::insistently(
-                           eval,
-                           rate = purrr::rate_delay(),
-                           quiet = FALSE
-                          ),
+                       evaluator = purrr::insistently(eval, quiet = FALSE),
                        ...) {
   geography <- validate_geography(match.arg(geography))
   year <- validate_year(year)

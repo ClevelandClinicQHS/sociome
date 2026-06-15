@@ -46,6 +46,7 @@ dataset_year_geography_availability <-
     "acs5", 2021L, "state",       TRUE,
     "acs5", 2022L, "state",       TRUE,
     "acs5", 2023L, "state",       TRUE,
+    "acs5", 2024L, "state",       TRUE,
     "acs5", 2009L, "county",      TRUE,
     "acs5", 2010L, "county",      TRUE,
     "acs5", 2011L, "county",      TRUE,
@@ -61,6 +62,7 @@ dataset_year_geography_availability <-
     "acs5", 2021L, "county",      TRUE,
     "acs5", 2022L, "county",      TRUE,
     "acs5", 2023L, "county",      TRUE,
+    "acs5", 2024L, "county",      TRUE,
     "acs5", 2009L, "tract",       TRUE,
     "acs5", 2010L, "tract",       TRUE,
     "acs5", 2011L, "tract",       TRUE,
@@ -76,6 +78,7 @@ dataset_year_geography_availability <-
     "acs5", 2021L, "tract",       TRUE,
     "acs5", 2022L, "tract",       TRUE,
     "acs5", 2023L, "tract",       TRUE,
+    "acs5", 2024L, "tract",       TRUE,
     "acs5", 2013L, "block group", TRUE,
     "acs5", 2014L, "block group", TRUE,
     "acs5", 2015L, "block group", TRUE,
@@ -87,6 +90,7 @@ dataset_year_geography_availability <-
     "acs5", 2021L, "block group", TRUE,
     "acs5", 2022L, "block group", TRUE,
     "acs5", 2023L, "block group", TRUE,
+    "acs5", 2024L, "block group", TRUE,
     "acs5", 2011L, "zcta",        TRUE,
     "acs5", 2012L, "zcta",        TRUE,
     "acs5", 2013L, "zcta",        TRUE,
@@ -100,6 +104,7 @@ dataset_year_geography_availability <-
     "acs5", 2021L, "zcta",        TRUE,
     "acs5", 2022L, "zcta",        TRUE,
     "acs5", 2023L, "zcta",        TRUE,
+    "acs5", 2024L, "zcta",        TRUE,
 
     # ACS3
     # No tract, block group, or ZCTA data available. All of 2010 is missing.

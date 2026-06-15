@@ -18,7 +18,7 @@ test_that("validate_dataset() works", {
 
   expect_error(validate_dataset("acs5", 2020, "block"), "ACS data are not available at the block level.")
   expect_error(validate_dataset("acs5", 2008, "tract"), "acs5 data are available starting for the year 2009")
-  expect_error(validate_dataset("acs5", 2024, "tract"), "acs5 data are not yet available for 2024")
+  expect_error(validate_dataset("acs5", 2025, "tract"), "acs5 data are not yet available for 2025")
   expect_error(validate_dataset("acs5", 2011, "block group"), "acs5 block group data are available starting for the year 2013")
   expect_error(validate_dataset("acs5", 2010, "zcta"), "acs5 ZCTA data are available starting for the year 2011")
 

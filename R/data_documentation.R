@@ -125,7 +125,7 @@
 #' `geography` arguments to [get_adi()] that should successfully yield ADI and
 #' ADI-3 estimates.
 #'
-#' @format A [`tibble`][tibble::tibble] with 130 rows and 4 variables:
+#' @format A [`tibble`][tibble::tibble] with 135 rows and 4 variables:
 #'
 #' - **dataset**: Value that can be supplied to the `dataset` argument of [get_adi()].
 #'

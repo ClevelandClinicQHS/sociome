@@ -210,6 +210,7 @@ test_that("get_geoids()_works", {
       progress_bar = FALSE
     )
   )
+
   # ZCTA 2020
   expect_snapshot(
     get_geoids(

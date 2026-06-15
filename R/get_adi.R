@@ -79,8 +79,7 @@
 #'   of the ADI and ADI-3 and only return the census variables. Defaults to
 #'   `FALSE`.
 #' @param evaluator A function that will evaluate the calls to the tidycensus
-#'   functions. Defaults to [`purrr::insistently`]`(`[`eval`]`, rate =
-#'   `[purrr::rate_delay()]`, quiet = FALSE)`.
+#'   functions. Defaults to [`purrr::insistently`]`(`[`eval`]`, quiet = FALSE)`.
 #' @param ... Additional arguments to be passed onto [tidycensus::get_acs()] or
 #'   [tidycensus::get_decennial()]. These must all be named. Must not match any
 #'   of the `tidycensus` formal arguments that `sociome` needs to set
@@ -154,10 +153,9 @@
 #'   [tidycensus::get_decennial()]) many times in order to accommodate their
 #'   behavior. When these calls are broken up by state or by state and county, a
 #'   message is printed indicating the state or state and county whose data is
-#'   being pulled. These calls are wrapped in
-#'   [`purrr::insistently`]`(`[purrr::rate_delay()]`, quiet = FALSE)`, meaning
-#'   that they are attempted over and over until success, and `tidycensus` error
-#'   messages are printed as they occur.
+#'   being pulled. These calls are wrapped in [`purrr::insistently`]`(quiet =
+#'   FALSE)`, meaning that they are attempted over and over until success, and
+#'   `tidycensus` error messages are printed as they occur.
 #'
 #' @section Warnings and disclaimers: Please note that this function calls data
 #'   from US Census servers, so execution may take a long time depending on the
@@ -247,12 +245,7 @@ get_adi <- function(geography = c("state", "county", "tract", "block group",
                     raw_data_only   = FALSE,
                     cache_tables    = TRUE,
                     key             = NULL,
-                    evaluator =
-                      purrr::insistently(
-                        eval,
-                        rate = purrr::rate_delay(),
-                        quiet = FALSE
-                      ),
+                    evaluator = purrr::insistently(eval, quiet = FALSE),
                     ...) {
   geography <- validate_geography(match.arg(geography))
   year      <- validate_year(year)

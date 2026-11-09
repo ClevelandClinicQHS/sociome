@@ -30,7 +30,6 @@ dataset_year_geography_availability <-
     # acs5
     # Block group data are not available until 2013.
     # ZCTA data are not available until 2011.
-    # 2024 data are not yet available.
     "acs5", 2009L, "state",       TRUE,
     "acs5", 2010L, "state",       TRUE,
     "acs5", 2011L, "state",       TRUE,

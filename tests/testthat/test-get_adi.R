@@ -94,6 +94,16 @@ test_that("get_adi works", {
     )
   )
 
+  # 2024 ACS
+  expect_snapshot(
+    get_adi(
+      geography = "state",
+      year = 2024,
+      dataset = "acs5",
+      cache_tables = FALSE
+    )
+  )
+
   # 2000 decennial
   expect_snapshot(
     get_adi(

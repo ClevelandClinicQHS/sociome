@@ -1852,6 +1852,42 @@
 ---
 
     Code
+      get_adi(geography = "state", year = 2024, dataset = "acs5", cache_tables = FALSE)
+    Message
+      
+      1 call(s) to tidycensus beginning.
+      Getting data from the 2020-2024 5-year ACS
+    Output
+      # A tibble: 52 x 6
+         GEOID NAME                   ADI Financial_Strength
+         <chr> <chr>                <dbl>              <dbl>
+       1 01    Alabama              118.                80.6
+       2 02    Alaska                86.7              107. 
+       3 04    Arizona              101.               102. 
+       4 05    Arkansas             120.                76.2
+       5 06    California            89.2              136. 
+       6 08    Colorado              78.1              125. 
+       7 09    Connecticut           88.0              117. 
+       8 10    Delaware              96.2              103. 
+       9 11    District of Columbia  72.7              166. 
+      10 12    Florida              102.               102. 
+         Economic_Hardship_and_Inequality Educational_Attainment
+                                    <dbl>                  <dbl>
+       1                            109.                    97.2
+       2                             93.1                  108. 
+       3                            100.                    85.7
+       4                            110.                    90.4
+       5                            102.                    35.6
+       6                             84.6                  111. 
+       7                             95.4                  103. 
+       8                             95.6                  109. 
+       9                            134.                   105. 
+      10                            101.                    92.8
+      # i 42 more rows
+
+---
+
+    Code
       get_adi(geography = "county", state = "NM", year = 2000, dataset = "decennial",
         keep_indicators = TRUE, cache_tables = FALSE)
     Message

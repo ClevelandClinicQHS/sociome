@@ -185,19 +185,16 @@ test_that("get_geoids()_works", {
 
 
   # ZCTA 2000
-  expect_warning(
-    zcta2000 <-
-      get_geoids(
-        geography = "zcta",
-        # state = "WY",
-        year = 2000,
-        dataset = "decennial",
-        geometry = TRUE,
-        progress_bar = FALSE
-      ),
-    "CB ZCTAs for 2000 include separate polygons for discontiguous parts"
+  expect_snapshot(
+    get_geoids(
+      geography = "zcta",
+      # state = "WY",
+      year = 2000,
+      dataset = "decennial",
+      geometry = TRUE,
+      progress_bar = FALSE
+    )
   )
-  expect_snapshot(zcta2000)
 
   # ZCTA 2010
   expect_snapshot(

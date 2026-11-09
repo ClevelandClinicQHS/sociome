@@ -1,3 +1,8 @@
+# sociome 3.1.1
+
+- Now depending on tidycensus >= 2.0.0 so that 2010 ZCTA geometries are not empty.
+- Added test for 2024 ACS5 estimates.
+
 # sociome 3.1.0
 
 - Made 2024 ACS5 estimates available since they're now available from the US census.
